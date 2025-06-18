@@ -12,8 +12,7 @@ config_version=5
 
 config/name="ROR Testing"
 config/features=PackedStringArray("4.4", "Forward Plus")
-boot_splash/bg_color=Color(0.134302, 0.102324, 0.291729, 1)
-boot_splash/show_image=false
+boot_splash/image="uid://bts1p38b5qivq"
 config/icon="res://icon.svg"
 
 [display]
