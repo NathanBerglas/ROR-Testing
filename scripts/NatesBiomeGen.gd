@@ -9,6 +9,10 @@ extends MeshInstance2D
 @export var y_0 = ROWS/2 # Defaults to the centre
 @export var COLOUR_MUTATION = 8
 
+func _sigmoid(x):
+	var SIG_SCALE = 1./10. # Scales how fast sigmoid noramlizes
+	return (exp(SIG_SCALE*x) / (1. + exp(SIG_SCALE*x)))
+
 func _ready():
 	if Engine.is_editor_hint():
 		return
@@ -90,7 +94,13 @@ func _generate_mesh():
 		for i in range(4): # In four directions: right, down, left, up
 			for j in range(layer*2): # Step layer * 2 times
 				var distance_to_origin = sqrt(pow(x-x_0,2)+pow(y-y_0,2))
-				var color = Color.from_rgba8(0,distance_to_origin * 255 / sqrt(pow(x_0,2)+pow(y_0,2)),0) # Scaled off distance
+				var color# = Color.from_rgba8(0,distance_to_origin * 255 / sqrt(pow(x_0,2)+pow(y_0,2)),0) # Scaled off distance
+				var rand = randf_range(0,1)
+				if (rand > _sigmoid(distance_to_origin-9)):
+					color = Color.REBECCA_PURPLE
+				else:
+					color = Color.BLACK	
+				#var color = Color.from_rgba8 _sigmoid()
 				colors[(y*COLS + x)*4] = color # Set the colour of this cell
 				colors[(y*COLS + x)*4+1] = color
 				colors[(y*COLS + x)*4+2] = color
