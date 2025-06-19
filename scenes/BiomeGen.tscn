@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://c55deqr6361v3"]
 
-[ext_resource type="Script" uid="uid://dojmlj5x4nvxm" path="res://biomeGen.gd" id="1_hjrcc"]
+[ext_resource type="Script" uid="uid://dojmlj5x4nvxm" path="res://scripts/biomeGen.gd" id="1_l40ff"]
 
 [node name="Node2D" type="Node2D"]
 
 [node name="MeshInstance2D" type="MeshInstance2D" parent="."]
-script = ExtResource("1_hjrcc")
+script = ExtResource("1_l40ff")
