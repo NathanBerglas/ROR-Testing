@@ -13,7 +13,7 @@ func _ready():
 	if Engine.is_editor_hint():
 		return
 	_generate_mesh()
-
+#Hi Nate
 @export var regenerate: bool:
 	set(value):
 		if value:
