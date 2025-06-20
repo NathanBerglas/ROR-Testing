@@ -16,12 +16,14 @@ func _sigmoid(x):
 func _ready():
 	if Engine.is_editor_hint():
 		return
-	_generate_mesh()
+	#_generate_mesh()
+	_generate_mesh_PC()
 #Hi Nate
 @export var regenerate: bool:
 	set(value):
 		if value:
-			_generate_mesh()
+			#_generate_mesh()
+			_generate_mesh_PC()
 			regenerate = false  # reset the toggle
 
 func _generate_mesh():
@@ -121,3 +123,32 @@ func _generate_mesh():
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	self.mesh = mesh
+
+# Point and Circle Generation
+func _generate_mesh_PC():
+	var mesh = ArrayMesh.new()
+	var arrays = []
+	
+	var vertices = PackedVector2Array()
+	var colors = PackedColorArray()
+	var indices = PackedInt32Array()
+	
+	var features = PackedStringArray()
+	var features_point_count = PackedInt32Array()
+	features = ["Origin", "Feature 1", "Feature 2"]
+	features_point_count = [1,1,1]
+	var points = PackedVector3Array()
+	
+	var M_TopLeft = Vector2(0,0)
+	var M_BottomRight = Vector2(108,192)
+	for f in len(features):
+		for p in features_point_count[f]:
+			points.append(Vector3(randi_range(M_TopLeft.x, M_BottomRight.x),randi_range(M_TopLeft.y, M_BottomRight.y),f))
+	print(points)
+
+# Algorithm idea (Point & Circle division)
+# Start with a closed set M to be the set of all points on the map
+# For each feature, choose n random points, where n is a random number within a range decided per feature
+# Create circles centered on each point. Expand each circle until it intersects with a circle centered on a point from another feature
+# At the intersection of the circle, start a new curve that will trace the intersection of the circles as they continue to expand until all points in M are assigned
+# Every point within the curve of a feature is assigned to that biome
