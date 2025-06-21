@@ -1,7 +1,7 @@
 extends MeshInstance2D
 
-@export var QUAD_WIDTH = 10
-@export var QUAD_HEIGHT = 10
+@export var QUAD_WIDTH = 5
+@export var QUAD_HEIGHT = 5
 @export var ROWS = 108
 @export var COLS = 192
 

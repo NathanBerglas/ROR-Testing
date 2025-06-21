@@ -8,7 +8,7 @@ extends MeshInstance2D
 @export var x_0 = COLS/2 # Define the colour origin
 @export var y_0 = ROWS/2 # Defaults to the centre
 @export var starting_area = 10
-
+@export var min_distance = 15 # Minimum distance one biome can be from another
 @export var gen_data = JSON
 
 func _sigmoid(x):
@@ -41,6 +41,7 @@ func _generate_mesh_PC():
 	var M_TopLeft = Vector2(0,0)
 	var M_BottomRight = Vector2(COLS, ROWS)
 	var points = PackedVector3Array() # (x, y, feature index)
+	var major_points = PackedVector3Array() # (x,y, feature index), only for major occurences
 	
 	#Resource data
 	var json_received = gen_data.data
@@ -59,41 +60,62 @@ func _generate_mesh_PC():
 		sizes.append(feature["sizes"])  # already an Array
 
 	for f in features.size():
-		for occ in occurences[f]:
-			# Base point (either origin or random)
-			var root_point
-			if (f==0):
-				root_point = Vector2(x_0, y_0) 
+		var placed = 0
+		while placed < occurences[f]:
+			var candidate: Vector2
+			if f == 0:
+				# Place the origin biome at a fixed location
+				candidate = Vector2(x_0, y_0)
 			else:
-				root_point = Vector2(randi_range(M_TopLeft.x, M_BottomRight.x), randi_range(M_TopLeft.y, M_BottomRight.y))
-			
-			points.append(Vector3(root_point.x, root_point.y, f))
+				# Random candidate position within bounds
+				candidate = Vector2(randi_range(M_TopLeft.x, M_BottomRight.x), randi_range(M_TopLeft.y, M_BottomRight.y))
 
+			var valid = true
+			for existing in major_points:
+				var existing_pos = Vector2(existing.x, existing.y)
+				if candidate.distance_to(existing_pos) < min_distance:
+					valid = false
+					break
+
+			if valid:
+				points.append(Vector3(candidate.x, candidate.y, f))
+				major_points.append(Vector3(candidate.x, candidate.y, f))
+				placed += 1
+		#for occ in occurences[f]:
+		#	# Base point (either origin or random)
+		#	var root_point
+		#	if (f==0):
+		#		root_point = Vector2(x_0, y_0) 
+		#	else:
+		#		root_point = Vector2(randi_range(M_TopLeft.x, M_BottomRight.x), randi_range(M_TopLeft.y, M_BottomRight.y))
+		#	
+		#	points.append(Vector3(root_point.x, root_point.y, f))
+		#
 			# Stack of [position, depth]
-			var stack: Array = [[root_point, 0]]
+				var stack: Array = [[candidate, 0]]
 
-			while stack.size() > 0:
-				var item = stack.pop_back()
-				var center = item[0]
-				var depth = item[1]
+				while stack.size() > 0:
+					var item = stack.pop_back()
+					var center = item[0]
+					var depth = item[1]
 
-				# Stop if we've reached max depth
-				if depth >= gen_depth[f]:
-					continue
+					# Stop if we've reached max depth
+					if depth >= gen_depth[f]:
+						continue
 
-				var num_children = sub_occurences[f][depth]
-				var radius = sizes[f][depth]
+					var num_children = sub_occurences[f][depth]
+					var radius = sizes[f][depth]
 
-				for i in num_children:
-					# Random angle around the circle
-					var angle = randf_range(0, TAU)
-					var offset = Vector2(radius, 0).rotated(angle)
-					var new_point = center + offset
-					points.append(Vector3(round(new_point.x), round(new_point.y), f))
+					for i in num_children:
+						# Random angle around the circle
+						var angle = randf_range(0, TAU)
+						var offset = Vector2(radius, 0).rotated(angle)
+						var new_point = center + offset
+						points.append(Vector3(round(new_point.x), round(new_point.y), f))
 
-					# Queue it up for the next depth layer
-					depth += 1
-					stack.append([new_point, depth])
+						# Queue it up for the next depth layer
+						depth += 1
+						stack.append([new_point, depth])
 	
 	# Generates mesh
 	for row in ROWS:
@@ -134,8 +156,11 @@ func _generate_mesh_PC():
 				color = Color.SKY_BLUE
 			elif (closest_feature.y == 6): # Rainforest
 				color = Color.GREEN_YELLOW
-			if (closest_feature.x == 0): # Is on a point
-				color = Color.WEB_PURPLE
+			
+			# FOR DEBUGGING
+			#if (closest_feature.x == 0): # Is on a point
+			#	color = Color.WEB_PURPLE
+			
 			colors.append_array([color, color, color, color])
 			# Define two triangles (quad = 2 triangles)
 			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
