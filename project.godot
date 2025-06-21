@@ -26,3 +26,13 @@ window/stretch/mode="canvas_items"
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
+
+[file_customization]
+
+folder_colors={
+"res://addons/": "gray",
+"res://assets/": "red",
+"res://balancing/": "teal",
+"res://scenes/": "purple",
+"res://scripts/": "pink"
+}

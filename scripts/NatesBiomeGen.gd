@@ -9,6 +9,8 @@ extends MeshInstance2D
 @export var y_0 = ROWS/2 # Defaults to the centre
 @export var COLOUR_MUTATION = 8
 
+@export var gen_data = JSON
+
 func _sigmoid(x):
 	var SIG_SCALE = 1./10. # Scales how fast sigmoid noramlizes
 	return (exp(SIG_SCALE*x) / (1. + exp(SIG_SCALE*x)))
@@ -132,18 +134,27 @@ func _generate_mesh_PC():
 	var vertices = PackedVector2Array()
 	var colors = PackedColorArray()
 	var indices = PackedInt32Array()
-	
-	var features = PackedStringArray()
-	var features_point_count = PackedInt32Array()
-	features = ["Origin", "Feature 1", "Feature 2"]
-	features_point_count = [1,1,1]
-	var points = PackedVector3Array()
-	
+		
+	# Map size
 	var M_TopLeft = Vector2(0,0)
-	var M_BottomRight = Vector2(108,192)
+	var M_BottomRight = Vector2(ROWS, COLS)
+	var points = PackedVector3Array() # (x, y, feature index)
+	
+	#Resource data
+	var json_received = gen_data.data
+	var features = PackedStringArray()
+	var occurences = PackedInt32Array()
+	var gen_depth = PackedInt32Array()
+	var sub_occurences: Array[Array] = [] # sub_occurences[i] is an array of integers of length gen_depth[i], where i is the ith feature
+	var sizes: Array[Array] = [] # sizes[i] is an array of integers of length gen_depth[i], where i is the ith feature
+	
 	for f in len(features):
-		for p in features_point_count[f]:
+		for occ in occurences:
 			points.append(Vector3(randi_range(M_TopLeft.x, M_BottomRight.x),randi_range(M_TopLeft.y, M_BottomRight.y),f))
+			var main_point = points.back()
+			for sub_occ in sub_occurences[0].size():
+				var new_point = (main_point.normalized() * sizes[sub_occ][0]).rotated(randf_range(0,2*PI)) # A point is size[occ][sub_occ] away from main_point
+				points.append(Vector3(new_point.x, new_point.y, f))
 	print(points)
 
 # Algorithm idea (Point & Circle division)
