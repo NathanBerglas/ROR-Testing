@@ -137,7 +137,7 @@ func _generate_mesh_PC():
 		
 	# Map size
 	var M_TopLeft = Vector2(0,0)
-	var M_BottomRight = Vector2(ROWS, COLS)
+	var M_BottomRight = Vector2(COLS, ROWS)
 	var points = PackedVector3Array() # (x, y, feature index)
 	
 	#Resource data
@@ -148,14 +148,67 @@ func _generate_mesh_PC():
 	var sub_occurences: Array[Array] = [] # sub_occurences[i] is an array of integers of length gen_depth[i], where i is the ith feature
 	var sizes: Array[Array] = [] # sizes[i] is an array of integers of length gen_depth[i], where i is the ith feature
 	
+	# Initialize data from JSON
+	for feature in json_received["features"]:
+		features.append(feature["name"])
+		occurences.append(feature["occurences"])
+		gen_depth.append(feature["gen_depth"])
+		sub_occurences.append(feature["sub_occurences"])  # already an Array
+		sizes.append(feature["sizes"])  # already an Array
+	
 	for f in len(features):
-		for occ in occurences:
-			points.append(Vector3(randi_range(M_TopLeft.x, M_BottomRight.x),randi_range(M_TopLeft.y, M_BottomRight.y),f))
-			var main_point = points.back()
-			for sub_occ in sub_occurences[0].size():
-				var new_point = (main_point.normalized() * sizes[sub_occ][0]).rotated(randf_range(0,2*PI)) # A point is size[occ][sub_occ] away from main_point
-				points.append(Vector3(new_point.x, new_point.y, f))
-	print(points)
+		for occ in occurences[f]:
+			if(f == 0): # Make origin at the center
+				points.append(Vector3(x_0,y_0,0))
+			else:
+				points.append(Vector3(randi_range(M_TopLeft.x, M_BottomRight.x),randi_range(M_TopLeft.y, M_BottomRight.y),f)) #TODO: Make this not normalized
+			var main_point = points[-1]
+			var main_point_v2 = Vector2(main_point.x, main_point.y)
+			for sub_occ in sub_occurences[f].size():
+				var new_point = main_point_v2 + (main_point_v2.normalized() * sizes[f][sub_occ]).rotated(randf_range(0,2*PI)) # A point is size[occ][sub_occ] away from main_point
+				points.append(Vector3(round(new_point.x), round(new_point.y), f))
+	
+	# Generates mesh
+	for row in ROWS:
+		for col in COLS:
+			var x = col * QUAD_WIDTH
+			var y = row * QUAD_HEIGHT
+			
+			var i = vertices.size()  # index of first vertex in this quad
+			
+			# Define the 4 vertices of the quad (clockwise or CCW)
+			vertices.push_back(Vector2(x, y))
+			vertices.push_back(Vector2(x + QUAD_WIDTH, y))
+			vertices.push_back(Vector2(x + QUAD_WIDTH, y + QUAD_HEIGHT))
+			vertices.push_back(Vector2(x, y + QUAD_HEIGHT))
+			
+			# Generate a random color for the whole quad
+			var color = Color.WHITE
+			if (points.has(Vector3(col,row,0))): # Origin
+				color = Color.BLACK
+			elif (points.has(Vector3(col,row,1))): # Forest
+				color = Color.FOREST_GREEN
+			elif (points.has(Vector3(col,row,2))): # Plains
+				color = Color.LIGHT_GREEN
+			elif (points.has(Vector3(col,row,3))): # Lake
+				color = Color.ROYAL_BLUE
+			elif (points.has(Vector3(col,row,4))): # Desert
+				color = Color.SANDY_BROWN
+			elif (points.has(Vector3(col,row,5))): # Tundra
+				color = Color.SKY_BLUE
+			elif (points.has(Vector3(col,row,5))): # Rainforest
+				color = Color.GREEN_YELLOW
+			colors.append_array([color, color, color, color])
+			# Define two triangles (quad = 2 triangles)
+			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+			
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_INDEX] = indices
+	
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	self.mesh = mesh
 
 # Algorithm idea (Point & Circle division)
 # Start with a closed set M to be the set of all points on the map
