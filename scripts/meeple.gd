@@ -1,15 +1,23 @@
 extends Node2D
 
+@onready var rb = $RigidBody2D
+
 @export var area_2d: Area2D
+@export var speed: float = 200
+@export var acceleration: float = 300
+var min_distance = 9 # Squared
 
-func _process(delta):
-	resolve_overlap()
+var target = Vector2(0,0)
 
-# Avoids overlapping
-func resolve_overlap():
-	var radius = 64
-	for touching in area_2d.get_overlapping_areas():
-		# Nudge away
-		print("Nudged!")
-		var angle_to = self.get_angle_to(touching.global_position)
-		global_position = touching.global_position - Vector2(cos(angle_to),sin(angle_to))*radius
+func _physics_process(delta):
+	_go_to_target(delta)
+
+# Marches Meeple to Target
+func _go_to_target(delta):
+	var to_target = target - rb.global_position
+	var dist = to_target.length_squared()
+	var speed_towards_target = rb.linear_velocity.dot(to_target.normalized())
+	
+	if dist > min_distance and speed_towards_target < speed: # Checks if meeple is close to target point
+		var force = to_target.normalized() * min(acceleration, abs(speed_towards_target-speed) / delta) # If acceleration would overshoot
+		rb.apply_central_force(force)
