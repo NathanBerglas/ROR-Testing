@@ -46,5 +46,6 @@ func _process(_delta):
 		if hit == false:
 			for m in group[0]:
 				m.selected = false
+				
 			
 	

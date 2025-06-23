@@ -1,6 +1,7 @@
 extends Node2D
 
 @onready var rb = $RigidBody2D
+@export var sprite: Sprite2D
 
 @export var area_2d: Area2D
 @export var speed: float = 200
@@ -17,11 +18,16 @@ var min_distance = 9 # Squared
 
 func _physics_process(delta): #runs on each meeple every tick
 	
+	if selected:
+		highlight()
+	else:
+		remove_highlight()
+		
 	if (dest != null): #if a meeple has somewhere to go, goes to it
 		_go_to_target(delta)
 		
-	if dest != null and closeEnough(): #meeple reaches destination
-		dest = null
+	#if dest != null and closeEnough(): #meeple reaches destination
+		#dest = null
 	
 	
 func closeEnough(): #checking if a meeple is close enough to their destination
@@ -36,12 +42,19 @@ func hasMouse(): #Checks if the mouse is within the meeple
 	
 	var dif = rb.global_position - mousePos
 	
-	if (dif.x * dif.x) < radius and (dif.y * dif.y)< radius:
+	if dif.length_squared() < radius:
 		return true
 	return false
 	
+
+func highlight():
+	sprite.modulate = Color(1, 1, 1)  # Reset to white
 	
+
+func remove_highlight():
+	sprite.modulate = Color(1, 0, 0)  # Red highlight
 # Marches Meeple to Target
+
 func _go_to_target(delta):
 	var to_target = dest - rb.global_position
 	var dist = to_target.length_squared()
