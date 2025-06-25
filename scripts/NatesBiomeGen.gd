@@ -11,20 +11,129 @@ extends MeshInstance2D
 @export var min_distance = 15 # Minimum distance one biome can be from another
 @export var gen_data = JSON
 
+const max_poisson_attempts_1d = 100
+const max_poisson_attempts_2d = 100
+const sphere_packing_constant = 0.8
+
+# FOR DEBUGGING
+#@export var target: PackedScene
+
 func _sigmoid(x):
 	var SIG_SCALE = 1./10. # Scales how fast sigmoid noramlizes
 	return (exp(SIG_SCALE*x) / (1. + exp(SIG_SCALE*x)))
 
+# 1 dimensional poisson disk distribution
+func _poisson_dd_1d(min, max, n: int, density):
+	var start_time = Time.get_ticks_usec()
+	var range = max-min
+	var min_distance = ceil(range/(n-2)) / density # The farthest each can get and still fit divided by density. If density >= 1, all can fit
+	var chunk_count = floor(range / min_distance)
+	var ending_remainder = (range / min_distance) - chunk_count
+	
+	var points: PackedInt32Array
+	var chunks: Array[Array] = [] # Each point is placed in a chunk. Each chunk is exactly min_distance wide starting from min (stretches to max)
+	for c in chunk_count: # Initialize the array
+		chunks.push_back([])
+	
+	for i in n: # For each point
+		for attempt in max_poisson_attempts_1d: # Cap number of attempts in case to prevent infinite loop
+			var sucess = true
+			var x = randi_range(min, max)
+			# Assign which chunk it is in
+			var chunk_id = min(floor(x / min_distance),chunk_count-1) # To not overrun 
+			#if (max - x) <= ending_remainder : # If it's too close to the last chunk and the last one must be extended
+			#		chunk_id = chunk_count-1
+			if (chunk_id > 0): # If it's not in the first chunk
+				for p in chunks[chunk_id-1]: # Check for each point in the previous chunk
+					if (abs(p - x) < min_distance):
+						sucess = false # Then this point is too close to a previous point
+						break
+			if sucess: # If the point has failed, stop checking
+				for p in chunks[chunk_id]: #Check for each point in this chunk
+					if (abs(p - x) < min_distance):
+						sucess = false
+						break
+			if (sucess and chunk_id < (chunk_count-1)): # If it's not in the next chunk
+				for p in chunks[chunk_id+1]: #Check for each point in the previous chunk
+					if (abs(p - x) < min_distance):
+						sucess = false
+						break
+			if (sucess):
+				chunks[chunk_id].push_back(x)
+				points.push_back(x)
+				break
+			if (attempt == max_poisson_attempts_1d):
+				print("Timed out!")
+	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
+	return points
+
+# 1 dimensional poisson disk distribution
+func _poisson_dd_2d(top_left: Vector2, bottom_right: Vector2, n: int, density: float):
+	var start_time = Time.get_ticks_usec()
+	var range_x = bottom_right.x-top_left.x
+	var range_y = bottom_right.y-top_left.y
+	var min_distance = sqrt((range_x * range_y) / (n * PI * sphere_packing_constant))  # The farthest each can get and still fit divided by density. If density >= 1, all can fit
+	var chunk_count_x = floor(range_x / min_distance)
+	var chunk_count_y = floor(range_y / min_distance)
+	var ending_remainder_x = (range_x / min_distance) - chunk_count_x
+	var ending_remainder_y = (range_y / min_distance) - chunk_count_y
+	
+	var points: PackedVector2Array
+	var chunks: Array # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
+	for cx in chunk_count_x: # Initialize the array
+		chunks.push_back([])
+		for cy in chunk_count_y:
+			chunks[cx].push_back([])
+	
+	for i in n: # For each point
+		for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
+			var sucess = true
+			var x = Vector2(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
+			# FOR WORLD GEN ONLY!!
+			if (i == 0): # Put the first point in the centre!
+				x = Vector2(floor(range_x/2),floor(range_y/2))
+				chunks[min(floor(x.x / min_distance),chunk_count_x-1)][min(floor(x.y / min_distance),chunk_count_y-1)].push_back(x)
+				points.push_back(x)
+				break
+			# Assign which chunk it is in
+			var chunk_id_x = min(floor(x.x / min_distance),chunk_count_x-1) # To not overrun
+			var chunk_id_y = min(floor(x.y / min_distance),chunk_count_y-1)
+			for dx in range(-1,2):
+				for dy in range(-1,2):
+					var nx = chunk_id_x + dx
+					var ny = chunk_id_y + dy
+					if nx >= 0 and ny >= 0 and nx < chunk_count_x and ny < chunk_count_y:
+						for point in chunks[nx][ny]:
+							if point.distance_squared_to(x) < min_distance * min_distance:
+								sucess = false
+								break
+			if (sucess):
+				chunks[chunk_id_x][chunk_id_y].push_back(x)
+				points.push_back(x)
+				break
+			if (attempt == max_poisson_attempts_1d-1):
+				print("Timed out!")
+	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
+	return points
+
+#func _print_2d_points(points):
+#	for p in points:
+#		var instance = target.instantiate()
+#		instance.global_position = p
+#		add_child(instance)
+
 func _ready():
+	#var points = _poisson_dd_2d(Vector2(40,40), Vector2(1880,1040),200,1)
+	#print(points)
+	#_print_2d_points(points)
 	if Engine.is_editor_hint():
 		return
-	#_generate_mesh()
 	_generate_mesh_PC()
+
 #Hi Nate
 @export var regenerate: bool:
 	set(value):
 		if value:
-			#_generate_mesh()
 			_generate_mesh_PC()
 			regenerate = false  # reset the toggle
 
@@ -58,65 +167,40 @@ func _generate_mesh_PC():
 		gen_depth.append(feature["gen_depth"])
 		sub_occurences.append(feature["sub_occurences"])  # already an Array
 		sizes.append(feature["sizes"])  # already an Array
+	
+	var number_of_features = 0
+	for f in features.size():
+		number_of_features += occurences[f]
+	var point_coords = _poisson_dd_2d(Vector2(0,0), Vector2(COLS,ROWS), number_of_features, 1)
+	var p_index = 0
 
 	for f in features.size():
-		var placed = 0
-		while placed < occurences[f]:
-			var candidate: Vector2
-			if f == 0:
-				# Place the origin biome at a fixed location
-				candidate = Vector2(x_0, y_0)
-			else:
-				# Random candidate position within bounds
-				candidate = Vector2(randi_range(M_TopLeft.x, M_BottomRight.x), randi_range(M_TopLeft.y, M_BottomRight.y))
-
-			var valid = true
-			for existing in major_points:
-				var existing_pos = Vector2(existing.x, existing.y)
-				if candidate.distance_to(existing_pos) < min_distance:
-					valid = false
-					break
-
-			if valid:
-				points.append(Vector3(candidate.x, candidate.y, f))
-				major_points.append(Vector3(candidate.x, candidate.y, f))
-				placed += 1
-		#for occ in occurences[f]:
-		#	# Base point (either origin or random)
-		#	var root_point
-		#	if (f==0):
-		#		root_point = Vector2(x_0, y_0) 
-		#	else:
-		#		root_point = Vector2(randi_range(M_TopLeft.x, M_BottomRight.x), randi_range(M_TopLeft.y, M_BottomRight.y))
-		#	
-		#	points.append(Vector3(root_point.x, root_point.y, f))
-		#
+		for occ in occurences[f]:
+			var occurence = point_coords[p_index]
+			points.append(Vector3(occurence.x, occurence.y, f))
+			p_index += 1
 			# Stack of [position, depth]
-				var stack: Array = [[candidate, 0]]
+			var stack: Array = [[occurence, 0]]
+			while stack.size() > 0:
+				var item = stack.pop_back()
+				var center = item[0]
+				var depth = item[1]
+				# Stop if we've reached max depth
+				if depth >= gen_depth[f]:
+					continue
+				var num_children = sub_occurences[f][depth]
+				var radius = sizes[f][depth]
+				var angles = _poisson_dd_1d(0, floor(TAU*1000),num_children,1) # Multiplied by 1000 to be like an integer
+				
+				for a in angles:
+					# Random angle around the circle
+					var offset = Vector2(radius, 0).rotated(a / 1000.)
+					var new_point = center + offset
+					points.append(Vector3(round(new_point.x), round(new_point.y), f))
+					# Queue it up for the next depth layer
+					depth += 1
+					stack.append([new_point, depth])
 
-				while stack.size() > 0:
-					var item = stack.pop_back()
-					var center = item[0]
-					var depth = item[1]
-
-					# Stop if we've reached max depth
-					if depth >= gen_depth[f]:
-						continue
-
-					var num_children = sub_occurences[f][depth]
-					var radius = sizes[f][depth]
-
-					for i in num_children:
-						# Random angle around the circle
-						var angle = randf_range(0, TAU)
-						var offset = Vector2(radius, 0).rotated(angle)
-						var new_point = center + offset
-						points.append(Vector3(round(new_point.x), round(new_point.y), f))
-
-						# Queue it up for the next depth layer
-						depth += 1
-						stack.append([new_point, depth])
-	
 	# Generates mesh
 	for row in ROWS:
 		for col in COLS:
@@ -150,12 +234,12 @@ func _generate_mesh_PC():
 				color = Color.LIGHT_GREEN
 			elif (closest_feature.y == 3): # Lake
 				color = Color.ROYAL_BLUE
-			elif (closest_feature.y == 4): # Desert
-				color = Color.SANDY_BROWN
+			elif (closest_feature.y == 4): # Rainforest
+				color = Color.GREEN_YELLOW
 			elif (closest_feature.y == 5): # Tundra
 				color = Color.SKY_BLUE
-			elif (closest_feature.y == 6): # Rainforest
-				color = Color.GREEN_YELLOW
+			elif (closest_feature.y == 6): # Desert
+				color = Color.SANDY_BROWN
 			
 			# FOR DEBUGGING
 			#if (closest_feature.x == 0): # Is on a point
@@ -172,10 +256,3 @@ func _generate_mesh_PC():
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	self.mesh = mesh
-
-# Algorithm idea (Point & Circle division)
-# Start with a closed set M to be the set of all points on the map
-# For each feature, choose n random points, where n is a random number within a range decided per feature
-# Create circles centered on each point. Expand each circle until it intersects with a circle centered on a point from another feature
-# At the intersection of the circle, start a new curve that will trace the intersection of the circles as they continue to expand until all points in M are assigned
-# Every point within the curve of a feature is assigned to that biome
