@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dlf1n01bma0ir"]
 
 [ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeple.png" id="1_qxbsp"]
-[ext_resource type="Script" uid="uid://cx0a0omc2dv20" path="res://scripts/meeple.gd" id="1_y4nmv"]
+[ext_resource type="Script" uid="uid://cx0a0omc2dv20" path="res://scripts/Meeples/meeple.gd" id="1_y4nmv"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
 friction = 0.0

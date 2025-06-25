@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3 uid="uid://bujhjvi3667ko"]
+
+[ext_resource type="Script" uid="uid://bgv44hfc0ifr3" path="res://scripts/Buildings/buildingControl.gd" id="1_kvhp6"]
+[ext_resource type="PackedScene" uid="uid://c6j2e1ddwb1ti" path="res://scenes/prefabs/moneyFarm.tscn" id="2_at16l"]
+[ext_resource type="Script" uid="uid://c4jvo5hivmdi5" path="res://scripts/Buildings/hud.gd" id="2_oj14w"]
+[ext_resource type="Texture2D" uid="uid://ct4cij7i3bsp6" path="res://assets/moneyFarm.png" id="3_f4nwg"]
+
+[node name="BuildingControl" type="Node2D"]
+script = ExtResource("1_kvhp6")
+farm_prefab = ExtResource("2_at16l")
+
+[node name="buildingHud" type="CanvasLayer" parent="."]
+script = ExtResource("2_oj14w")
+
+[node name="Money" type="Label" parent="buildingHud"]
+offset_right = 274.0
+offset_bottom = 55.0
+theme_override_font_sizes/font_size = 40
+text = "Money: 1000"
+
+[node name="FarmButton" type="Button" parent="buildingHud"]
+offset_left = 467.0
+offset_top = 4.0
+offset_right = 597.0
+offset_bottom = 132.0
+theme_override_font_sizes/font_size = 43
+icon = ExtResource("3_f4nwg")
+flat = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="FarmButtonLabel" type="Label" parent="buildingHud"]
+offset_left = 447.0
+offset_top = 125.0
+offset_right = 615.0
+offset_bottom = 179.0
+theme_override_font_sizes/font_size = 30
+text = "Farm - $500"
+
+[node name="BarracksButton" type="Button" parent="buildingHud"]
+offset_right = 8.0
+offset_bottom = 8.0
