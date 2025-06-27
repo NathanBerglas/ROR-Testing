@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://ct4cij7i3bsp6" path="res://assets/moneyFarm.png" id="2_wjva3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_leie8"]
-size = Vector2(303, 295)
+size = Vector2(305, 302.5)
 
 [node name="MoneyFarm" type="Node2D"]
 script = ExtResource("1_642g8")
@@ -12,9 +12,8 @@ script = ExtResource("1_642g8")
 [node name="RigidBody2D" type="RigidBody2D" parent="."]
 freeze = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
-position = Vector2(0.5, 0.5)
-scale = Vector2(0.2, 0.2)
+[node name="BodyForFarm" type="CollisionShape2D" parent="RigidBody2D"]
+scale = Vector2(0.4, 0.4)
 shape = SubResource("RectangleShape2D_leie8")
 
 [node name="Sprite2D" type="Sprite2D" parent="RigidBody2D"]

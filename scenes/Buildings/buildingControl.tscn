@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://bujhjvi3667ko"]
+[gd_scene load_steps=6 format=3 uid="uid://bujhjvi3667ko"]
 
 [ext_resource type="Script" uid="uid://bgv44hfc0ifr3" path="res://scripts/Buildings/buildingControl.gd" id="1_kvhp6"]
 [ext_resource type="PackedScene" uid="uid://c6j2e1ddwb1ti" path="res://scenes/prefabs/moneyFarm.tscn" id="2_at16l"]
 [ext_resource type="Script" uid="uid://c4jvo5hivmdi5" path="res://scripts/Buildings/hud.gd" id="2_oj14w"]
 [ext_resource type="Texture2D" uid="uid://ct4cij7i3bsp6" path="res://assets/moneyFarm.png" id="3_f4nwg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_at16l"]
 
 [node name="BuildingControl" type="Node2D"]
 script = ExtResource("1_kvhp6")
@@ -24,6 +26,7 @@ offset_top = 4.0
 offset_right = 597.0
 offset_bottom = 132.0
 theme_override_font_sizes/font_size = 43
+theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
 icon = ExtResource("3_f4nwg")
 flat = true
 icon_alignment = 1
