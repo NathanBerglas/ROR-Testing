@@ -5,6 +5,7 @@ extends Node2D
 
 var group: Array[Array] = [[]]
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
+var teammates = []
 
 func _process(_delta):
 	if Input.is_action_just_pressed("spawn_meeple"):

@@ -1,15 +1,20 @@
-[gd_scene load_steps=6 format=3 uid="uid://bujhjvi3667ko"]
+[gd_scene load_steps=9 format=3 uid="uid://bujhjvi3667ko"]
 
 [ext_resource type="Script" uid="uid://bgv44hfc0ifr3" path="res://scripts/Buildings/buildingControl.gd" id="1_kvhp6"]
 [ext_resource type="PackedScene" uid="uid://c6j2e1ddwb1ti" path="res://scenes/prefabs/moneyFarm.tscn" id="2_at16l"]
 [ext_resource type="Script" uid="uid://c4jvo5hivmdi5" path="res://scripts/Buildings/hud.gd" id="2_oj14w"]
 [ext_resource type="Texture2D" uid="uid://ct4cij7i3bsp6" path="res://assets/moneyFarm.png" id="3_f4nwg"]
+[ext_resource type="PackedScene" uid="uid://vr7ll0w6bfdx" path="res://scenes/prefabs/barracks.tscn" id="3_fbp8a"]
+[ext_resource type="Texture2D" uid="uid://dmme2pmdcs6we" path="res://assets/barracks.png" id="5_vw06n"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_at16l"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
 
 [node name="BuildingControl" type="Node2D"]
 script = ExtResource("1_kvhp6")
 farm_prefab = ExtResource("2_at16l")
+barracks_prefab = ExtResource("3_fbp8a")
 
 [node name="buildingHud" type="CanvasLayer" parent="."]
 script = ExtResource("2_oj14w")
@@ -21,10 +26,10 @@ theme_override_font_sizes/font_size = 40
 text = "Money: 1000"
 
 [node name="FarmButton" type="Button" parent="buildingHud"]
-offset_left = 467.0
-offset_top = 4.0
-offset_right = 597.0
-offset_bottom = 132.0
+offset_left = 309.0
+offset_top = 2.0
+offset_right = 439.0
+offset_bottom = 130.0
 theme_override_font_sizes/font_size = 43
 theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
 icon = ExtResource("3_f4nwg")
@@ -33,13 +38,27 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="FarmButtonLabel" type="Label" parent="buildingHud"]
-offset_left = 447.0
+offset_left = 291.0
 offset_top = 125.0
-offset_right = 615.0
+offset_right = 459.0
 offset_bottom = 179.0
 theme_override_font_sizes/font_size = 30
 text = "Farm - $500"
 
 [node name="BarracksButton" type="Button" parent="buildingHud"]
-offset_right = 8.0
-offset_bottom = 8.0
+offset_left = 539.0
+offset_top = 1.0
+offset_right = 674.0
+offset_bottom = 134.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("5_vw06n")
+flat = true
+expand_icon = true
+
+[node name="BarracksButtonLabel" type="Label" parent="buildingHud"]
+offset_left = 492.0
+offset_top = 124.0
+offset_right = 722.0
+offset_bottom = 178.0
+theme_override_font_sizes/font_size = 30
+text = "Barracks- $1000"

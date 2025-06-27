@@ -12,7 +12,7 @@ script = ExtResource("1_642g8")
 [node name="RigidBody2D" type="RigidBody2D" parent="."]
 freeze = true
 
-[node name="BodyForFarm" type="CollisionShape2D" parent="RigidBody2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
 scale = Vector2(0.4, 0.4)
 shape = SubResource("RectangleShape2D_leie8")
 

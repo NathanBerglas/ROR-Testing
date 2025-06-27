@@ -12,7 +12,8 @@ var dest = null #destination of a meeple
 
 
 var min_distance = 9 # Squared
-
+func _ready():
+	print("Spawned meeple: " + str(self.get_global_position()))
 
 #var target = Vector2(0,0)
 
