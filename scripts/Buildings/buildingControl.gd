@@ -47,8 +47,8 @@ func _on_farm_button_released():
 		return
 	buildingDraggin = null
 	
+	#If not placeable, REMOVED
 	if !buildings[buildings.size() - 1][2].is_placeable():
-		
 		buildings.pop_back()[2].queue_free()
 		return
 	buildings[buildings.size() - 1][2].fake = false
