@@ -1,18 +1,12 @@
 extends MeshInstance2D
 
-@export var SCREEN_RESOLUTION = Vector2(1000,1000)
-@export var TILES_ALONG_X = 300
-
-@export var min_distance = 15 # Minimum distance one biome can be from another
+@export var SCREEN_RESOLUTION = Vector2(1920,1080)
+@export var TILES_ALONG_X = 192
 @export var gen_data = JSON
 
 const max_poisson_attempts_1d = 100
 const max_poisson_attempts_2d = 100
 const sphere_packing_constant = 0.8
-
-func _sigmoid(x):
-	var SIG_SCALE = 1./10. # Scales how fast sigmoid noramlizes
-	return (exp(SIG_SCALE*x) / (1. + exp(SIG_SCALE*x)))
 
 # 1 dimensional poisson disk distribution
 func _poisson_dd_1d(min, max, n: int, density):
@@ -60,33 +54,48 @@ func _poisson_dd_1d(min, max, n: int, density):
 	return points
 
 # 1 dimensional poisson disk distribution
-func _poisson_dd_2d(top_left: Vector2, bottom_right: Vector2, n: int, density: float):
-	var start_time = Time.get_ticks_usec()
+func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, n: int, total:int, density: float, prev_points: Array[Vector2i]):
+	#var start_time = Time.get_ticks_usec()
 	var range_x = bottom_right.x-top_left.x
 	var range_y = bottom_right.y-top_left.y
-	var min_distance = sqrt((range_x * range_y) / (n * PI * sphere_packing_constant))  # The farthest each can get and still fit divided by density. If density >= 1, all can fit
-	var chunk_count_x = floor(range_x / min_distance)
-	var chunk_count_y = floor(range_y / min_distance)
-	var ending_remainder_x = (range_x / min_distance) - chunk_count_x
-	var ending_remainder_y = (range_y / min_distance) - chunk_count_y
+	var min_distance = sqrt((range_x * range_y) / (total * PI * sphere_packing_constant))  # The farthest each can get and still fit divided by density. If density >= 1, all can fit
+	var chunk_count_x
+	var chunk_count_y
+	var ending_remainder_x
+	var ending_remainder_y
+	if min_distance >= 1:
+		chunk_count_x = floor(range_x / min_distance)
+		chunk_count_y = floor(range_y / min_distance)
+		ending_remainder_x = (range_x / min_distance) - chunk_count_x
+		ending_remainder_y = (range_y / min_distance) - chunk_count_y
+	else:
+		chunk_count_x = 1
+		chunk_count_y = 1
+		ending_remainder_x = 0
+		ending_remainder_y = 0
 	
-	var points: PackedVector2Array
+	var points: Array[Vector2i] = prev_points
+	
 	var chunks: Array # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
 	for cx in chunk_count_x: # Initialize the array
 		chunks.push_back([])
 		for cy in chunk_count_y:
 			chunks[cx].push_back([])
 	
+	# Put prev_points into points
+	for point in prev_points:
+		chunks[min(floor(point.x / min_distance),chunk_count_x-1)][min(floor(point.y / min_distance),chunk_count_y-1)].push_back(point)
+
 	for i in n: # For each point
 		for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
 			var sucess = true
-			var x = Vector2(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
+			var x = Vector2i(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
 			# FOR WORLD GEN ONLY!!
-			if (i == 0): # Put the first point in the centre!
-				x = Vector2(floor(range_x/2),floor(range_y/2))
-				chunks[min(floor(x.x / min_distance),chunk_count_x-1)][min(floor(x.y / min_distance),chunk_count_y-1)].push_back(x)
-				points.push_back(x)
-				break
+			#if (i == 0): # Put the first point in the centre!
+			#	x = Vector2i(floor(range_x/2),floor(range_y/2))
+			#	chunks[min(floor(x.x / min_distance),chunk_count_x-1)][min(floor(x.y / min_distance),chunk_count_y-1)].push_back(x)
+			#	points.push_back(x)
+			#	break
 			# Assign which chunk it is in
 			var chunk_id_x = min(floor(x.x / min_distance),chunk_count_x-1) # To not overrun
 			var chunk_id_y = min(floor(x.y / min_distance),chunk_count_y-1)
@@ -106,31 +115,13 @@ func _poisson_dd_2d(top_left: Vector2, bottom_right: Vector2, n: int, density: f
 			if (attempt == max_poisson_attempts_1d-1):
 				print("Biome Gen Timed out 2d!")
 	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
-	return points
-
-#func _print_2d_points(points):
-#	for p in points:
-#		var instance = target.instantiate()
-#		instance.global_position = p
-#		add_child(instance)
+	return points.slice(-n, points.size())
 
 func _ready():
-	#var points = _poisson_dd_2d(Vector2(40,40), Vector2(1880,1040),200,1)
-	#print(points)
-	#_print_2d_points(points)
-	if Engine.is_editor_hint():
-		return
-	_generate_mesh_PC()
+	_generate_mesh()
 
-#Hi Nate
-@export var regenerate: bool:
-	set(value):
-		if value:
-			_generate_mesh_PC()
-			regenerate = false  # reset the toggle
-
-# Point and Circle Generation
-func _generate_mesh_PC():
+# Generates the mesh
+func _generate_mesh():
 	var mesh = ArrayMesh.new()
 	var arrays = []
 	
@@ -140,7 +131,7 @@ func _generate_mesh_PC():
 		
 	# Map size
 	var cols = TILES_ALONG_X
-	var rows = cols * SCREEN_RESOLUTION.y / SCREEN_RESOLUTION.x
+	var rows = floor(cols * SCREEN_RESOLUTION.y / SCREEN_RESOLUTION.x)
 	var M_TopLeft = Vector2(0,0)
 	var M_BottomRight = Vector2(cols, rows)
 	var points = PackedVector3Array() # (x, y, feature index)
@@ -149,6 +140,7 @@ func _generate_mesh_PC():
 	#Resource data
 	var json_received = gen_data.data
 	var features = PackedStringArray()
+	var spawn_area: Array[Array] = [] # [0] is the top left, [1] is bottom right Vector2i
 	var occurences = PackedInt32Array()
 	var gen_depth = PackedInt32Array()
 	var sub_occurences: Array[Array] = [] # sub_occurences[i] is an array of integers of length gen_depth[i], where i is the ith feature
@@ -157,32 +149,44 @@ func _generate_mesh_PC():
 	# Initialize data from JSON
 	for feature in json_received["features"]:
 		features.append(feature["name"])
+		spawn_area.append(feature["spawn_area"])
 		occurences.append(feature["occurences"])
 		gen_depth.append(feature["gen_depth"])
 		sub_occurences.append(feature["sub_occurences"])  # already an Array
 		sizes.append(feature["sizes"])  # already an Array
-	
 	var gen_screen_resolution = Vector2(json_received["x-resolution"], json_received["y-resolution"])
+	var gen_tiles = Vector2(json_received["x-tiles"], json_received["y-tiles"])
 	var quad_width = SCREEN_RESOLUTION.x / cols
 	var quad_height = SCREEN_RESOLUTION.y / rows
 	
 	# Scaled based on desired resolution
-	for size in sizes:
-		for length in size:
-			length *= SCREEN_RESOLUTION.dot(SCREEN_RESOLUTION) / gen_screen_resolution.dot(gen_screen_resolution)
-	
-	
+	for f in sizes.size():
+		for s in sizes[f].size():
+			sizes[f][s] *= sqrt((cols*cols + rows*rows) / gen_tiles.dot(gen_tiles))
+			sizes[f][s] = floor(sizes[f][s])
+	for area in spawn_area:
+		for p in 2:
+				area[p][0] *= (cols / gen_screen_resolution.x)
+				area[p][1] *= (rows / gen_screen_resolution.y)
+				area[p][0] = floor(area[p][0])
+				area[p][1] = floor(area[p][1])
+	print(sizes)
+	#Calculate number of features
 	var number_of_features = 0
 	for f in features.size():
 		number_of_features += occurences[f]
-	var point_coords = _poisson_dd_2d(Vector2(0,0), Vector2(cols,rows), number_of_features, 1)
-	var p_index = 0
+	
+	# Generate Vectors of previous points
+	var prev_points: Array[Vector2i]
+	for p in points:
+		prev_points.push_back(Vector2i(p.x, p.y))
 	
 	for f in features.size():
 		for occ in occurences[f]:
-			var occurence = point_coords[p_index]
+			var top_left = Vector2i(floor(spawn_area[f][0][0]), floor(spawn_area[f][0][1]))
+			var bottom_right = Vector2i(floor(spawn_area[f][1][0]), floor(spawn_area[f][1][1]))
+			var occurence = _poisson_dd_2d(top_left, bottom_right, 1, number_of_features, 1, prev_points)[0]
 			points.append(Vector3(occurence.x, occurence.y, f))
-			p_index += 1
 			# Stack of [position, depth]
 			var stack: Array = [[occurence, 0]]
 			while stack.size() > 0:
@@ -199,15 +203,14 @@ func _generate_mesh_PC():
 				for a in angles:
 					# Random angle around the circle
 					var offset = Vector2(radius, 0).rotated(a / 1000.)
-					var new_point = center + offset
+					var new_point_f = Vector2(center.x,center.y) + offset
+					var new_point = Vector2i(floor(new_point_f.x),floor(new_point_f.y))
 					points.append(Vector3(round(new_point.x), round(new_point.y), f))
 					# Queue it up for the next depth layer
 					depth += 1
 					stack.append([new_point, depth])
 
 	# Generates mesh
-	print(rows)
-	print(cols)
 	for row in rows:
 		for col in cols:
 			var x = col * quad_width
@@ -232,18 +235,18 @@ func _generate_mesh_PC():
 			var color = Color.WHITE
 			if (closest_feature.y == 0): # Origin
 				color = Color.BLACK
-			elif (closest_feature.y == 1): # Forest
-				color = Color.FOREST_GREEN
-			elif (closest_feature.y == 2): # Plains
-				color = Color.LIGHT_GREEN
-			elif (closest_feature.y == 3): # Lake
-				color = Color.ROYAL_BLUE
-			elif (closest_feature.y == 4): # Rainforest
+			elif (closest_feature.y == 1): # Rainforest
 				color = Color.GREEN_YELLOW
-			elif (closest_feature.y == 5): # Tundra
+			elif (closest_feature.y == 2): # Tundra
 				color = Color.SKY_BLUE
-			elif (closest_feature.y == 6): # Desert
+			elif (closest_feature.y == 3): # Desert
 				color = Color.SANDY_BROWN
+			elif (closest_feature.y == 4): # Forest
+				color = Color.FOREST_GREEN
+			elif (closest_feature.y == 5): # Plains
+				color = Color.LIGHT_GREEN
+			elif (closest_feature.y == 6): # Lake
+				color = Color.ROYAL_BLUE
 			
 			# FOR DEBUGGING
 			#if (closest_feature.x == 0): # Is on a point
