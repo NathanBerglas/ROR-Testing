@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bbjr8sh5hxnjt"]
+
+[ext_resource type="Script" uid="uid://cpf0vhs8huu5t" path="res://scripts/camera_2d.gd" id="1_cvpoc"]
+
+[node name="Camera" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 10.0
+script = ExtResource("1_cvpoc")
