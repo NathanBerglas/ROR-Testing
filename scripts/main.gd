@@ -1,7 +1,5 @@
 extends Node
 
-
-
 func _ready():
 	$MeepleControl.teammates.push_back($BuildingControl)
 	$BuildingControl.teammates.push_back($MeepleControl)

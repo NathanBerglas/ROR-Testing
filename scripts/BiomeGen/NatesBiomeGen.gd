@@ -1,22 +1,14 @@
 extends MeshInstance2D
 
-@export var QUAD_WIDTH = 10
-@export var QUAD_HEIGHT = 10
-@export var ROWS = 108
-@export var COLS = 192
+@export var SCREEN_RESOLUTION = Vector2(1000,1000)
+@export var TILES_ALONG_X = 300
 
-@export var x_0 = COLS/2 # Define the colour origin
-@export var y_0 = ROWS/2 # Defaults to the centre
-@export var starting_area = 10
 @export var min_distance = 15 # Minimum distance one biome can be from another
 @export var gen_data = JSON
 
 const max_poisson_attempts_1d = 100
 const max_poisson_attempts_2d = 100
 const sphere_packing_constant = 0.8
-
-# FOR DEBUGGING
-#@export var target: PackedScene
 
 func _sigmoid(x):
 	var SIG_SCALE = 1./10. # Scales how fast sigmoid noramlizes
@@ -63,7 +55,7 @@ func _poisson_dd_1d(min, max, n: int, density):
 				points.push_back(x)
 				break
 			if (attempt == max_poisson_attempts_1d):
-				print("Timed out!")
+				print("Biome Gen Timed out! 1d")
 	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
 	return points
 
@@ -112,7 +104,7 @@ func _poisson_dd_2d(top_left: Vector2, bottom_right: Vector2, n: int, density: f
 				points.push_back(x)
 				break
 			if (attempt == max_poisson_attempts_1d-1):
-				print("Timed out!")
+				print("Biome Gen Timed out 2d!")
 	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
 	return points
 
@@ -147,8 +139,10 @@ func _generate_mesh_PC():
 	var indices = PackedInt32Array()
 		
 	# Map size
+	var cols = TILES_ALONG_X
+	var rows = cols * SCREEN_RESOLUTION.y / SCREEN_RESOLUTION.x
 	var M_TopLeft = Vector2(0,0)
-	var M_BottomRight = Vector2(COLS, ROWS)
+	var M_BottomRight = Vector2(cols, rows)
 	var points = PackedVector3Array() # (x, y, feature index)
 	var major_points = PackedVector3Array() # (x,y, feature index), only for major occurences
 	
@@ -168,12 +162,22 @@ func _generate_mesh_PC():
 		sub_occurences.append(feature["sub_occurences"])  # already an Array
 		sizes.append(feature["sizes"])  # already an Array
 	
+	var gen_screen_resolution = Vector2(json_received["x-resolution"], json_received["y-resolution"])
+	var quad_width = SCREEN_RESOLUTION.x / cols
+	var quad_height = SCREEN_RESOLUTION.y / rows
+	
+	# Scaled based on desired resolution
+	for size in sizes:
+		for length in size:
+			length *= SCREEN_RESOLUTION.dot(SCREEN_RESOLUTION) / gen_screen_resolution.dot(gen_screen_resolution)
+	
+	
 	var number_of_features = 0
 	for f in features.size():
 		number_of_features += occurences[f]
-	var point_coords = _poisson_dd_2d(Vector2(0,0), Vector2(COLS,ROWS), number_of_features, 1)
+	var point_coords = _poisson_dd_2d(Vector2(0,0), Vector2(cols,rows), number_of_features, 1)
 	var p_index = 0
-
+	
 	for f in features.size():
 		for occ in occurences[f]:
 			var occurence = point_coords[p_index]
@@ -202,31 +206,31 @@ func _generate_mesh_PC():
 					stack.append([new_point, depth])
 
 	# Generates mesh
-	for row in ROWS:
-		for col in COLS:
-			var x = col * QUAD_WIDTH
-			var y = row * QUAD_HEIGHT
+	print(rows)
+	print(cols)
+	for row in rows:
+		for col in cols:
+			var x = col * quad_width
+			var y = row * quad_height
 			
 			var i = vertices.size()  # index of first vertex in this quad
 			
 			# Define the 4 vertices of the quad (clockwise or CCW)
 			vertices.push_back(Vector2(x, y))
-			vertices.push_back(Vector2(x + QUAD_WIDTH, y))
-			vertices.push_back(Vector2(x + QUAD_WIDTH, y + QUAD_HEIGHT))
-			vertices.push_back(Vector2(x, y + QUAD_HEIGHT))
+			vertices.push_back(Vector2(x + quad_width, y))
+			vertices.push_back(Vector2(x + quad_width, y + quad_height))
+			vertices.push_back(Vector2(x, y + quad_height))
 			
 			# Calculate the closest feature to this point
 			var closest_feature = Vector2(-1, -1) # distance squared, feature id
 			for p in points:
-				var distance = pow(col-p.x,2) + pow(row-p.y,2) # Calculate distance squared
+				var distance = (col-p.x) * (col-p.x) + (row-p.y) * (row-p.y) # Calculate distance squared
 				if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
 					closest_feature = Vector2(distance,p.z) 
 			
 			# Generate the color for the whole quad
 			var color = Color.WHITE
-			if (pow(col-x_0,2) + pow(row-y_0,2) < pow(starting_area,2)): # Force starting area
-				color = Color.BLACK
-			elif (closest_feature.y == 0): # Origin
+			if (closest_feature.y == 0): # Origin
 				color = Color.BLACK
 			elif (closest_feature.y == 1): # Forest
 				color = Color.FOREST_GREEN

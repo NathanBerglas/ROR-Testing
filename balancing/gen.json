@@ -1,6 +1,6 @@
 {
 	"x-resolution": 1920,
-	"x-resolution": 1080,
+	"y-resolution": 1080,
 	"features": [
 		{
 			"name": "origin",
