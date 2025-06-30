@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=4 uid="uid://cqyjg1x55n0jr"]
+[gd_scene load_steps=9 format=4 uid="uid://cqyjg1x55n0jr"]
 
 [ext_resource type="Script" uid="uid://cdyjf7gitcaf2" path="res://scripts/main.gd" id="1_o5qli"]
 [ext_resource type="PackedScene" uid="uid://8s5fbc42yax2" path="res://scenes/Meeples/meepleControl.tscn" id="2_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://bujhjvi3667ko" path="res://scenes/Buildings/buildingControl.tscn" id="3_sugp2"]
 [ext_resource type="Texture2D" uid="uid://bcpr0ilxug5yd" path="res://assets/testingBackground.png" id="4_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://bbjr8sh5hxnjt" path="res://scenes/camera.tscn" id="5_tbgi4"]
+[ext_resource type="PackedScene" uid="uid://c55deqr6361v3" path="res://scenes/BiomeGen/BiomeGen.tscn" id="6_tefeu"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbgi4"]
 texture = ExtResource("4_jyhfs")
@@ -8062,6 +8063,7 @@ script = ExtResource("1_o5qli")
 [node name="BuildingControl" parent="." instance=ExtResource("3_sugp2")]
 
 [node name="Background" type="TileMapLayer" parent="."]
+visible = false
 light_mask = 524288
 visibility_layer = 524288
 z_index = -20
@@ -8074,8 +8076,9 @@ collision_enabled = false
 [node name="Camera" parent="." instance=ExtResource("5_tbgi4")]
 position = Vector2(960, 540)
 
-[node name="Outer Barrier" type="RigidBody2D" parent="."]
-freeze = true
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Outer Barrier"]
-polygon = PackedVector2Array(-1, -1, 1921, -1, 1921, 1081, -1, 1081, -1, -1, 0, 0, 0, 1080, 1920, 1080, 1920, 0, 0, 0)
+[node name="Biome Gen" parent="." instance=ExtResource("6_tefeu")]
+light_mask = 512
+visibility_layer = 512
+z_index = -2
+position = Vector2(-9600, -5400)
+SCREEN_RESOLUTION = Vector2(19200, 10800)

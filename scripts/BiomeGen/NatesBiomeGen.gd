@@ -1,8 +1,8 @@
-extends MeshInstance2D
+extends Node2D
 
 @export var SCREEN_RESOLUTION = Vector2(1920,1080)
 @export var TILES_ALONG_X = 192
-@export var gen_data = JSON
+@export var gen_data: JSON
 
 const max_poisson_attempts_1d = 100
 const max_poisson_attempts_2d = 100
@@ -27,8 +27,6 @@ func _poisson_dd_1d(min, max, n: int, density):
 			var x = randi_range(min, max)
 			# Assign which chunk it is in
 			var chunk_id = min(floor(x / min_distance),chunk_count-1) # To not overrun 
-			#if (max - x) <= ending_remainder : # If it's too close to the last chunk and the last one must be extended
-			#		chunk_id = chunk_count-1
 			if (chunk_id > 0): # If it's not in the first chunk
 				for p in chunks[chunk_id-1]: # Check for each point in the previous chunk
 					if (abs(p - x) < min_distance):
@@ -170,7 +168,6 @@ func _generate_mesh():
 				area[p][1] *= (rows / gen_screen_resolution.y)
 				area[p][0] = floor(area[p][0])
 				area[p][1] = floor(area[p][1])
-	print(sizes)
 	#Calculate number of features
 	var number_of_features = 0
 	for f in features.size():
@@ -262,4 +259,4 @@ func _generate_mesh():
 	arrays[Mesh.ARRAY_INDEX] = indices
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	self.mesh = mesh
+	$"Ground Mesh".mesh = mesh
