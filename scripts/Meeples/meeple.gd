@@ -13,10 +13,10 @@ var dest = null #destination of a meeple
 var size = 1 #Size of the ARMY hashtag troops slay
 
 var min_distance = 9 # Squared
-
+var pos = null
 
 func _physics_process(delta): #runs on each meeple every tick
-	
+	pos = self.rb.get_global_position()
 	if selected:
 		highlight()
 	else:

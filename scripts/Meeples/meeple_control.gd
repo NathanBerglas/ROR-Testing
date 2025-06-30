@@ -68,6 +68,7 @@ func _process(delta):
 			update_selection_box()
 
 	elif Input.is_action_just_released("select"):
+		selectingTime += delta
 		if selectingTime < 0.5:
 			var hit = false
 			for m in group[0]:
@@ -81,7 +82,7 @@ func _process(delta):
 			var rect = Rect2(selection_box.global_position, selection_box.size)
 
 			for m in group[0]:
-				if rect.has_point(m.global_position):
+				if rect.has_point(m.pos):
 					m.selected = true
 					
 					
