@@ -1,8 +1,13 @@
 extends Node2D
 
-@export var SCREEN_RESOLUTION = Vector2(1920,1080)
-@export var TILES_ALONG_X = 192
+@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
+@export var MAP_SIZE: Vector2i = Vector2i(1920+250,1080+250)
+@export var TILES_ALONG_X: int = 192
+@export var TILES_ALONG_X_MAP: int = 192+25
 @export var gen_data: JSON
+
+var map_cols: int = (MAP_SIZE.x / SCREEN_RESOLUTION.x) * TILES_ALONG_X_MAP
+var map_rows: int = floor(map_cols * MAP_SIZE.y / MAP_SIZE.x)
 
 const max_poisson_attempts_1d = 100
 const max_poisson_attempts_2d = 100
@@ -115,6 +120,17 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, n: int, total:in
 	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
 	return points.slice(-n, points.size())
 
+func _ocean(distance: int) -> Vector2:
+	var shore_length: int = map_cols * 2 + map_rows
+	distance *= shore_length / 100
+	if (distance > map_cols):
+		distance -= map_cols
+		if (distance > map_rows):
+			distance -= map_rows
+			return Vector2(distance,map_rows)
+		return Vector2(0,distance)
+	return Vector2(distance,0)
+	
 func _ready():
 	_generate_mesh()
 
@@ -128,8 +144,8 @@ func _generate_mesh():
 	var indices = PackedInt32Array()
 		
 	# Map size
-	var cols = TILES_ALONG_X
-	var rows = floor(cols * SCREEN_RESOLUTION.y / SCREEN_RESOLUTION.x)
+	var cols: int = TILES_ALONG_X
+	var rows: int = floor(cols * SCREEN_RESOLUTION.y / SCREEN_RESOLUTION.x)
 	var M_TopLeft = Vector2(0,0)
 	var M_BottomRight = Vector2(cols, rows)
 	var points = PackedVector3Array() # (x, y, feature index)
@@ -154,8 +170,8 @@ func _generate_mesh():
 		sizes.append(feature["sizes"])  # already an Array
 	var gen_screen_resolution = Vector2(json_received["x-resolution"], json_received["y-resolution"])
 	var gen_tiles = Vector2(json_received["x-tiles"], json_received["y-tiles"])
-	var quad_width = SCREEN_RESOLUTION.x / cols
-	var quad_height = SCREEN_RESOLUTION.y / rows
+	var quad_width: int = MAP_SIZE.x / cols
+	var quad_height: int = MAP_SIZE.y / rows
 	
 	# Scaled based on desired resolution
 	for f in sizes.size():
@@ -207,11 +223,18 @@ func _generate_mesh():
 					depth += 1
 					stack.append([new_point, depth])
 
+	# Place the Ocean
+	var ocean_distances: Array = range(0,100,1)
+	for p in ocean_distances.size():
+		var ocean_point: Vector2 = _ocean(ocean_distances[p])
+		print(ocean_point)
+		points.push_back(Vector3(ocean_point.x, ocean_point.y, -1))
+
 	# Generates mesh
-	for row in rows:
-		for col in cols:
-			var x = col * quad_width
-			var y = row * quad_height
+	for row: int in map_rows:
+		for col: int in map_cols:
+			var x: int = col * quad_width
+			var y: int = row * quad_height
 			
 			var i = vertices.size()  # index of first vertex in this quad
 			
@@ -244,15 +267,21 @@ func _generate_mesh():
 				color = Color.LIGHT_GREEN
 			elif (closest_feature.y == 6): # Lake
 				color = Color.ROYAL_BLUE
-			
+			elif (closest_feature.y == -1): # Ocean
+				color = Color.DARK_BLUE
+				
 			# FOR DEBUGGING
-			#if (closest_feature.x == 0): # Is on a point
+			#if (row == floor(rows/2) and col == floor(cols/2)):
 			#	color = Color.WEB_PURPLE
+			#if  !(((map_rows-rows) < row and row < rows) and ((map_cols-cols) < col and col < cols)): # Inside point area
+			#	color = Color.WEB_MAROON
+			if (closest_feature.x == 0): # Is on a point
+				color = Color.WEB_PURPLE
 			
 			colors.append_array([color, color, color, color])
 			# Define two triangles (quad = 2 triangles)
 			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
-			
+
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_COLOR] = colors

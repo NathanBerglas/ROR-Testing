@@ -8063,13 +8063,13 @@ script = ExtResource("1_o5qli")
 [node name="BuildingControl" parent="." instance=ExtResource("3_sugp2")]
 
 [node name="Background" type="TileMapLayer" parent="."]
-visible = false
 light_mask = 524288
 visibility_layer = 524288
 z_index = -20
 texture_filter = 3
 use_parent_material = true
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAD/////AAAAAAAAAAAAAP//AAAAAAAAAAABAP//AAAAAAAAAAABAAAAAAAAAAAAAAABAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAD//wEAAAAAAAAAAAA=")
+enabled = false
 tile_set = SubResource("TileSet_tefeu")
 collision_enabled = false
 

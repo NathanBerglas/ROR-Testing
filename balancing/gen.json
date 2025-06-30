@@ -7,7 +7,7 @@
 		{
 			"name": "origin",
 			"occurences": 1,
-			"spawn_area": [[960,540],[960,540]],
+			"spawn_area": [[959,539],[961,541]],
 			"gen_depth": 1,
 			"sub_occurences": [20],
 			"sizes": [5],
