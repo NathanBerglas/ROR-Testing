@@ -1,17 +1,15 @@
 extends Node2D
 
 # Main Area
-@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920 * 15,15 * 1080)
+@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
 @export var COLS: int = 192
-var PIXELS_PER_TILE: int = int(SCREEN_RESOLUTION.x / COLS)
-var ROWS: int = int(SCREEN_RESOLUTION.y / PIXELS_PER_TILE)
+var PIXELS_PER_TILE: int
 
 # Map Area
 @export var BORDER_RESOLUTION: int = 500
-var BORDER_TILES: int = int(BORDER_RESOLUTION / PIXELS_PER_TILE)
-var MAP_RESOLUTION: Vector2i = Vector2i(SCREEN_RESOLUTION.x + BORDER_RESOLUTION, SCREEN_RESOLUTION.y + BORDER_RESOLUTION)
-var MAP_COLS: int = MAP_RESOLUTION.x / PIXELS_PER_TILE
-var MAP_ROWS: int = MAP_RESOLUTION.y / PIXELS_PER_TILE
+var MAP_RESOLUTION: Vector2i
+var MAP_COLS: int
+var MAP_ROWS: int
 
 # Gen Data
 @export var gen_data: JSON
@@ -20,6 +18,18 @@ var MAP_ROWS: int = MAP_RESOLUTION.y / PIXELS_PER_TILE
 const max_poisson_attempts_1d: int = 100
 const max_poisson_attempts_2d: int = 100
 const sphere_packing_constant: float = 0.8
+
+func _ready() -> void:
+	# Main Area
+	PIXELS_PER_TILE = int(SCREEN_RESOLUTION.x / COLS)
+
+	# Map Area
+	MAP_RESOLUTION = Vector2i(SCREEN_RESOLUTION.x + BORDER_RESOLUTION, SCREEN_RESOLUTION.y + BORDER_RESOLUTION)
+	MAP_COLS = MAP_RESOLUTION.x / PIXELS_PER_TILE
+	MAP_ROWS = MAP_RESOLUTION.y / PIXELS_PER_TILE
+	
+	# Generate Mesh
+	_generate_mesh()
 
 # 1 dimensional poisson disk distribution
 func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
@@ -104,9 +114,6 @@ func _ocean(distance: int) -> Vector2:
 			return Vector2(distance,MAP_RESOLUTION.y)
 		return Vector2(0,distance)
 	return Vector2(distance,0)
-	
-func _ready():
-	_generate_mesh()
 
 # Generates the mesh
 func _generate_mesh():
@@ -247,8 +254,6 @@ func _generate_mesh():
 			# FOR DEBUGGING
 			#if (row == floor(MAP_ROWS/2) and col == floor(MAP_COLS/2)):
 			#	color = Color.WEB_PURPLE
-			#if  !((BORDER_TILES < row and row < ROWS) and (BORDER_TILES < col and col < COLS)): # Inside point area
-			#	color = Color.WEB_MAROON
 			#if (closest_feature.x < PIXELS_PER_TILE): # Is on a point
 			#	color = Color.WEB_PURPLE
 			
