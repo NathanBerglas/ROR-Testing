@@ -1,7 +1,7 @@
 extends Node2D
 
 # Main Area
-@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
+@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920 * 15,15 * 1080)
 @export var COLS: int = 192
 var PIXELS_PER_TILE: int = int(SCREEN_RESOLUTION.x / COLS)
 var ROWS: int = int(SCREEN_RESOLUTION.y / PIXELS_PER_TILE)

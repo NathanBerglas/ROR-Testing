@@ -3,9 +3,9 @@ extends Node2D
 @export var targetMarker: Sprite2D
 @export var meeple_prefab: PackedScene
 @onready var selection_box = $ColorRect
-@onready var RCLICKORDER = $"Rightclick Menu/VBoxContainer/Order"
-@onready var RCLICKGROUP = $"Rightclick Menu/VBoxContainer/Group"
-@onready var RCLICKMENU = $"Rightclick Menu/VBoxContainer"
+@onready var RCLICKORDER = $VBoxContainer/Order
+@onready var RCLICKGROUP = $VBoxContainer/Group
+@onready var RCLICKMENU = $VBoxContainer
 var group: Array[Array] = [[]]
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
 var teammates = []
