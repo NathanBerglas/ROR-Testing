@@ -1,8 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://8s5fbc42yax2"]
+[gd_scene load_steps=6 format=3 uid="uid://8s5fbc42yax2"]
 
 [ext_resource type="Script" uid="uid://5sxahsim667x" path="res://scripts/Meeples/meeple_control.gd" id="1_py3r1"]
 [ext_resource type="PackedScene" uid="uid://dlf1n01bma0ir" path="res://scenes/prefabs/meeple.tscn" id="2_6lno3"]
 [ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeple.png" id="3_hkl3t"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mbxmy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jurxu"]
 
 [node name="MeepleControl" type="Node2D" node_paths=PackedStringArray("targetMarker")]
 script = ExtResource("1_py3r1")
@@ -22,3 +26,19 @@ offset_left = 92.0
 offset_top = 49.0
 offset_right = 678.0
 offset_bottom = 432.0
+
+[node name="Rightclick Menu" type="CanvasLayer" parent="."]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Rightclick Menu"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Order" type="Button" parent="Rightclick Menu/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_mbxmy")
+text = "1- Order Selected Troops"
+
+[node name="Group" type="Button" parent="Rightclick Menu/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_jurxu")
+text = "2 - Create/Merge Groups"
