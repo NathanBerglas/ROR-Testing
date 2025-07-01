@@ -1,40 +1,38 @@
 {
 	"x-resolution": 1920,
 	"y-resolution": 1080,
-	"x-tiles": 192,
-	"y-tiles": 108,
 	"features": [
 		{
 			"name": "origin",
 			"occurences": 1,
-			"spawn_area": [[959,539],[961,541]],
+			"spawn_area": [[480,539],[480,541]],
 			"gen_depth": 1,
 			"sub_occurences": [30],
-			"sizes": [5],
+			"sizes": [50],
 		},
 		{
 			"name": "rainforest",
 			"occurences": 2,
-			"spawn_area": [[1620,10],[1970,310]],
-			"gen_depth": 2,
-			"sub_occurences": [5,5],
-			"sizes": [10,10],
+			"spawn_area": [[1720,10],[1970,310]],
+			"gen_depth": 3,
+			"sub_occurences": [10,5,2],
+			"sizes": [100,100,50],
 		},
 		{
 			"name": "tundra",
-			"occurences": 2,
+			"occurences": 1,
 			"spawn_area": [[10,10],[310,310]],
-			"gen_depth": 3,
-			"sub_occurences": [10,5,3],
-			"sizes": [15,10,3],
+			"gen_depth": 2,
+			"sub_occurences": [15,10],
+			"sizes": [100,100],
 		},
 		{
 			"name": "desert",
-			"occurences": 2,
-			"spawn_area": [[10,830],[1970,1030]],
+			"occurences": 1,
+			"spawn_area": [[10,830],[310,1030]],
 			"gen_depth": 2,
-			"sub_occurences": [5,5],
-			"sizes": [4,10],
+			"sub_occurences": [10,5],
+			"sizes": [100,100],
 		},
 		{
 			"name": "forest",
@@ -42,7 +40,7 @@
 			"spawn_area": [[0,0],[1920,1080]],
 			"gen_depth": 2,
 			"sub_occurences": [3,3],
-			"sizes": [15,10],
+			"sizes": [150,100],
 		},
 		{
 			"name": "plains",
@@ -50,7 +48,7 @@
 			"spawn_area": [[0,0],[1920,1080]],
 			"gen_depth": 2,
 			"sub_occurences": [3,3],
-			"sizes": [20,5],
+			"sizes": [200,50],
 		},
 		{
 			"name": "lake",
@@ -58,7 +56,7 @@
 			"spawn_area": [[0,0],[1920,1080]],
 			"gen_depth": 1,
 			"sub_occurences": [10],
-			"sizes": [4],
+			"sizes": [40],
 		}
 	]
 }

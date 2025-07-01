@@ -1,28 +1,33 @@
 extends Node2D
 
-
+# Main Area
 @export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
-@export var BORDER: int = 400
-@export var TILES_ALONG_X: int = 192
+@export var COLS: int = 192
+var PIXELS_PER_TILE: int = int(SCREEN_RESOLUTION.x / COLS)
+var ROWS: int = int(SCREEN_RESOLUTION.y / PIXELS_PER_TILE)
+
+# Map Area
+@export var BORDER_RESOLUTION: int = 500
+var BORDER_TILES: int = int(BORDER_RESOLUTION / PIXELS_PER_TILE)
+var MAP_RESOLUTION: Vector2i = Vector2i(SCREEN_RESOLUTION.x + BORDER_RESOLUTION, SCREEN_RESOLUTION.y + BORDER_RESOLUTION)
+var MAP_COLS: int = MAP_RESOLUTION.x / PIXELS_PER_TILE
+var MAP_ROWS: int = MAP_RESOLUTION.y / PIXELS_PER_TILE
+
+# Gen Data
 @export var gen_data: JSON
 
-var map_size: Vector2i = Vector2i(SCREEN_RESOLUTION.x + BORDER,SCREEN_RESOLUTION.y + BORDER)
-var tiles_along_x_map: int = TILES_ALONG_X+floor(BORDER / (SCREEN_RESOLUTION.x / TILES_ALONG_X))
-var map_cols: int = (map_size.x / SCREEN_RESOLUTION.x) * tiles_along_x_map
-var map_rows: int = floor(map_cols * map_size.y / map_size.x)
-
-const max_poisson_attempts_1d = 100
-const max_poisson_attempts_2d = 100
-const sphere_packing_constant = 0.8
+# Poisson distribution constants
+const max_poisson_attempts_1d: int = 100
+const max_poisson_attempts_2d: int = 100
+const sphere_packing_constant: float = 0.8
 
 # 1 dimensional poisson disk distribution
-func _poisson_dd_1d(min, max, n: int, density):
+func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 	var start_time = Time.get_ticks_usec()
-	var range = max-min
-	var min_distance = ceil(range/(n-2)) / density # The farthest each can get and still fit divided by density. If density >= 1, all can fit
-	var chunk_count = floor(range / min_distance)
-	var ending_remainder = (range / min_distance) - chunk_count
-	
+	var range: int = max-min
+	var min_distance: float = ceil(range / n) / density # The farthest each can get and still fit divided by density. If density >= 1, all can fit
+	var chunk_count: int = int(range / min_distance)
+	 
 	var points: PackedInt32Array
 	var chunks: Array[Array] = [] # Each point is placed in a chunk. Each chunk is exactly min_distance wide starting from min (stretches to max)
 	for c in chunk_count: # Initialize the array
@@ -58,71 +63,45 @@ func _poisson_dd_1d(min, max, n: int, density):
 	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
 	return points
 
-# 1 dimensional poisson disk distribution
-func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, n: int, total:int, density: float, prev_points: Array[Vector2i]):
-	#var start_time = Time.get_ticks_usec()
-	var range_x = bottom_right.x-top_left.x
-	var range_y = bottom_right.y-top_left.y
-	var min_distance = sqrt((range_x * range_y) / (total * PI * sphere_packing_constant))  # The farthest each can get and still fit divided by density. If density >= 1, all can fit
-	var chunk_count_x
-	var chunk_count_y
-	var ending_remainder_x
-	var ending_remainder_y
-	if min_distance >= 1:
-		chunk_count_x = floor(range_x / min_distance)
-		chunk_count_y = floor(range_y / min_distance)
-		ending_remainder_x = (range_x / min_distance) - chunk_count_x
-		ending_remainder_y = (range_y / min_distance) - chunk_count_y
-	else:
-		chunk_count_x = 1
-		chunk_count_y = 1
-		ending_remainder_x = 0
-		ending_remainder_y = 0
-	
-	var points: Array[Vector2i] = prev_points
-	
-	var chunks: Array # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
-	for cx in chunk_count_x: # Initialize the array
-		chunks.push_back([])
-		for cy in chunk_count_y:
-			chunks[cx].push_back([])
-	
-	# Put prev_points into points
-	for point in prev_points:
-		chunks[min(floor(point.x / min_distance),chunk_count_x-1)][min(floor(point.y / min_distance),chunk_count_y-1)].push_back(point)
+# 2 dimensional poisson disk distribution for rectangle - Generates based on resolution
+# Takes previous points, generation options, and outputs a point
+# top_left: Vector2i - The top left corner of the rectangle
+# bottom_right: Vector2i - The bottom right corner of the rectangle
+# min_distance: float - The minimum distance any two points can be
+# density: float - How dense the points can be packed. Higher is denser, lower is less dense. < 1 may result in not fitting total points
+# chunks: Array - A 2d array of chunks, each chunk is an array of points previously generated with tile coordinates
+# Note: The diagonal of each chunk is equal to minimum_distance
+func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: float, chunks: Array[Array]) -> Vector2i:
+	var range_x: int = bottom_right.x - top_left.x
+	var range_y: int = bottom_right.y - top_left.y
+	var chunk_length: float = 0.70711 * min_distance # sqrt(2) * min_distance
 
-	for i in n: # For each point
-		for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
-			var sucess = true
-			var x = Vector2i(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
-			var chunk_id_x = min(floor(x.x / min_distance),chunk_count_x-1) # To not overrun
-			var chunk_id_y = min(floor(x.y / min_distance),chunk_count_y-1)
-			for dx in range(-1,2):
-				for dy in range(-1,2):
-					var nx = chunk_id_x + dx
-					var ny = chunk_id_y + dy
-					if nx >= 0 and ny >= 0 and nx < chunk_count_x and ny < chunk_count_y:
-						for point in chunks[nx][ny]:
-							if point.distance_squared_to(x) < min_distance * min_distance:
-								sucess = false
-								break
-			if (sucess):
-				chunks[chunk_id_x][chunk_id_y].push_back(x)
-				points.push_back(x)
-				break
-			if (attempt == max_poisson_attempts_1d-1):
-				print("Biome Gen Timed out 2d!")
-	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
-	return points.slice(-n, points.size())
+	for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
+		var sucess: bool = true
+		var x: Vector2i = Vector2i(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
+		var global_x = x + Vector2i(1, 1) * int(BORDER_RESOLUTION/2)
+		var chunk_index: Vector2i = Vector2i(int(global_x.x / chunk_length),int(global_x.y / chunk_length))
+		for dx: int in range(-2,3):
+			for dy: int in range(-2,3):
+				var adj_chunk_index: Vector2i = chunk_index + Vector2i(dx,dy)
+				if (adj_chunk_index.x >= 0 and adj_chunk_index.y >= 0) and (adj_chunk_index.x >= chunks.size() and adj_chunk_index.y >= chunks[0].size()): # CHECK FOR MAX BOUNDS!
+					for point: Vector2i in chunks[adj_chunk_index.x][adj_chunk_index.y]:
+						if point.distance_squared_to(x) < min_distance * min_distance:
+							sucess = false
+							break # Too close to a point
+		if sucess:
+			return x
+	print("PDD 2D Timed out!")
+	return Vector2i.ZERO
 
 func _ocean(distance: int) -> Vector2:
-	var shore_length: int = map_cols * 2 + map_rows
+	var shore_length: int = MAP_RESOLUTION.x * 2 + MAP_RESOLUTION.y
 	distance *= shore_length / 100
-	if (distance > map_cols):
-		distance -= map_cols
-		if (distance > map_rows):
-			distance -= map_rows
-			return Vector2(distance,map_rows)
+	if (distance > MAP_RESOLUTION.x):
+		distance -= MAP_RESOLUTION.x
+		if (distance > MAP_RESOLUTION.y):
+			distance -= MAP_RESOLUTION.y
+			return Vector2(distance,MAP_RESOLUTION.y)
 		return Vector2(0,distance)
 	return Vector2(distance,0)
 	
@@ -131,31 +110,26 @@ func _ready():
 
 # Generates the mesh
 func _generate_mesh():
+	# Mesh variables
 	var mesh = ArrayMesh.new()
 	var arrays = []
-	
+	var quad_size: int = PIXELS_PER_TILE
 	var vertices = PackedVector2Array()
 	var colors = PackedColorArray()
 	var indices = PackedInt32Array()
-		
-	# Map size
-	var cols: int = TILES_ALONG_X
-	var rows: int = floor(cols * SCREEN_RESOLUTION.y / SCREEN_RESOLUTION.x)
-	var M_TopLeft = Vector2(0,0)
-	var M_BottomRight = Vector2(cols, rows)
-	var points = PackedVector3Array() # (x, y, feature index)
-	var major_points = PackedVector3Array() # (x,y, feature index), only for major occurences
 	
 	#Resource data
 	var json_received = gen_data.data
 	var features = PackedStringArray()
-	var spawn_area: Array[Array] = [] # [0] is the top left, [1] is bottom right Vector2i
+	var spawn_area: Array # [0] is the top left, [1] is bottom right Vector2i
 	var occurences = PackedInt32Array()
 	var gen_depth = PackedInt32Array()
-	var sub_occurences: Array[Array] = [] # sub_occurences[i] is an array of integers of length gen_depth[i], where i is the ith feature
-	var sizes: Array[Array] = [] # sizes[i] is an array of integers of length gen_depth[i], where i is the ith feature
+	var sub_occurences: Array # sub_occurences[i] is an array of integers of length gen_depth[i], where i is the ith feature
+	var sizes: Array # sizes[i] is an array of integers of length gen_depth[i], where i is the ith feature
+	var gen_screen_resolution # The resolution that gen.json is balanced for
 	
 	# Initialize data from JSON
+	gen_screen_resolution = Vector2(json_received["x-resolution"], json_received["y-resolution"])
 	for feature in json_received["features"]:
 		features.append(feature["name"])
 		spawn_area.append(feature["spawn_area"])
@@ -163,41 +137,46 @@ func _generate_mesh():
 		gen_depth.append(feature["gen_depth"])
 		sub_occurences.append(feature["sub_occurences"])  # already an Array
 		sizes.append(feature["sizes"])  # already an Array
-	var gen_screen_resolution = Vector2(json_received["x-resolution"], json_received["y-resolution"])
-	var gen_tiles = Vector2(json_received["x-tiles"], json_received["y-tiles"])
-	var quad_width: int = map_size.x / cols
-	var quad_height: int = map_size.y / rows
 	
 	# Scaled based on desired resolution
+	var scaling_factor = (SCREEN_RESOLUTION.length() / gen_screen_resolution.length())
 	for f in sizes.size():
 		for s in sizes[f].size():
-			sizes[f][s] *= sqrt((cols*cols + rows*rows) / gen_tiles.dot(gen_tiles))
-			sizes[f][s] = floor(sizes[f][s])
-	for area in spawn_area:
+			sizes[f][s] = int(sizes[f][s] * scaling_factor)
+	for a in spawn_area.size():
 		for p in 2:
-				area[p][0] *= (cols / gen_screen_resolution.x)
-				area[p][1] *= (rows / gen_screen_resolution.y)
-				area[p][0] = floor(area[p][0])
-				area[p][1] = floor(area[p][1])
+			for xy in 2:
+				spawn_area[a][p][xy] = int(spawn_area[a][p][xy] * scaling_factor)
+	
 	#Calculate number of features
 	var number_of_features = 0
 	for f in features.size():
 		number_of_features += occurences[f]
+		
+	# Points and chunks
+	var points = PackedVector3Array() # (x, y, feature index)
+	var min_distance: float = sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)) # The minimum distance any two points can be
+	var chunks: Array[Array] # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
+	var chunk_length: float = 0.70711 * min_distance # sqrt(2) * min_distance
+	var chunk_count: Vector2i = Vector2i(int(ceil(MAP_RESOLUTION.x / chunk_length)), int(ceil(MAP_RESOLUTION.y / chunk_length)))
 	
-	# Generate Vectors of previous points
-	var prev_points: Array[Vector2i]
-	for p in points:
-		prev_points.push_back(Vector2i(p.x, p.y))
-	
+	# Initialize the chunks array
+	for cx: int in chunk_count.x:
+		chunks.push_back([])
+		for cy: int in chunk_count.y:
+			chunks[cx].push_back([])
+
 	for f in features.size():
 		for occ in occurences[f]:
-			var top_left = Vector2i(floor(spawn_area[f][0][0]), floor(spawn_area[f][0][1]))
-			var bottom_right = Vector2i(floor(spawn_area[f][1][0]), floor(spawn_area[f][1][1]))
-			var occurence = _poisson_dd_2d(top_left, bottom_right, 1, number_of_features, 1, prev_points)[0]
-			occurence += Vector2i(tiles_along_x_map-TILES_ALONG_X, tiles_along_x_map-TILES_ALONG_X)/2 # Shift by the border
-			points.append(Vector3(occurence.x, occurence.y, f))
+			var top_left: Vector2i = Vector2i(spawn_area[f][0][0], spawn_area[f][0][1])
+			var bottom_right: Vector2i = Vector2i(spawn_area[f][1][0], spawn_area[f][1][1])
+			var point: Vector2i = _poisson_dd_2d(top_left, bottom_right, min_distance, chunks)
+			point += Vector2i(1, 1) * int(BORDER_RESOLUTION/2) # Shift by the border
+			# Put occurence in points and in chunks
+			points.append(Vector3(point.x, point.y, f))
+			chunks[int(point.x / chunk_length)][int(point.y / min_distance)].push_back(point)
 			# Stack of [position, depth]
-			var stack: Array = [[occurence, 0]]
+			var stack: Array = [[point, 0]]
 			while stack.size() > 0:
 				var item = stack.pop_back()
 				var center = item[0]
@@ -220,29 +199,29 @@ func _generate_mesh():
 					stack.append([new_point, depth])
 
 	# Place the Ocean
-	var ocean_distances: Array = range(0,BORDER/3,1)
+	var ocean_distances: Array = range(0,BORDER_RESOLUTION/3,1)
 	for p in ocean_distances.size():
 		var ocean_point: Vector2 = _ocean(ocean_distances[p])
 		points.push_back(Vector3(ocean_point.x, ocean_point.y, -1))
 		
 	# Generates mesh
-	for row: int in map_rows:
-		for col: int in map_cols:
-			var x: int = col * quad_width
-			var y: int = row * quad_height
+	for row: int in MAP_ROWS:
+		for col: int in MAP_COLS:
+			var x: int = col * quad_size
+			var y: int = row * quad_size
 			
 			var i = vertices.size()  # index of first vertex in this quad
 			
 			# Define the 4 vertices of the quad (clockwise or CCW)
 			vertices.push_back(Vector2(x, y))
-			vertices.push_back(Vector2(x + quad_width, y))
-			vertices.push_back(Vector2(x + quad_width, y + quad_height))
-			vertices.push_back(Vector2(x, y + quad_height))
+			vertices.push_back(Vector2(x + quad_size, y))
+			vertices.push_back(Vector2(x + quad_size, y + quad_size))
+			vertices.push_back(Vector2(x, y + quad_size))
 			
 			# Calculate the closest feature to this point
 			var closest_feature = Vector2(-1, -1) # distance squared, feature id
 			for p in points:
-				var distance = (col-p.x) * (col-p.x) + (row-p.y) * (row-p.y) # Calculate distance squared
+				var distance = (col * PIXELS_PER_TILE - p.x) * (col * PIXELS_PER_TILE - p.x) + (row * PIXELS_PER_TILE - p.y) * (row * PIXELS_PER_TILE - p.y) # Calculate distance squared
 				if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
 					closest_feature = Vector2(distance,p.z) 
 			
@@ -266,11 +245,11 @@ func _generate_mesh():
 				color = Color.DARK_BLUE
 				
 			# FOR DEBUGGING
-			if (row == floor(map_rows/2) and col == floor(map_cols/2)):
-				color = Color.WEB_PURPLE
-			#if  !(((map_rows-rows) < row and row < rows) and ((map_cols-cols) < col and col < cols)): # Inside point area
+			#if (row == floor(MAP_ROWS/2) and col == floor(MAP_COLS/2)):
+			#	color = Color.WEB_PURPLE
+			#if  !((BORDER_TILES < row and row < ROWS) and (BORDER_TILES < col and col < COLS)): # Inside point area
 			#	color = Color.WEB_MAROON
-			#if (closest_feature.x == 0): # Is on a point
+			#if (closest_feature.x < PIXELS_PER_TILE): # Is on a point
 			#	color = Color.WEB_PURPLE
 			
 			colors.append_array([color, color, color, color])
