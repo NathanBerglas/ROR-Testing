@@ -10,15 +10,13 @@ extends Node2D
 var selected = false #Determines if a meeple is selected
 var dest = null #destination of a meeple
 
+var size = 1 #Size of the ARMY hashtag troops slay
 
 var min_distance = 9 # Squared
-func _ready():
-	print("Spawned meeple: " + str(self.get_global_position()))
-
-#var target = Vector2(0,0)
+var pos = null
 
 func _physics_process(delta): #runs on each meeple every tick
-	
+	pos = self.rb.get_global_position()
 	if selected:
 		highlight()
 	else:
@@ -38,7 +36,7 @@ func closeEnough(): #checking if a meeple is close enough to their destination
 	return false
 	
 func hasMouse(): #Checks if the mouse is within the meeple
-	var radius = 800 #should be set to meeple radius squared
+	var radius = 220 #should be set to meeple radius squared
 	var mousePos = get_global_mouse_position()
 	
 	var dif = rb.global_position - mousePos

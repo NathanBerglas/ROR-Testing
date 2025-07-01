@@ -6,8 +6,8 @@
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_y4nmv"]
-size = Vector2(66, 66)
+[sub_resource type="CircleShape2D" id="CircleShape2D_y4nmv"]
+radius = 16.0312
 
 [node name="Meeple" type="Node2D" node_paths=PackedStringArray("sprite")]
 script = ExtResource("1_y4nmv")
@@ -20,10 +20,10 @@ lock_rotation = true
 linear_damp = 2.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
-shape = SubResource("RectangleShape2D_y4nmv")
+shape = SubResource("CircleShape2D_y4nmv")
 
 [node name="Sprite2D" type="Sprite2D" parent="RigidBody2D"]
 texture_filter = 1
 texture_repeat = 1
-scale = Vector2(0.5, 0.5)
+scale = Vector2(0.25, 0.25)
 texture = ExtResource("1_qxbsp")
