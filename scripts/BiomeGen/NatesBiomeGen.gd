@@ -1,13 +1,15 @@
 extends Node2D
 
+
 @export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
-@export var MAP_SIZE: Vector2i = Vector2i(1920+250,1080+250)
+@export var BORDER: int = 400
 @export var TILES_ALONG_X: int = 192
-@export var TILES_ALONG_X_MAP: int = 192+25
 @export var gen_data: JSON
 
-var map_cols: int = (MAP_SIZE.x / SCREEN_RESOLUTION.x) * TILES_ALONG_X_MAP
-var map_rows: int = floor(map_cols * MAP_SIZE.y / MAP_SIZE.x)
+var map_size: Vector2i = Vector2i(SCREEN_RESOLUTION.x + BORDER,SCREEN_RESOLUTION.y + BORDER)
+var tiles_along_x_map: int = TILES_ALONG_X+floor(BORDER / (SCREEN_RESOLUTION.x / TILES_ALONG_X))
+var map_cols: int = (map_size.x / SCREEN_RESOLUTION.x) * tiles_along_x_map
+var map_rows: int = floor(map_cols * map_size.y / map_size.x)
 
 const max_poisson_attempts_1d = 100
 const max_poisson_attempts_2d = 100
@@ -93,13 +95,6 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, n: int, total:in
 		for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
 			var sucess = true
 			var x = Vector2i(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
-			# FOR WORLD GEN ONLY!!
-			#if (i == 0): # Put the first point in the centre!
-			#	x = Vector2i(floor(range_x/2),floor(range_y/2))
-			#	chunks[min(floor(x.x / min_distance),chunk_count_x-1)][min(floor(x.y / min_distance),chunk_count_y-1)].push_back(x)
-			#	points.push_back(x)
-			#	break
-			# Assign which chunk it is in
 			var chunk_id_x = min(floor(x.x / min_distance),chunk_count_x-1) # To not overrun
 			var chunk_id_y = min(floor(x.y / min_distance),chunk_count_y-1)
 			for dx in range(-1,2):
@@ -170,8 +165,8 @@ func _generate_mesh():
 		sizes.append(feature["sizes"])  # already an Array
 	var gen_screen_resolution = Vector2(json_received["x-resolution"], json_received["y-resolution"])
 	var gen_tiles = Vector2(json_received["x-tiles"], json_received["y-tiles"])
-	var quad_width: int = MAP_SIZE.x / cols
-	var quad_height: int = MAP_SIZE.y / rows
+	var quad_width: int = map_size.x / cols
+	var quad_height: int = map_size.y / rows
 	
 	# Scaled based on desired resolution
 	for f in sizes.size():
@@ -199,6 +194,7 @@ func _generate_mesh():
 			var top_left = Vector2i(floor(spawn_area[f][0][0]), floor(spawn_area[f][0][1]))
 			var bottom_right = Vector2i(floor(spawn_area[f][1][0]), floor(spawn_area[f][1][1]))
 			var occurence = _poisson_dd_2d(top_left, bottom_right, 1, number_of_features, 1, prev_points)[0]
+			occurence += Vector2i(tiles_along_x_map-TILES_ALONG_X, tiles_along_x_map-TILES_ALONG_X)/2 # Shift by the border
 			points.append(Vector3(occurence.x, occurence.y, f))
 			# Stack of [position, depth]
 			var stack: Array = [[occurence, 0]]
@@ -224,12 +220,11 @@ func _generate_mesh():
 					stack.append([new_point, depth])
 
 	# Place the Ocean
-	var ocean_distances: Array = range(0,100,1)
+	var ocean_distances: Array = range(0,BORDER/3,1)
 	for p in ocean_distances.size():
 		var ocean_point: Vector2 = _ocean(ocean_distances[p])
-		print(ocean_point)
 		points.push_back(Vector3(ocean_point.x, ocean_point.y, -1))
-
+		
 	# Generates mesh
 	for row: int in map_rows:
 		for col: int in map_cols:
@@ -271,12 +266,12 @@ func _generate_mesh():
 				color = Color.DARK_BLUE
 				
 			# FOR DEBUGGING
-			#if (row == floor(rows/2) and col == floor(cols/2)):
-			#	color = Color.WEB_PURPLE
+			if (row == floor(map_rows/2) and col == floor(map_cols/2)):
+				color = Color.WEB_PURPLE
 			#if  !(((map_rows-rows) < row and row < rows) and ((map_cols-cols) < col and col < cols)): # Inside point area
 			#	color = Color.WEB_MAROON
-			if (closest_feature.x == 0): # Is on a point
-				color = Color.WEB_PURPLE
+			#if (closest_feature.x == 0): # Is on a point
+			#	color = Color.WEB_PURPLE
 			
 			colors.append_array([color, color, color, color])
 			# Define two triangles (quad = 2 triangles)
