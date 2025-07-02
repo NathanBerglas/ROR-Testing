@@ -17,7 +17,7 @@ var MAP_ROWS: int
 # Poisson distribution constants
 const max_poisson_attempts_1d: int = 100
 const max_poisson_attempts_2d: int = 100
-const sphere_packing_constant: float = 0.8
+const sphere_packing_constant: float = 0.7
 
 func _ready() -> void:
 	# Main Area
@@ -89,8 +89,8 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 		var x: Vector2i = Vector2i(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
 		var global_x = x + Vector2i(1, 1) * int(BORDER_RESOLUTION/2)
 		var chunk_index: Vector2i = Vector2i(int(global_x.x / chunk_length),int(global_x.y / chunk_length))
-		for dx: int in range(-1,2):
-			for dy: int in range(-1,2):
+		for dx: int in range(-2,3):
+			for dy: int in range(-2,3):
 				var adj_chunk_index: Vector2i = chunk_index + Vector2i(dx,dy)
 				if (adj_chunk_index.x >= 0 and adj_chunk_index.y >= 0) and (adj_chunk_index.x < chunks.size() and adj_chunk_index.y < chunks[0].size()): # CHECK FOR MAX BOUNDS!
 					for point: Vector2i in chunks[adj_chunk_index.x][adj_chunk_index.y]:
@@ -188,8 +188,8 @@ func _generate_mesh():
 					# Random angle around the circle
 					var offset = Vector2(radius, 0).rotated(a / 1000.)
 					var new_point = Vector2(center.x,center.y) + offset
-					new_point.x = int(clamp(new_point.x, BORDER_RESOLUTION, BORDER_RESOLUTION + SCREEN_RESOLUTION.x))
-					new_point.y = int(clamp(new_point.y, BORDER_RESOLUTION, BORDER_RESOLUTION + SCREEN_RESOLUTION.y))
+					new_point.x = int(clamp(new_point.x, 2./3. * BORDER_RESOLUTION, MAP_RESOLUTION.x))
+					new_point.y = int(clamp(new_point.y, 2./3. * BORDER_RESOLUTION, MAP_RESOLUTION.y - 2./3. * BORDER_RESOLUTION))
 					points.append(Vector3(new_point.x, new_point.y, f))
 					# Queue it up for the next depth layer
 					depth += 1
@@ -235,7 +235,7 @@ func _generate_mesh():
 			if ((sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE))
 			or (sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE))): # Ocean
 				color = Color.DARK_BLUE
-				
+			
 			# FOR DEBUGGING
 			#if (row == floor(MAP_ROWS/2) and col == floor(MAP_COLS/2)):
 			#	color = Color.WEB_PURPLE

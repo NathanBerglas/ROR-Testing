@@ -5,6 +5,7 @@
 
 [node name="Biome Gen" type="Node2D"]
 script = ExtResource("1_l40ff")
+BORDER_RESOLUTION = 150
 gen_data = ExtResource("2_5j2y8")
 
 [node name="Ground Mesh" type="MeshInstance2D" parent="."]

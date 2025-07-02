@@ -7,8 +7,8 @@
 			"occurences": 1,
 			"spawn_area": [[480,539],[480,541]],
 			"gen_depth": 1,
-			"sub_occurences": [30],
-			"sizes": [50],
+			"sub_occurences": [5, 15],
+			"sizes": [20, 50],
 		},
 		{
 			"name": "rainforest",
@@ -31,8 +31,8 @@
 			"occurences": 1,
 			"spawn_area": [[10,830],[310,1030]],
 			"gen_depth": 2,
-			"sub_occurences": [10,5],
-			"sizes": [100,100],
+			"sub_occurences": [10,5,3],
+			"sizes": [50,50,20],
 		},
 		{
 			"name": "forest",
@@ -40,7 +40,7 @@
 			"spawn_area": [[0,0],[1920,1080]],
 			"gen_depth": 2,
 			"sub_occurences": [3,3],
-			"sizes": [150,100],
+			"sizes": [100,50],
 		},
 		{
 			"name": "plains",
@@ -48,7 +48,7 @@
 			"spawn_area": [[0,0],[1920,1080]],
 			"gen_depth": 2,
 			"sub_occurences": [3,3],
-			"sizes": [200,50],
+			"sizes": [150,50],
 		},
 		{
 			"name": "lake",
