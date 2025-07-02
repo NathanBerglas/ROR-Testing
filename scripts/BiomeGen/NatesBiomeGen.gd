@@ -6,7 +6,7 @@ extends Node2D
 var PIXELS_PER_TILE: int
 
 # Map Area
-@export var BORDER_RESOLUTION: int = 500
+@export var BORDER_RESOLUTION: int = 100
 var MAP_RESOLUTION: Vector2i
 var MAP_COLS: int
 var MAP_ROWS: int
@@ -24,10 +24,9 @@ func _ready() -> void:
 	PIXELS_PER_TILE = int(SCREEN_RESOLUTION.x / COLS)
 
 	# Map Area
-	MAP_RESOLUTION = Vector2i(SCREEN_RESOLUTION.x + BORDER_RESOLUTION, SCREEN_RESOLUTION.y + BORDER_RESOLUTION)
+	MAP_RESOLUTION = Vector2i(SCREEN_RESOLUTION.x + BORDER_RESOLUTION, SCREEN_RESOLUTION.y + 2 * BORDER_RESOLUTION)
 	MAP_COLS = MAP_RESOLUTION.x / PIXELS_PER_TILE
 	MAP_ROWS = MAP_RESOLUTION.y / PIXELS_PER_TILE
-	
 	# Generate Mesh
 	_generate_mesh()
 
@@ -70,7 +69,6 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 				break
 			if (attempt == max_poisson_attempts_1d):
 				print("Biome Gen Timed out! 1d")
-	#print(Time.get_ticks_usec() - start_time, " microseconds passed") # Debugging
 	return points
 
 # 2 dimensional poisson disk distribution for rectangle - Generates based on resolution
@@ -84,17 +82,17 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: float, chunks: Array[Array]) -> Vector2i:
 	var range_x: int = bottom_right.x - top_left.x
 	var range_y: int = bottom_right.y - top_left.y
-	var chunk_length: float = 0.70711 * min_distance # sqrt(2) * min_distance
+	var chunk_length: float = min_distance / 0.70711 # min_distance / sqrt(2) 
 
 	for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
 		var sucess: bool = true
 		var x: Vector2i = Vector2i(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
 		var global_x = x + Vector2i(1, 1) * int(BORDER_RESOLUTION/2)
 		var chunk_index: Vector2i = Vector2i(int(global_x.x / chunk_length),int(global_x.y / chunk_length))
-		for dx: int in range(-2,3):
-			for dy: int in range(-2,3):
+		for dx: int in range(-1,2):
+			for dy: int in range(-1,2):
 				var adj_chunk_index: Vector2i = chunk_index + Vector2i(dx,dy)
-				if (adj_chunk_index.x >= 0 and adj_chunk_index.y >= 0) and (adj_chunk_index.x >= chunks.size() and adj_chunk_index.y >= chunks[0].size()): # CHECK FOR MAX BOUNDS!
+				if (adj_chunk_index.x >= 0 and adj_chunk_index.y >= 0) and (adj_chunk_index.x < chunks.size() and adj_chunk_index.y < chunks[0].size()): # CHECK FOR MAX BOUNDS!
 					for point: Vector2i in chunks[adj_chunk_index.x][adj_chunk_index.y]:
 						if point.distance_squared_to(x) < min_distance * min_distance:
 							sucess = false
@@ -103,17 +101,6 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 			return x
 	print("PDD 2D Timed out!")
 	return Vector2i.ZERO
-
-func _ocean(distance: int) -> Vector2:
-	var shore_length: int = MAP_RESOLUTION.x * 2 + MAP_RESOLUTION.y
-	distance *= shore_length / 100
-	if (distance > MAP_RESOLUTION.x):
-		distance -= MAP_RESOLUTION.x
-		if (distance > MAP_RESOLUTION.y):
-			distance -= MAP_RESOLUTION.y
-			return Vector2(distance,MAP_RESOLUTION.y)
-		return Vector2(0,distance)
-	return Vector2(distance,0)
 
 # Generates the mesh
 func _generate_mesh():
@@ -146,14 +133,15 @@ func _generate_mesh():
 		sizes.append(feature["sizes"])  # already an Array
 	
 	# Scaled based on desired resolution
-	var scaling_factor = (SCREEN_RESOLUTION.length() / gen_screen_resolution.length())
+	var scaling_factor: Vector2 = Vector2(SCREEN_RESOLUTION.x / gen_screen_resolution.x, SCREEN_RESOLUTION.y / gen_screen_resolution.y)
 	for f in sizes.size():
 		for s in sizes[f].size():
-			sizes[f][s] = int(sizes[f][s] * scaling_factor)
+			sizes[f][s] = int(sizes[f][s] * scaling_factor.length())
+			
 	for a in spawn_area.size():
 		for p in 2:
-			for xy in 2:
-				spawn_area[a][p][xy] = int(spawn_area[a][p][xy] * scaling_factor)
+				spawn_area[a][p][0] = int(spawn_area[a][p][0] * scaling_factor.x)
+				spawn_area[a][p][1] = int(spawn_area[a][p][1] * scaling_factor.y)
 	
 	#Calculate number of features
 	var number_of_features = 0
@@ -164,13 +152,13 @@ func _generate_mesh():
 	var points = PackedVector3Array() # (x, y, feature index)
 	var min_distance: float = sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)) # The minimum distance any two points can be
 	var chunks: Array[Array] # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
-	var chunk_length: float = 0.70711 * min_distance # sqrt(2) * min_distance
+	var chunk_length: float = min_distance / 0.70711  # sqrt(2) * min_distance
 	var chunk_count: Vector2i = Vector2i(int(ceil(MAP_RESOLUTION.x / chunk_length)), int(ceil(MAP_RESOLUTION.y / chunk_length)))
 	
 	# Initialize the chunks array
-	for cx: int in chunk_count.x:
+	for cx: int in chunk_count.x + 1:
 		chunks.push_back([])
-		for cy: int in chunk_count.y:
+		for cy: int in chunk_count.y + 1:
 			chunks[cx].push_back([])
 
 	for f in features.size():
@@ -178,12 +166,13 @@ func _generate_mesh():
 			var top_left: Vector2i = Vector2i(spawn_area[f][0][0], spawn_area[f][0][1])
 			var bottom_right: Vector2i = Vector2i(spawn_area[f][1][0], spawn_area[f][1][1])
 			var point: Vector2i = _poisson_dd_2d(top_left, bottom_right, min_distance, chunks)
-			point += Vector2i(1, 1) * int(BORDER_RESOLUTION/2) # Shift by the border
+			var global_point = point + Vector2i(BORDER_RESOLUTION, BORDER_RESOLUTION)# Shift by the border
 			# Put occurence in points and in chunks
-			points.append(Vector3(point.x, point.y, f))
-			chunks[int(point.x / chunk_length)][int(point.y / min_distance)].push_back(point)
+			points.append(Vector3(global_point.x, global_point.y, f))
+			chunks[int(global_point.x / chunk_length)][int(global_point.y / chunk_length)].push_back(point)
 			# Stack of [position, depth]
-			var stack: Array = [[point, 0]]
+			var stack: Array = [[global_point, 0]]
+
 			while stack.size() > 0:
 				var item = stack.pop_back()
 				var center = item[0]
@@ -198,19 +187,14 @@ func _generate_mesh():
 				for a in angles:
 					# Random angle around the circle
 					var offset = Vector2(radius, 0).rotated(a / 1000.)
-					var new_point_f = Vector2(center.x,center.y) + offset
-					var new_point = Vector2i(floor(new_point_f.x),floor(new_point_f.y))
-					points.append(Vector3(round(new_point.x), round(new_point.y), f))
+					var new_point = Vector2(center.x,center.y) + offset
+					new_point.x = int(clamp(new_point.x, BORDER_RESOLUTION, BORDER_RESOLUTION + SCREEN_RESOLUTION.x))
+					new_point.y = int(clamp(new_point.y, BORDER_RESOLUTION, BORDER_RESOLUTION + SCREEN_RESOLUTION.y))
+					points.append(Vector3(new_point.x, new_point.y, f))
 					# Queue it up for the next depth layer
 					depth += 1
 					stack.append([new_point, depth])
-
-	# Place the Ocean
-	var ocean_distances: Array = range(0,BORDER_RESOLUTION/3,1)
-	for p in ocean_distances.size():
-		var ocean_point: Vector2 = _ocean(ocean_distances[p])
-		points.push_back(Vector3(ocean_point.x, ocean_point.y, -1))
-		
+	
 	# Generates mesh
 	for row: int in MAP_ROWS:
 		for col: int in MAP_COLS:
@@ -230,7 +214,7 @@ func _generate_mesh():
 			for p in points:
 				var distance = (col * PIXELS_PER_TILE - p.x) * (col * PIXELS_PER_TILE - p.x) + (row * PIXELS_PER_TILE - p.y) * (row * PIXELS_PER_TILE - p.y) # Calculate distance squared
 				if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
-					closest_feature = Vector2(distance,p.z) 
+					closest_feature = Vector2(distance,p.z)
 			
 			# Generate the color for the whole quad
 			var color = Color.WHITE
@@ -248,7 +232,8 @@ func _generate_mesh():
 				color = Color.LIGHT_GREEN
 			elif (closest_feature.y == 6): # Lake
 				color = Color.ROYAL_BLUE
-			elif (closest_feature.y == -1): # Ocean
+			if ((sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE))
+			or (sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE))): # Ocean
 				color = Color.DARK_BLUE
 				
 			# FOR DEBUGGING
@@ -256,6 +241,11 @@ func _generate_mesh():
 			#	color = Color.WEB_PURPLE
 			#if (closest_feature.x < PIXELS_PER_TILE): # Is on a point
 			#	color = Color.WEB_PURPLE
+			#var border_tiles = BORDER_RESOLUTION / PIXELS_PER_TILE
+			#if((col == border_tiles and border_tiles <= row and row < (MAP_RESOLUTION.y / PIXELS_PER_TILE) - border_tiles)
+			#or (row == border_tiles and border_tiles <= col)
+			#or (row == (MAP_RESOLUTION.y / PIXELS_PER_TILE) - border_tiles and border_tiles < col)):
+			#	color = Color.WEB_MAROON
 			
 			colors.append_array([color, color, color, color])
 			# Define two triangles (quad = 2 triangles)
