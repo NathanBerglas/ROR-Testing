@@ -20,3 +20,7 @@ position = Vector2(960, 540)
 light_mask = 512
 visibility_layer = 512
 z_index = -2
+position = Vector2(-10725, -10350)
+SCREEN_RESOLUTION = Vector2i(28800, 16200)
+BORDER_RESOLUTION = 2250
+origin_radius = 1500

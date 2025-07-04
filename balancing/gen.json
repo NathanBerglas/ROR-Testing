@@ -5,7 +5,7 @@
 		{
 			"name": "origin",
 			"occurences": 1,
-			"spawn_area": [[480,539],[480,541]],
+			"spawn_area": [[640,540],[640,540]],
 			"gen_depth": 1,
 			"sub_occurences": [5, 15],
 			"sizes": [20, 50],
@@ -33,6 +33,14 @@
 			"gen_depth": 2,
 			"sub_occurences": [10,5,3],
 			"sizes": [50,50,20],
+		},
+		{
+			"name": "grasslands",
+			"occurences": 3,
+			"spawn_area": [[1080,720],[1520,1030]],
+			"gen_depth": 2,
+			"sub_occurences": [3,3],
+			"sizes": [150,50],
 		},
 		{
 			"name": "forest",

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://b8mu8fyo5b0e8"]
+
+[ext_resource type="Texture2D" uid="uid://cudeoyxiwk1sp" path="res://assets/target.png" id="1_ki7k3"]
+
+[node name="Target" type="Sprite2D"]
+texture_filter = 1
+texture_repeat = 1
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("1_ki7k3")

@@ -4,6 +4,7 @@ extends Node2D
 @export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
 @export var COLS: int = 192
 var PIXELS_PER_TILE: int
+var points = PackedVector3Array() # (x, y, feature index)
 
 # Map Area
 @export var BORDER_RESOLUTION: int = 100
@@ -13,6 +14,13 @@ var MAP_ROWS: int
 
 # Gen Data
 @export var gen_data: JSON
+
+#Hardcode
+@export var origin_radius = 100 # Squared
+@export var biome_colours: Array[Color] = [Color.BLACK, Color.GREEN_YELLOW, Color.SKY_BLUE, Color.SANDY_BROWN, Color.WHEAT, Color.FOREST_GREEN, Color.LIGHT_GREEN, Color.ROYAL_BLUE]
+
+# Debugging
+@export var target: PackedScene
 
 # Poisson distribution constants
 const max_poisson_attempts_1d: int = 100
@@ -29,6 +37,14 @@ func _ready() -> void:
 	MAP_ROWS = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
 	_generate_mesh()
+	#_show_points()
+
+func _show_points():
+	for p in points:
+		var instance = target.instantiate()
+		instance.global_position = Vector2(p.x,p.y)
+		instance.modulate = biome_colours[p.z] * 0.9
+		add_child(instance)
 
 # 1 dimensional poisson disk distribution
 func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
@@ -37,7 +53,7 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 	var min_distance: float = ceil(range / n) / density # The farthest each can get and still fit divided by density. If density >= 1, all can fit
 	var chunk_count: int = int(range / min_distance)
 	 
-	var points: PackedInt32Array
+	var p_points: PackedInt32Array
 	var chunks: Array[Array] = [] # Each point is placed in a chunk. Each chunk is exactly min_distance wide starting from min (stretches to max)
 	for c in chunk_count: # Initialize the array
 		chunks.push_back([])
@@ -65,11 +81,11 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 						break
 			if (sucess):
 				chunks[chunk_id].push_back(x)
-				points.push_back(x)
+				p_points.push_back(x)
 				break
 			if (attempt == max_poisson_attempts_1d):
 				print("Biome Gen Timed out! 1d")
-	return points
+	return p_points
 
 # 2 dimensional poisson disk distribution for rectangle - Generates based on resolution
 # Takes previous points, generation options, and outputs a point
@@ -149,7 +165,6 @@ func _generate_mesh():
 		number_of_features += occurences[f]
 		
 	# Points and chunks
-	var points = PackedVector3Array() # (x, y, feature index)
 	var min_distance: float = sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)) # The minimum distance any two points can be
 	var chunks: Array[Array] # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
 	var chunk_length: float = min_distance / 0.70711  # sqrt(2) * min_distance
@@ -188,12 +203,14 @@ func _generate_mesh():
 					# Random angle around the circle
 					var offset = Vector2(radius, 0).rotated(a / 1000.)
 					var new_point = Vector2(center.x,center.y) + offset
-					new_point.x = int(clamp(new_point.x, 2./3. * BORDER_RESOLUTION, MAP_RESOLUTION.x))
-					new_point.y = int(clamp(new_point.y, 2./3. * BORDER_RESOLUTION, MAP_RESOLUTION.y - 2./3. * BORDER_RESOLUTION))
-					points.append(Vector3(new_point.x, new_point.y, f))
-					# Queue it up for the next depth layer
-					depth += 1
-					stack.append([new_point, depth])
+					#new_point.x = int(clamp(new_point.x, 2./3. * BORDER_RESOLUTION, 1000000))#MAP_RESOLUTION.x))
+					#new_point.y = int(clamp(new_point.y, 2./3. * BORDER_RESOLUTION, MAP_RESOLUTION.y - 2./3. * BORDER_RESOLUTION))
+					if ((2./3. * BORDER_RESOLUTION < new_point.x and new_point.x < MAP_RESOLUTION.x) and 
+						(2./3. * BORDER_RESOLUTION < new_point.y and new_point.y < MAP_RESOLUTION.y - 2./3. * BORDER_RESOLUTION)):
+						points.append(Vector3(new_point.x, new_point.y, f))
+						# Queue it up for the next depth layer
+						depth += 1
+						stack.append([new_point, depth])
 	
 	# Generates mesh
 	for row: int in MAP_ROWS:
@@ -213,25 +230,14 @@ func _generate_mesh():
 			var closest_feature = Vector2(-1, -1) # distance squared, feature id
 			for p in points:
 				var distance = (col * PIXELS_PER_TILE - p.x) * (col * PIXELS_PER_TILE - p.x) + (row * PIXELS_PER_TILE - p.y) * (row * PIXELS_PER_TILE - p.y) # Calculate distance squared
+				if (distance < origin_radius*origin_radius and p.z == 0): # If it's within origin radius from origin, force it to be origin
+					closest_feature = Vector2(distance,p.z)
+					break
 				if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
 					closest_feature = Vector2(distance,p.z)
-			
+				
 			# Generate the color for the whole quad
-			var color = Color.WHITE
-			if (closest_feature.y == 0): # Origin
-				color = Color.BLACK
-			elif (closest_feature.y == 1): # Rainforest
-				color = Color.GREEN_YELLOW
-			elif (closest_feature.y == 2): # Tundra
-				color = Color.SKY_BLUE
-			elif (closest_feature.y == 3): # Desert
-				color = Color.SANDY_BROWN
-			elif (closest_feature.y == 4): # Forest
-				color = Color.FOREST_GREEN
-			elif (closest_feature.y == 5): # Plains
-				color = Color.LIGHT_GREEN
-			elif (closest_feature.y == 6): # Lake
-				color = Color.ROYAL_BLUE
+			var color = biome_colours[closest_feature.y]
 			if ((sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE))
 			or (sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE))): # Ocean
 				color = Color.DARK_BLUE
