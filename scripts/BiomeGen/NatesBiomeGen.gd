@@ -4,7 +4,6 @@ extends Node2D
 @export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
 @export var COLS: int = 192
 var PIXELS_PER_TILE: int
-var points = PackedVector3Array() # (x, y, feature index)
 
 # Map Area
 @export var BORDER_RESOLUTION: int = 100
@@ -36,10 +35,16 @@ func _ready() -> void:
 	MAP_COLS = MAP_RESOLUTION.x / PIXELS_PER_TILE
 	MAP_ROWS = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
-	_generate_mesh()
-	#_show_points()
+	var points_blue_pc = _generate_points()
+	var points_red_pc = _generate_points()
+	var points_red = points_blue_pc.x
+	for pr in points_red:
+		pr.x = MAP_RESOLUTION.x + (MAP_RESOLUTION.x - pr.x)
+		points_blue_pc.x.append(pr)
+	_generate_mesh(points_blue_pc.x, points_blue_pc.y)
+	#_show_points(points_blue)
 
-func _show_points():
+func _show_points(points: PackedVector3Array):
 	for p in points:
 		var instance = target.instantiate()
 		instance.global_position = Vector2(p.x,p.y)
@@ -118,15 +123,8 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 	print("PDD 2D Timed out!")
 	return Vector2i.ZERO
 
-# Generates the mesh
-func _generate_mesh():
-	# Mesh variables
-	var mesh = ArrayMesh.new()
-	var arrays = []
-	var quad_size: int = PIXELS_PER_TILE
-	var vertices = PackedVector2Array()
-	var colors = PackedColorArray()
-	var indices = PackedInt32Array()
+func _generate_points() -> PackedVector3Array:
+	var points = PackedVector3Array() # (x, y, feature index)
 	
 	#Resource data
 	var json_received = gen_data.data
@@ -211,10 +209,21 @@ func _generate_mesh():
 						# Queue it up for the next depth layer
 						depth += 1
 						stack.append([new_point, depth])
+	return [points, chunks]
+
+# Generates the mesh
+func _generate_mesh(points: PackedVector3Array, chunks: Array):
+	# Mesh variables
+	var mesh = ArrayMesh.new()
+	var arrays = []
+	var quad_size: int = PIXELS_PER_TILE
+	var vertices = PackedVector2Array()
+	var colors = PackedColorArray()
+	var indices = PackedInt32Array()
 	
 	# Generates mesh
 	for row: int in MAP_ROWS:
-		for col: int in MAP_COLS:
+		for col: int in MAP_COLS*2:
 			var x: int = col * quad_size
 			var y: int = row * quad_size
 			
@@ -238,22 +247,11 @@ func _generate_mesh():
 				
 			# Generate the color for the whole quad
 			var color = biome_colours[closest_feature.y]
-			if ((sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE))
-			or (sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE))): # Ocean
+			if (sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (2 * MAP_RESOLUTION.x - col * PIXELS_PER_TILE)
+			 or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE) or sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE)):
 				color = Color.DARK_BLUE
 			
-			# FOR DEBUGGING
-			#if (row == floor(MAP_ROWS/2) and col == floor(MAP_COLS/2)):
-			#	color = Color.WEB_PURPLE
-			#if (closest_feature.x < PIXELS_PER_TILE): # Is on a point
-			#	color = Color.WEB_PURPLE
-			#var border_tiles = BORDER_RESOLUTION / PIXELS_PER_TILE
-			#if((col == border_tiles and border_tiles <= row and row < (MAP_RESOLUTION.y / PIXELS_PER_TILE) - border_tiles)
-			#or (row == border_tiles and border_tiles <= col)
-			#or (row == (MAP_RESOLUTION.y / PIXELS_PER_TILE) - border_tiles and border_tiles < col)):
-			#	color = Color.WEB_MAROON
-			
-			colors.append_array([color, color, color, color])
+			colors.append_array([color, color*1.1, color*1.2, color*1.3])
 			# Define two triangles (quad = 2 triangles)
 			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
 
