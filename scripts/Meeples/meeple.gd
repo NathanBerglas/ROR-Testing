@@ -18,7 +18,7 @@ var pos = null
 func _physics_process(delta): #runs on each meeple every tick
 	pos = self.rb.get_global_position()
 	if selected:
-		highlight()
+		highlight(Color(3,3,3))
 	else:
 		remove_highlight()
 		
@@ -46,10 +46,9 @@ func hasMouse(): #Checks if the mouse is within the meeple
 	return false
 	
 
-func highlight():
-	sprite.modulate = Color(1, 1, 1)  # Reset to white
+func highlight(colour):
+	sprite.modulate = colour  # White Highlight
 	
-
 func remove_highlight():
 	sprite.modulate = Color(1, 0, 0)  # Red highlight
 # Marches Meeple to Target
