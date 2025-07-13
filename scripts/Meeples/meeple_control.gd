@@ -9,7 +9,7 @@ extends Node2D
 var group: Array[Array] = [[]]
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
 var teammates = []
-
+var groupColours = [Color(1,0,0), Color(0,255,239), Color(3,10,3), Color(10,3,10), Color(80,0,255), Color(145,0,255), Color(255,179,1)]
 var selecting = Vector2(0,0)
 var selectingTime = 0
 
@@ -25,8 +25,17 @@ func _ready() -> void:
 	RCLICKORDER.button_up.connect(_on_order_button_released)
 	
 func _process(delta):
+	
+	for g in range(0,group.size()):
+		for node in range(0,group[g].size()):
+			if group[g][node].selected:
+				group[g][node].highlight(Color(3,3,3))
+			else:
+				group[g][node].remove_highlight(groupColours[g])
+				
 	if Input.is_action_just_pressed("spawn_meeple"):
 		var instance = meeple_prefab.instantiate()
+	
 		
 		# Set instance's data
 		
@@ -130,7 +139,9 @@ func _on_group_button_pressed():
 		var cap = g.size()
 		while m < cap:
 			if g[m].selected == true:
-				group[group.size() - 1].push_back(g.pop_at(m))
+				var n = g.pop_at(m)
+				n.highlight(groupColours[group.size() - 1])
+				group[group.size() - 1].push_back(n)
 				print("Put a node in group: " + str(group.size() - 1))
 				m -= 1
 				cap -= 1
