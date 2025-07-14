@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3 uid="uid://dhecsdio6ymnp"]
+
+[ext_resource type="PackedScene" uid="uid://8s5fbc42yax2" path="res://scenes/Meeples/meepleControl.tscn" id="1_3li8b"]
+[ext_resource type="Script" uid="uid://c5g8gaakh6ukg" path="res://Player.gd" id="1_mdl7e"]
+[ext_resource type="PackedScene" uid="uid://bujhjvi3667ko" path="res://scenes/Buildings/buildingControl.tscn" id="2_mdl7e"]
+[ext_resource type="PackedScene" uid="uid://bbjr8sh5hxnjt" path="res://scenes/camera.tscn" id="3_qu4a1"]
+
+[node name="Player" type="Node2D"]
+script = ExtResource("1_mdl7e")
+
+[node name="MeepleControl" parent="." instance=ExtResource("1_3li8b")]
+
+[node name="BuildingControl" parent="." instance=ExtResource("2_mdl7e")]
+
+[node name="Camera" parent="." instance=ExtResource("3_qu4a1")]
+position = Vector2(577, 323)

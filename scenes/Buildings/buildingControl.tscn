@@ -17,6 +17,7 @@ farm_prefab = ExtResource("2_at16l")
 barracks_prefab = ExtResource("3_fbp8a")
 
 [node name="buildingHud" type="CanvasLayer" parent="."]
+visible = false
 script = ExtResource("2_oj14w")
 
 [node name="Money" type="Label" parent="buildingHud"]

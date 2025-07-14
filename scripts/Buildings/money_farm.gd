@@ -7,7 +7,7 @@ var moneyTimer = 0 #Tracking when to give $$$
 
 
 #func _ready():
-	#if !self.fake: print("Farm ready to grow food!")
+	#$MultiplayerSynchronizer.set_multiplayer_authority()
 
 
 

@@ -7,7 +7,7 @@ class_name Building
 var buildingCosts = [["Barracks", 1000], ["Farm", 500]] 
 
 var fake = false #Check if this is dragging or NAH
-
+var playerID = 0
 
 #Dont ask Jacob WTF this code is. ChatGPT wrote is
 func is_placeable() -> bool: #Only for if a body is FAKE

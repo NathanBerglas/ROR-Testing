@@ -16,7 +16,7 @@ meeple_prefab = ExtResource("2_6lno3")
 [node name="TargetMarker" type="Sprite2D" parent="."]
 modulate = Color(0.000645722, 0.218362, 1, 1)
 z_index = 1
-position = Vector2(1000, 500)
+position = Vector2(531, 344)
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("3_hkl3t")
 

@@ -18,6 +18,8 @@ var buildingDraggin = null
 var buildings = [] 
 
 var teammates = [] #list of teammates
+var playerID = 0
+
 
 func _ready(): #Runs on start, connects buttons
 	farmButton.button_down.connect(_on_farm_button_pressed)
@@ -27,6 +29,9 @@ func _ready(): #Runs on start, connects buttons
 	barracksButton.button_down.connect(_on_barracks_button_pressed)
 	barracksButton.button_up.connect(_on_barracks_button_released)
 	barracksButton.custom_minimum_size = Vector2(121.6,120)
+	
+	#print(playerID)
+	
 
 #Start dragging the farm if has enough money
 func _on_farm_button_pressed():
@@ -39,6 +44,7 @@ func _on_farm_button_pressed():
 	# hashtag-No way this will cause errors in the future
 	var instance = farm_prefab.instantiate() #New FAKE money farm
 	instance.fake = true
+	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	var toAdd = ["Farm", get_global_mouse_position(), instance]
 	
 	instance.global_position = get_global_mouse_position()

@@ -1,27 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://cqyjg1x55n0jr"]
+[gd_scene load_steps=3 format=3 uid="uid://cqyjg1x55n0jr"]
 
 [ext_resource type="Script" uid="uid://cdyjf7gitcaf2" path="res://scripts/main.gd" id="1_o5qli"]
-[ext_resource type="PackedScene" uid="uid://8s5fbc42yax2" path="res://scenes/Meeples/meepleControl.tscn" id="2_0wfyh"]
-[ext_resource type="PackedScene" uid="uid://bujhjvi3667ko" path="res://scenes/Buildings/buildingControl.tscn" id="3_sugp2"]
-[ext_resource type="PackedScene" uid="uid://bbjr8sh5hxnjt" path="res://scenes/camera.tscn" id="5_tbgi4"]
-[ext_resource type="PackedScene" uid="uid://c55deqr6361v3" path="res://scenes/BiomeGen/BiomeGen.tscn" id="6_tefeu"]
+[ext_resource type="PackedScene" uid="uid://dhecsdio6ymnp" path="res://scenes/Player.tscn" id="2_sugp2"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_o5qli")
+playerScene = ExtResource("2_sugp2")
 
-[node name="MeepleControl" parent="." instance=ExtResource("2_0wfyh")]
+[node name="0" type="Node2D" parent="." groups=["PlayerSpawnPoints"]]
+position = Vector2(106, 158)
 
-[node name="BuildingControl" parent="." instance=ExtResource("3_sugp2")]
-
-[node name="Camera" parent="." instance=ExtResource("5_tbgi4")]
-position = Vector2(960, 540)
-
-[node name="Biome Gen" parent="." instance=ExtResource("6_tefeu")]
-light_mask = 512
-visibility_layer = 512
-z_index = -2
-position = Vector2(-10725, -10350)
-SCREEN_RESOLUTION = Vector2i(28800, 16200)
-BORDER_RESOLUTION = 2250
-origin_radius = 1500
-biome_colours = Array[Color]([Color(0.804743, 0.804743, 0.804743, 1), Color(0.678431, 1, 0.184314, 1), Color(0.529412, 0.807843, 0.921569, 1), Color(0.956863, 0.643137, 0.376471, 1), Color(0.960784, 0.870588, 0.701961, 1), Color(0.133333, 0.545098, 0.133333, 1), Color(0.564706, 0.933333, 0.564706, 1), Color(0.254902, 0.411765, 0.882353, 1)])
+[node name="1" type="Node2D" parent="." groups=["PlayerSpawnPoints"]]
+position = Vector2(938, 163)
