@@ -27,6 +27,8 @@ const max_poisson_attempts_2d: int = 100
 const sphere_packing_constant: float = 0.7
 
 func _ready() -> void:
+	var previous_time = Time.get_ticks_msec()
+	var ellapsed = 0
 	# Main Area
 	PIXELS_PER_TILE = int(SCREEN_RESOLUTION.x / COLS)
 
@@ -35,15 +37,30 @@ func _ready() -> void:
 	MAP_COLS = MAP_RESOLUTION.x / PIXELS_PER_TILE
 	MAP_ROWS = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
-	var total_point_chunk = _generate_points()
-	var red_point_chunk = _generate_points()
-	for pr in red_point_chunk[0]:
+	var data = get_data()
+	ellapsed = Time.get_ticks_msec() - previous_time
+	previous_time = Time.get_ticks_msec()
+	print("Data gotten: ", ellapsed)
+	var total_point_chunk = _generate_points(data[0], data[1], data[2], data[3], data[4], data[5], data[6])
+	ellapsed = Time.get_ticks_msec() - previous_time
+	previous_time = Time.get_ticks_msec()
+	print("Blue points generated: ", ellapsed)
+	var red_point_chunk = _generate_points(data[0], data[1], data[2], data[3], data[4], data[5], data[6])
+	for pr: Vector3 in red_point_chunk[0]:
 		pr.x = MAP_RESOLUTION.x + (MAP_RESOLUTION.x - pr.x)
 		total_point_chunk[0].append(pr)
 		# Calculate the chunk
-		#total_point_chunk[1][id].append(pr)
+		var chunk_length = data[0] / 0.70711
+		var chunk_index: Vector2i = Vector2i(int(pr.x / chunk_length),int(pr.y / chunk_length))
+		total_point_chunk[1][chunk_index.x][chunk_index.y].append(pr)
+	ellapsed = Time.get_ticks_msec() - previous_time
+	previous_time = Time.get_ticks_msec()
+	print("Red points generated: ", ellapsed)
 	_generate_mesh(total_point_chunk[0], total_point_chunk[1])
-	#_show_points(points_blue)
+	ellapsed = Time.get_ticks_msec() - previous_time
+	previous_time = Time.get_ticks_msec()
+	print("Mesh generated: ", ellapsed)
+	_show_points(total_point_chunk[0])
 
 func _show_points(points: PackedVector3Array):
 	for p in points:
@@ -69,7 +86,7 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 			var sucess = true
 			var x = randi_range(min, max)
 			# Assign which chunk it is in
-			var chunk_id = min(floor(x / min_distance),chunk_count-1) # To not overrun 
+			var chunk_id = min(floor(x / min_distance),chunk_count-1)
 			if (chunk_id > 0): # If it's not in the first chunk
 				for p in chunks[chunk_id-1]: # Check for each point in the previous chunk
 					if (abs(p - x) < min_distance):
@@ -124,10 +141,7 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 	print("PDD 2D Timed out!")
 	return Vector2i.ZERO
 
-#Returns [PackedVector3Array, Array[Array]]
-func _generate_points() -> Array:
-	var points = PackedVector3Array() # (x, y, feature index)
-	
+func get_data() -> Array:
 	#Resource data
 	var json_received = gen_data.data
 	var features = PackedStringArray()
@@ -164,11 +178,19 @@ func _generate_points() -> Array:
 	for f in features.size():
 		number_of_features += occurences[f]
 		
+	# Return min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes
+	return [sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, gen_depth, sub_occurences, sizes]
+	
+#Returns [PackedVector3Array, Array[Array]]
+func _generate_points(min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes) -> Array:
+	var points = PackedVector3Array() # (x, y, feature index)
+		
 	# Points and chunks
-	var min_distance: float = sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)) # The minimum distance any two points can be
+	#var min_distance: float = sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)) # The minimum distance any two points can be
 	var chunks: Array[Array] # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
 	var chunk_length: float = min_distance / 0.70711  # sqrt(2) * min_distance
 	var chunk_count: Vector2i = Vector2i(int(ceil(MAP_RESOLUTION.x / chunk_length)), int(ceil(MAP_RESOLUTION.y / chunk_length)))
+	chunk_count.x *= 2 # For doubled map size
 	
 	# Initialize the chunks array
 	for cx: int in chunk_count.x + 1:
