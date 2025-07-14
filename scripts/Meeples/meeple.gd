@@ -1,7 +1,10 @@
 extends Node2D
 
 @onready var rb = $RigidBody2D
+
+
 @export var sprite: Sprite2D
+
 
 @export var area_2d: Area2D
 @export var speed: float = 200
@@ -11,16 +14,13 @@ var selected = false #Determines if a meeple is selected
 var dest = null #destination of a meeple
 
 var size = 1 #Size of the ARMY hashtag troops slay
-
+var groupNum = 0
 var min_distance = 9 # Squared
 var pos = null
 
 func _physics_process(delta): #runs on each meeple every tick
 	pos = self.rb.get_global_position()
-	if selected:
-		highlight()
-	else:
-		remove_highlight()
+	
 		
 	if (dest != null): #if a meeple has somewhere to go, goes to it
 		_go_to_target(delta)
@@ -46,12 +46,11 @@ func hasMouse(): #Checks if the mouse is within the meeple
 	return false
 	
 
-func highlight():
-	sprite.modulate = Color(1, 1, 1)  # Reset to white
+func highlight(colour):
+	sprite.modulate = colour  # White Highlight
 	
-
-func remove_highlight():
-	sprite.modulate = Color(1, 0, 0)  # Red highlight
+func remove_highlight(colour):
+	sprite.modulate = colour  # Red highlight
 # Marches Meeple to Target
 
 func _go_to_target(delta):

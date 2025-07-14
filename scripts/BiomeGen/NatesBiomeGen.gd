@@ -35,13 +35,14 @@ func _ready() -> void:
 	MAP_COLS = MAP_RESOLUTION.x / PIXELS_PER_TILE
 	MAP_ROWS = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
-	var points_blue_pc = _generate_points()
-	var points_red_pc = _generate_points()
-	var points_red = points_blue_pc.x
-	for pr in points_red:
+	var total_point_chunk = _generate_points()
+	var red_point_chunk = _generate_points()
+	for pr in red_point_chunk[0]:
 		pr.x = MAP_RESOLUTION.x + (MAP_RESOLUTION.x - pr.x)
-		points_blue_pc.x.append(pr)
-	_generate_mesh(points_blue_pc.x, points_blue_pc.y)
+		total_point_chunk[0].append(pr)
+		# Calculate the chunk
+		#total_point_chunk[1][id].append(pr)
+	_generate_mesh(total_point_chunk[0], total_point_chunk[1])
 	#_show_points(points_blue)
 
 func _show_points(points: PackedVector3Array):
@@ -123,7 +124,8 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 	print("PDD 2D Timed out!")
 	return Vector2i.ZERO
 
-func _generate_points() -> PackedVector3Array:
+#Returns [PackedVector3Array, Array[Array]]
+func _generate_points() -> Array:
 	var points = PackedVector3Array() # (x, y, feature index)
 	
 	#Resource data
@@ -251,7 +253,7 @@ func _generate_mesh(points: PackedVector3Array, chunks: Array):
 			 or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE) or sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE)):
 				color = Color.DARK_BLUE
 			
-			colors.append_array([color, color*1.1, color*1.2, color*1.3])
+			colors.append_array([color, color, color, color])
 			# Define two triangles (quad = 2 triangles)
 			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
 

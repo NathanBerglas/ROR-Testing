@@ -9,7 +9,8 @@ extends Node2D
 var group: Array[Array] = [[]]
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
 var teammates = []
-
+var groupColours = [Color(1,0,0)]
+var permGroupColour = [Color.AQUA, Color.ALICE_BLUE, Color.AQUAMARINE, Color.BLUE,Color.CORNFLOWER_BLUE]
 var selecting = Vector2(0,0)
 var selectingTime = 0
 
@@ -25,8 +26,17 @@ func _ready() -> void:
 	RCLICKORDER.button_up.connect(_on_order_button_released)
 	
 func _process(delta):
+	
+	for g in range(0,group.size()):
+		for node in range(0,group[g].size()):
+			if group[g][node].selected:
+				group[g][node].highlight(Color(3,3,3))
+			else:
+				group[g][node].remove_highlight(groupColours[g])
+				
 	if Input.is_action_just_pressed("spawn_meeple"):
 		var instance = meeple_prefab.instantiate()
+	
 		
 		# Set instance's data
 		
@@ -130,27 +140,44 @@ func _on_group_button_pressed():
 		var cap = g.size()
 		while m < cap:
 			if g[m].selected == true:
-				group[group.size() - 1].push_back(g.pop_at(m))
-				print("Put a node in group: " + str(group.size() - 1))
+				var n = g.pop_at(m)
+				groupColours.push_back(colourNotIn())
+				n.highlight(groupColours[group.size() - 1])
+				group[group.size() - 1].push_back(n)
+				#print("Put a node in group: " + str(group.size() - 1))
 				m -= 1
 				cap -= 1
 			m += 1
-	
 	removeEmptyGroups()
-	print("Groups look like: " + str(group))
+	#print("Groups look like: " + str(group))
 	for g in group:
 		print(str(g.size()))
+		
+		
 func _on_group_button_released():
 	RCLICKMENU.visible 	= false
 	
-func removeEmptyGroups():
+func removeEmptyGroups(): #Gets rid of all groups with no meeples
 	var cap = group.size()
 	var i = 0
 	
 	while i < cap:
 		if i > 0 and group[i].size() <= 0:
 			group.pop_at(i)
+			groupColours.pop_at(i)
 			i -= 1
 			cap -= 1
 		i += 1
 		
+func colourNotIn():
+	print("looking for one")
+	var found = false
+	for c in permGroupColour:
+		for nc in groupColours:
+			found = false
+			if c == nc:
+				found = true
+				break
+		if found == false:
+			print("Found One")
+			return c
