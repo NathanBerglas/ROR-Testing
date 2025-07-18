@@ -26,7 +26,7 @@ func _ready():
 
 func _process(_delta): #runs every
 	#We as the kids say: are no longer vibin
-	for p in GameManager.Players:
+	for p in GameManager.Players: #Where we mirror player actions
 		if p == 1:
-			print("Hi")
+			print("Hi") 
 	
