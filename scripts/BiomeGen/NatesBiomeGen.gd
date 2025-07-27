@@ -15,7 +15,7 @@ var MAP_ROWS: int
 @export var gen_data: JSON
 
 #Hardcode
-@export var origin_radius = 100 # Squared
+@export var origin_radius = 100*100 # Squared
 @export var biome_colours: Array[Color] = [Color.BLACK, Color.GREEN_YELLOW, Color.SKY_BLUE, Color.SANDY_BROWN, Color.WHEAT, Color.FOREST_GREEN, Color.LIGHT_GREEN, Color.ROYAL_BLUE]
 
 # Debugging
@@ -40,11 +40,11 @@ func _ready() -> void:
 	var data = get_data()
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
-	print("Data gotten: ", ellapsed)
+	#print("Data gotten: ", ellapsed)
 	var total_point_chunk = _generate_points(data[0], data[1], data[2], data[3], data[4], data[5], data[6])
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
-	print("Blue points generated: ", ellapsed)
+	#print("Blue points generated: ", ellapsed)
 	var red_point_chunk = _generate_points(data[0], data[1], data[2], data[3], data[4], data[5], data[6])
 	for pr: Vector3 in red_point_chunk[0]:
 		pr.x = MAP_RESOLUTION.x + (MAP_RESOLUTION.x - pr.x)
@@ -56,7 +56,7 @@ func _ready() -> void:
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	print("Red points generated: ", ellapsed)
-	_generate_mesh(total_point_chunk[0], total_point_chunk[1])
+	_generate_mesh(total_point_chunk[1], total_point_chunk[2])
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	print("Mesh generated: ", ellapsed)
@@ -132,8 +132,8 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 			for dy: int in range(-2,3):
 				var adj_chunk_index: Vector2i = chunk_index + Vector2i(dx,dy)
 				if (adj_chunk_index.x >= 0 and adj_chunk_index.y >= 0) and (adj_chunk_index.x < chunks.size() and adj_chunk_index.y < chunks[0].size()): # CHECK FOR MAX BOUNDS!
-					for point: Vector2i in chunks[adj_chunk_index.x][adj_chunk_index.y]:
-						if point.distance_squared_to(x) < min_distance * min_distance:
+					for point: Vector3 in chunks[adj_chunk_index.x][adj_chunk_index.y]:
+						if Vector2i(point.x,point.y).distance_squared_to(x) < min_distance * min_distance:
 							sucess = false
 							break # Too close to a point
 		if sucess:
@@ -181,7 +181,7 @@ func get_data() -> Array:
 	# Return min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes
 	return [sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, gen_depth, sub_occurences, sizes]
 	
-#Returns [PackedVector3Array, Array[Array]]
+#Returns [PackedVector3Array, Array[Array], Vector2i]
 func _generate_points(min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes) -> Array:
 	var points = PackedVector3Array() # (x, y, feature index)
 		
@@ -189,8 +189,7 @@ func _generate_points(min_distance, features, spawn_area, occurences, gen_depth,
 	#var min_distance: float = sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)) # The minimum distance any two points can be
 	var chunks: Array[Array] # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
 	var chunk_length: float = min_distance / 0.70711  # sqrt(2) * min_distance
-	var chunk_count: Vector2i = Vector2i(int(ceil(MAP_RESOLUTION.x / chunk_length)), int(ceil(MAP_RESOLUTION.y / chunk_length)))
-	chunk_count.x *= 2 # For doubled map size
+	var chunk_count: Vector2i = Vector2i(2 * int(ceil(MAP_RESOLUTION.x / chunk_length)), int(ceil(MAP_RESOLUTION.y / chunk_length)))
 	
 	# Initialize the chunks array
 	for cx: int in chunk_count.x + 1:
@@ -206,7 +205,8 @@ func _generate_points(min_distance, features, spawn_area, occurences, gen_depth,
 			var global_point = point + Vector2i(BORDER_RESOLUTION, BORDER_RESOLUTION)# Shift by the border
 			# Put occurence in points and in chunks
 			points.append(Vector3(global_point.x, global_point.y, f))
-			chunks[int(global_point.x / chunk_length)][int(global_point.y / chunk_length)].push_back(point)
+			var chunk_index = Vector2i(int(global_point.x / chunk_length),int(global_point.y / chunk_length))
+			chunks[chunk_index.x][chunk_index.y].append(Vector3(global_point.x, global_point.y, f))
 			# Stack of [position, depth]
 			var stack: Array = [[global_point, 0]]
 
@@ -230,13 +230,15 @@ func _generate_points(min_distance, features, spawn_area, occurences, gen_depth,
 					if ((2./3. * BORDER_RESOLUTION < new_point.x and new_point.x < MAP_RESOLUTION.x) and 
 						(2./3. * BORDER_RESOLUTION < new_point.y and new_point.y < MAP_RESOLUTION.y - 2./3. * BORDER_RESOLUTION)):
 						points.append(Vector3(new_point.x, new_point.y, f))
+						var new_chunk_index = Vector2i(int(new_point.x / chunk_length),int(new_point.y / chunk_length))
+						chunks[chunk_index.x][chunk_index.y].append(Vector3(new_point.x, new_point.y, f))
 						# Queue it up for the next depth layer
 						depth += 1
 						stack.append([new_point, depth])
-	return [points, chunks]
+	return [points, chunks, chunk_count]
 
 # Generates the mesh
-func _generate_mesh(points: PackedVector3Array, chunks: Array):
+func _generate_mesh(chunks: Array, chunk_count: Vector2i):
 	# Mesh variables
 	var mesh = ArrayMesh.new()
 	var arrays = []
@@ -261,18 +263,29 @@ func _generate_mesh(points: PackedVector3Array, chunks: Array):
 			
 			# Calculate the closest feature to this point
 			var closest_feature = Vector2(-1, -1) # distance squared, feature id
-			for p in points:
-				var distance = (col * PIXELS_PER_TILE - p.x) * (col * PIXELS_PER_TILE - p.x) + (row * PIXELS_PER_TILE - p.y) * (row * PIXELS_PER_TILE - p.y) # Calculate distance squared
-				if (distance < origin_radius*origin_radius and p.z == 0): # If it's within origin radius from origin, force it to be origin
-					closest_feature = Vector2(distance,p.z)
-					break
-				if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
-					closest_feature = Vector2(distance,p.z)
+			var current_chunk = Vector2i(
+				int(x / (2 * MAP_RESOLUTION.x / chunk_count.x)),
+				int(y / (MAP_RESOLUTION.y / chunk_count.y)))
+			var d_d = 2 # The range of chunks to check (-d_d < chunk < d_dd)
+			
+			while closest_feature.x == -1 and d_d < chunk_count.x:
+				for dy in range(-d_d,d_d+1):
+					for dx in range(-d_d, d_d+1):
+						var target_chunk = current_chunk + Vector2i(dx,dy)
+						if ((0 <= target_chunk.x and target_chunk.x < chunk_count.x) and (0 <= target_chunk.y and target_chunk.y < chunk_count.y)):
+							for p in chunks[target_chunk.x][target_chunk.y]:
+								var distance = pow((x - p.x),2) + pow((y - p.y),2) # Calculate distance squared
+								if (p.z == 0 and distance < origin_radius): # If it's within origin radius from origin, force it to be origin
+									closest_feature = Vector2(distance, p.z)
+									break
+								if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
+									closest_feature = Vector2(distance,p.z)
+				d_d += 1
 				
 			# Generate the color for the whole quad
 			var color = biome_colours[closest_feature.y]
 			if (sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (2 * MAP_RESOLUTION.x - col * PIXELS_PER_TILE)
-			 or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE) or sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE)):
+			or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE) or sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE)):
 				color = Color.DARK_BLUE
 			
 			colors.append_array([color, color, color, color])
