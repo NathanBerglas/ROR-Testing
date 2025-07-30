@@ -61,7 +61,7 @@ func _process(delta): #Runs every tick
 			add_child(instance)
 			set_id(instance)
 			group[0].push_back(instance)
-			print("Spawned meeple")
+			#print("Spawned meeple")
 			
 			
 		#Orders all meeples to a location
@@ -206,7 +206,7 @@ func removeEmptyGroups(): #Gets rid of all groups with no meeples
 		i += 1
 		
 func colourNotIn(): #Returns a colour for a group
-	print("looking for one")
+	#print("looking for one")
 	var found = false
 	for c in permGroupColour:
 		for nc in groupColours:
@@ -215,7 +215,7 @@ func colourNotIn(): #Returns a colour for a group
 				found = true
 				break
 		if found == false:
-			print("Found One")
+			#print("Found One")
 			return c
 	return null
 
