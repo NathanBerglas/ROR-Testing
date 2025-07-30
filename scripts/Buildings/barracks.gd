@@ -19,6 +19,7 @@ func spawn(p, delta,pos): #Generates income every 10 seconds
 		var instance = p.meeple_prefab.instantiate()
 		
 		add_child(instance)
+		p.set_id(instance)
 		p.group[0].push_back(instance)
 		
 		spawnTimer = 0

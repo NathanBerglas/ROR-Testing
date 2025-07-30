@@ -13,6 +13,8 @@ extends Node2D
 var selected = false #Determines if a meeple is selected
 var dest = null #destination of a meeple
 
+var UNIQUEID = null #Unique Id for every meeple on a team
+#When I say Unique, I mean UNIQUE
 var size = 1 #Size of the ARMY hashtag troops slay
 var groupNum = 0
 var min_distance = 9 # Squared

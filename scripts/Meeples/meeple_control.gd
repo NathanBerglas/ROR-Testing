@@ -7,6 +7,8 @@ extends Node2D
 @onready var RCLICKGROUP = $VBoxContainer/Group
 @onready var RCLICKMENU = $VBoxContainer
 
+var time = 0
+
 #The list of meeple groups, their targets, and their colours
 var group: Array[Array] = [[]]
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
@@ -20,6 +22,7 @@ var playerID = 0
 var selecting = Vector2(0,0)
 var selectingTime = 0
 
+var MEEPLE_ID_COUNTER = 1
 func _ready() -> void:
 	
 	#Setting base states for the selection box and the right click menu
@@ -33,6 +36,7 @@ func _ready() -> void:
 	RCLICKORDER.button_up.connect(_on_order_button_released)
 	
 func _process(delta): #Runs every tick
+	time += delta
 	if playerID == multiplayer.get_unique_id():
 		
 		#Goes through every meeple and sets them to their colour
@@ -55,6 +59,7 @@ func _process(delta): #Runs every tick
 			
 			# Create instance
 			add_child(instance)
+			set_id(instance)
 			group[0].push_back(instance)
 			print("Spawned meeple")
 			
@@ -122,7 +127,15 @@ func _process(delta): #Runs every tick
 						
 			selecting = false #No more selecting :(
 			selection_box.visible = false
-			
+	else:
+		var MEEPLE_CONTROL_INDEX = 0
+		var BUILDING_CONTROL_INDEX = 1
+		for p in GameManager.Players:
+			#print(playerID)
+			if p == playerID:
+				if GameManager.Players[p].controllers.size() > 1 and GameManager.controllersSet == true:
+					equalize(GameManager.Players[p].controllers[MEEPLE_CONTROL_INDEX])
+	
 
 #Updates the selction box to where the mouse is
 func update_selection_box():
@@ -205,3 +218,20 @@ func colourNotIn(): #Returns a colour for a group
 			print("Found One")
 			return c
 	return null
+
+func set_id(node):
+	node.UNIQUEID = MEEPLE_ID_COUNTER
+	MEEPLE_ID_COUNTER += 1
+
+
+func equalize(otherController):
+	group = otherController.get_group()
+	group_targets = otherController.get_group_targets()
+	groupColours = otherController.get_groupColours()
+	
+func get_group():
+	return group
+func get_group_targets():
+	return group_targets
+func get_groupColours():
+	return groupColours

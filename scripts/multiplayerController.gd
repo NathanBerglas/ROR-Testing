@@ -3,6 +3,9 @@ extends Control
 @export var Address = "127.0.0.1"
 @export var port = 8910
 
+var connected_players = []
+#Looks like I need to create a server
+#yay
 var peer
 var testTime = 0
 func _ready():
@@ -16,7 +19,10 @@ func _process(delta):
 
 #Called on the server and all clients when someone connects
 func peer_connected(id):
-	print("Player Connected: " + str(id))
+	if multiplayer.is_server():
+		print("Server Running")
+	else:
+		print("Player Connected: " + str(id))
 	
 	
 #Called on the server and all clients when someone connects
@@ -27,6 +33,7 @@ func peer_disconnected(id):
 #Only called on clients (Send info from clients to server)
 func connected_to_server():
 	print("Connected to server!")
+	
 	sendPlayerInfo.rpc_id(1, $LineEdit.text, multiplayer.get_unique_id(),[])
 
 #Only called on clients
@@ -34,29 +41,34 @@ func connection_failed():
 	print("Connection failed :(")
 	
 @rpc("any_peer")
-func sendPlayerInfo(name,id,controllers):
+func sendPlayerInfo(name, id,controllers):
+	multiplayer.allow_object_decoding = true
 	if !GameManager.Players.has(id):
 		GameManager.Players[id] ={
 			"name" : name,
 			"id" : id,
-			"controllers" : controllers
+			"controllers" : controllers,
+
 		}
 	
 	if multiplayer.is_server():
 		for i in GameManager.Players:
-			sendPlayerInfo.rpc(GameManager.Players[i].name, i,[])
+			sendPlayerInfo.rpc(GameManager.Players[i].name, i,GameManager.Players[i].controllers)
 	
 @rpc("any_peer","call_local")
 func StartGame():
 	print("Starting Game!")
 	var scene = load("res://scenes/main.tscn").instantiate()
+	
 	get_tree().root.add_child(scene)
 	self.hide()
 
 func _on_host_button_down() -> void:
-	var MAX_PLAYERS = 2
+	
+	
+	var MAX_PLAYERS_AND_SERVER = 3
 	peer = ENetMultiplayerPeer.new()
-	var error = peer.create_server(port, MAX_PLAYERS)
+	var error = peer.create_server(port, MAX_PLAYERS_AND_SERVER)
 	
 	if error != OK:
 		print("Cannot Host: " + str(error))
@@ -67,7 +79,7 @@ func _on_host_button_down() -> void:
 	
 	multiplayer.set_multiplayer_peer(peer)
 	print("Waiting for Players")
-	sendPlayerInfo($LineEdit.text, multiplayer.get_unique_id(),[])
+	#sendPlayerInfo($LineEdit.text, multiplayer.get_unique_id(),[])
 
 
 func _on_join_button_down() -> void:
