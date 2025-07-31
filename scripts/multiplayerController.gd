@@ -34,29 +34,31 @@ func peer_disconnected(id):
 func connected_to_server():
 	print("Connected to server!")
 	
-	sendPlayerInfo.rpc_id(1, $LineEdit.text, multiplayer.get_unique_id(),[])
+	sendPlayerInfo.rpc_id(1, $LineEdit.text, multiplayer.get_unique_id(),null, null)
 
 #Only called on clients
 func connection_failed():
 	print("Connection failed :(")
 	
 @rpc("any_peer")
-func sendPlayerInfo(name, id,controllers):
+func sendPlayerInfo(name, id,meepleInfo, buildingInfo):
 	multiplayer.allow_object_decoding = true
 	if !GameManager.Players.has(id):
 		GameManager.Players[id] ={
 			"name" : name,
 			"id" : id,
-			"controllers" : controllers,
+			"meepleInfo" : meepleInfo,
+			"buildingInfo" : buildingInfo
 
 		}
 	
 	if multiplayer.is_server():
 		for i in GameManager.Players:
-			sendPlayerInfo.rpc(GameManager.Players[i].name, i,GameManager.Players[i].controllers)
+			sendPlayerInfo.rpc(GameManager.Players[i].name, i,GameManager.Players[i].meepleInfo, GameManager.Players[i].buildingInfo)
 	
 @rpc("any_peer","call_local")
 func StartGame():
+	GameManager.IdOfCURRENT = multiplayer.get_unique_id()
 	print("Starting Game!")
 	var scene = load("res://scenes/main.tscn").instantiate()
 	
@@ -91,5 +93,6 @@ func _on_join_button_down() -> void:
 
 
 func _on_start_button_down() -> void:
+	
 	StartGame.rpc()
 	pass # Replace with function body.

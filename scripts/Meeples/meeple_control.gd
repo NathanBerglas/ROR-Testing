@@ -10,6 +10,11 @@ extends Node2D
 var time = 0
 
 #The list of meeple groups, their targets, and their colours
+var MEEPLE_ID_INDEX = 0
+var MEEPLE_POS_INDEX = 1
+var MEEPLE_HP_INDEX = 2
+
+var unorderedMeeples = [[]]
 var group: Array[Array] = [[]]
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
 var groupColours = [Color(1,0,0)]
@@ -53,6 +58,8 @@ func _process(delta): #Runs every tick
 		
 			
 			# Set instance's data
+			instance.UNIQUEID = MEEPLE_ID_COUNTER
+			MEEPLE_ID_COUNTER += 1
 			
 			instance.global_position = get_global_mouse_position()
 			#instance.target = group_targets[0]
@@ -60,6 +67,13 @@ func _process(delta): #Runs every tick
 			# Create instance
 			add_child(instance)
 			set_id(instance)
+			
+			var newMeeple = []
+			newMeeple.push_back(instance.UNIQUEID)
+			newMeeple.push_back(instance.global_position)
+			newMeeple.push_back(instance.HP)
+			
+			unorderedMeeples.push_back(newMeeple)
 			group[0].push_back(instance)
 			#print("Spawned meeple")
 			
@@ -133,8 +147,8 @@ func _process(delta): #Runs every tick
 		for p in GameManager.Players:
 			#print(playerID)
 			if p == playerID:
-				if GameManager.Players[p].controllers.size() > 1 and GameManager.controllersSet == true:
-					equalize(GameManager.Players[p].controllers[MEEPLE_CONTROL_INDEX])
+				if GameManager.controllersSet == true:
+					equalize(GameManager.Players[p].meepleInfo)
 	
 
 #Updates the selction box to where the mouse is
@@ -225,13 +239,63 @@ func set_id(node):
 
 
 func equalize(otherController):
-	group = otherController.get_group()
-	group_targets = otherController.get_group_targets()
-	groupColours = otherController.get_groupColours()
 	
+	cleanNodes(otherController)
+	
+	updatePos(otherController)
 func get_group():
 	return group
 func get_group_targets():
 	return group_targets
 func get_groupColours():
 	return groupColours
+
+
+func cleanNodes(meepleList):
+	
+	var x = 1
+	if meepleList == null: return
+	if meepleList.size() == 0 and unorderedMeeples.size() == 0: return
+	
+	while x < meepleList.size():
+		if x >= unorderedMeeples.size():
+			var instance = meeple_prefab.instantiate()
+			
+			instance.UNIQUEID = meepleList[x][MEEPLE_ID_INDEX]
+			
+			
+			instance.global_position = meepleList[x][MEEPLE_POS_INDEX]
+			
+				
+			add_child(instance)
+			set_id(instance)
+			
+			var newMeepleInfo = []
+			newMeepleInfo.push_back(instance.UNIQUEID)
+			newMeepleInfo.push_back(instance.global_position)
+			newMeepleInfo.push_back(instance.HP)
+			
+			unorderedMeeples.push_back(newMeepleInfo)
+			group[0].push_back(instance)
+			
+			
+		elif meepleList[x][MEEPLE_ID_INDEX] != unorderedMeeples[x][MEEPLE_ID_INDEX]:
+			for n in unorderedMeeples:
+				if n[MEEPLE_ID_INDEX]== meepleList[x][MEEPLE_ID_INDEX]:
+					remove_child(n)
+			unorderedMeeples.pop_at(x)
+			continue
+		x += 1
+	while x < unorderedMeeples.size():
+		unorderedMeeples.pop_at(x)
+
+func updatePos(meepleList):
+	var x = 1
+	if meepleList == null: return
+	while x < meepleList.size():
+		unorderedMeeples[x][MEEPLE_POS_INDEX] = meepleList[x][MEEPLE_POS_INDEX]
+	for g in group:
+		for n in g:
+			for n1 in unorderedMeeples:
+				if n1[MEEPLE_ID_INDEX] == n.UNIQUEID:
+					n.set_global_position(n1[MEEPLE_POS_INDEX])

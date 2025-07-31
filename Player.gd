@@ -19,9 +19,11 @@ func _process(_delta): #Runs every tick
 		if playerID == multiplayer.get_unique_id():
 			$BuildingControl/buildingHud.visible = true
 			
-			GameManager.Players[playerID].controllers.push_back($MeepleControl)
-			GameManager.Players[playerID].controllers.push_back($BuildingControl)
+			GameManager.Players[playerID].meepleInfo = $MeepleControl.unorderedMeeples
+			
 			GameManager.ownControllersSet = true
 			
+		if multiplayer.is_server():
+			GameManager.ownControllersSet = true
 		setShit = true
 	
