@@ -9,6 +9,8 @@ var orderNum = 0
 
 func _ready():
 	multiplayer.allow_object_decoding = true
+	
+	
 	var index = 0
 	for i in GameManager.Players:
 		var currentPlayer = playerScene.instantiate()

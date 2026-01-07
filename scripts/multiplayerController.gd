@@ -41,7 +41,7 @@ func connection_failed():
 	print("Connection failed :(")
 	
 @rpc("any_peer")
-func sendPlayerInfo(name, id,meepleInfo, buildingInfo):
+func sendPlayerInfo(name, id, meepleInfo, buildingInfo):
 	multiplayer.allow_object_decoding = true
 	if !GameManager.Players.has(id):
 		GameManager.Players[id] ={
