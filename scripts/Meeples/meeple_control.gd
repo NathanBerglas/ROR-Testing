@@ -22,7 +22,7 @@ var permGroupColour = [Color(0,0,3), Color(0,3,0), Color(3,3,0), Color(3,0,3),Co
 
 #Team mates for this player and what team they are on
 var teammates = [] 
-var playerID = 0
+#var playerID = 0
 #logic used for the cool selcting box
 var selecting = Vector2(0,0)
 var selectingTime = 0
@@ -42,105 +42,107 @@ func _ready() -> void:
 	
 func _process(delta): #Runs every tick
 	time += delta
-	if playerID == multiplayer.get_unique_id():
-		
-		#Goes through every meeple and sets them to their colour
-		for g in range(0,group.size()):
-			for node in range(0,group[g].size()):
-				if group[g][node].selected:
-					group[g][node].highlight(Color(3,3,3))
-				else:
-					group[g][node].remove_highlight(groupColours[g])
-					
-					
-		if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-			var instance = meeple_prefab.instantiate()
-		
-			
-			# Set instance's data
-			instance.UNIQUEID = MEEPLE_ID_COUNTER
-			MEEPLE_ID_COUNTER += 1
-			
-			instance.global_position = get_global_mouse_position()
-			#instance.target = group_targets[0]
-			
-			# Create instance
-			add_child(instance)
-			set_id(instance)
-			
-			var newMeeple = []
-			newMeeple.push_back(instance.UNIQUEID)
-			newMeeple.push_back(instance.global_position)
-			newMeeple.push_back(instance.HP)
-			
-			unorderedMeeples.push_back(newMeeple)
-			group[0].push_back(instance)
-			#print("Spawned meeple")
-			
-			
-		#Orders all meeples to a location
-		elif Input.is_action_just_pressed("super_order"):
-			group_targets[0] = get_global_mouse_position()
-			targetMarker.global_position = group_targets[0]
-			
-			for m in group[0]:
-				m.dest = group_targets[0]
-				
-		
-		#Opens up the right click menu
-		elif Input.is_action_just_pressed("right_click_menu"):
-			RCLICKMENU.set_global_position(get_global_mouse_position())
-			RCLICKMENU.visible = true
-		
-		#Starts the selction process
-		elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
-			RCLICKMENU.visible = false
-			selecting = get_global_mouse_position()
-			selectingTime = 0
-		
-		#Used to build the selection box if
-		elif Input.is_action_pressed("select") and teammates[0].buildingDraggin == null:
-			selectingTime += delta
-			if selectingTime > 0.25:
-				selection_box.visible = true
-				update_selection_box()
-		
-		#Logic for when the select button is released
-		elif Input.is_action_just_released("select"):
-			selectingTime += delta
-			if selectingTime < 0.25: #No selecting box
-				var hit = false
-				
-				#Goes through every group to select every meeple 
-				#in the selected meeple's group
-				for g in group.size(): 
-					for m in group[g].size():
-						if group[g][m].hasMouse():
-							group[g][m].selected = true
-							hit = true
-							
-							if g > 0:
-								for i in group[g]:
-									i.selected = true
-				if hit == false:
-					for g in group:
-						for m in g:
-							m.selected = false
+	#if playerID == multiplayer.get_unique_id():
+	
+	#Goes through every meeple and sets them to their colour
+	for g in range(0,group.size()):
+		for node in range(0,group[g].size()):
+			if group[g][node].selected:
+				group[g][node].highlight(Color(3,3,3))
 			else:
-				#Same thing but for all meeples in the rectangle
-				var rect = Rect2(selection_box.global_position, selection_box.size)
-				for g in group.size():
-					for m in group[g].size():
-						if rect.has_point(group[g][m].pos):
-							group[g][m].selected = true
-							
-							if g > 0:
-								for i in group[g]:
-									i.selected = true
+				group[g][node].remove_highlight(groupColours[g])
+				
+				
+	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
+		var instance = meeple_prefab.instantiate()
+	
+		
+		# Set instance's data
+		instance.UNIQUEID = MEEPLE_ID_COUNTER
+		MEEPLE_ID_COUNTER += 1
+		
+		instance.global_position = get_global_mouse_position()
+		#instance.target = group_targets[0]
+		
+		# Create instance
+		add_child(instance)
+		set_id(instance)
+		
+		var newMeeple = []
+		newMeeple.push_back(instance.UNIQUEID)
+		newMeeple.push_back(instance.global_position)
+		newMeeple.push_back(instance.HP)
+		
+		unorderedMeeples.push_back(newMeeple)
+		group[0].push_back(instance)
+		#print("Spawned meeple")
+		
+		
+	#Orders all meeples to a location
+	elif Input.is_action_just_pressed("super_order"):
+		group_targets[0] = get_global_mouse_position()
+		targetMarker.global_position = group_targets[0]
+		
+		for m in group[0]:
+			m.dest = group_targets[0]
+			
+	
+	#Opens up the right click menu
+	elif Input.is_action_just_pressed("right_click_menu"):
+		RCLICKMENU.set_global_position(get_global_mouse_position())
+		RCLICKMENU.visible = true
+	
+	#Starts the selction process
+	elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
+		RCLICKMENU.visible = false
+		selecting = get_global_mouse_position()
+		selectingTime = 0
+	
+	#Used to build the selection box if
+	elif Input.is_action_pressed("select") and teammates[0].buildingDraggin == null:
+		selectingTime += delta
+		if selectingTime > 0.25:
+			selection_box.visible = true
+			update_selection_box()
+	
+	#Logic for when the select button is released
+	elif Input.is_action_just_released("select"):
+		selectingTime += delta
+		if selectingTime < 0.25: #No selecting box
+			var hit = false
+			
+			#Goes through every group to select every meeple 
+			#in the selected meeple's group
+			for g in group.size(): 
+				for m in group[g].size():
+					if group[g][m].hasMouse():
+						group[g][m].selected = true
+						hit = true
 						
+						if g > 0:
+							for i in group[g]:
+								i.selected = true
+			if hit == false:
+				for g in group:
+					for m in g:
+						m.selected = false
+		else:
+			#Same thing but for all meeples in the rectangle
+			var rect = Rect2(selection_box.global_position, selection_box.size)
+			for g in group.size():
+				for m in group[g].size():
+					if rect.has_point(group[g][m].pos):
+						group[g][m].selected = true
 						
-			selecting = false #No more selecting :(
-			selection_box.visible = false
+						if g > 0:
+							for i in group[g]:
+								i.selected = true
+					
+					
+		selecting = false #No more selecting :(
+		selection_box.visible = false
+		
+	"""
 	else:
 		var MEEPLE_CONTROL_INDEX = 0
 		var BUILDING_CONTROL_INDEX = 1
@@ -149,7 +151,7 @@ func _process(delta): #Runs every tick
 			if p == playerID:
 				if GameManager.controllersSet == true:
 					equalize(GameManager.Players[p].meepleInfo)
-	
+	"""
 
 #Updates the selction box to where the mouse is
 func update_selection_box():
