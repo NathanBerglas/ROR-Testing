@@ -345,8 +345,7 @@ func mergeAllMeeples():
 
 
 
-	print(vectorsSeen)
-	print(vectorsSaved)
+	
 	
 func atDest(meeple):
 	if meeple.dest == null:
