@@ -11,7 +11,7 @@ func _ready(): #I EXIST!
 		print("Hi")
 
 
-func spawn(p, delta,_pos): #Generates meeple every 5 seconds
+func spawn(p, delta, pos, grid): #Generates meeple every 5 seconds
 	if self.fake: return
 	
 	spawnTimer += delta
@@ -19,16 +19,15 @@ func spawn(p, delta,_pos): #Generates meeple every 5 seconds
 		var instance = p.meeple_prefab.instantiate()
 		instance.UNIQUEID = p.MEEPLE_ID_COUNTER
 		p.MEEPLE_ID_COUNTER += 1
+		var tempVector = pos
+		tempVector.x += 1
 		
 		add_child(instance)
 		p.set_id(instance)
 		
-		var newMeeple = []
-		newMeeple.push_back(instance.UNIQUEID)
-		newMeeple.push_back(instance.global_position)
-		newMeeple.push_back(instance.HP)
+		instance.set_global_position(grid._axial_hex_to_coord(tempVector))
 			
-		p.unorderedMeeples.push_back(newMeeple)
+		p.unorderedMeeples.push_back(instance)
 		p.group[0].push_back(instance)
 		
 		spawnTimer = 0

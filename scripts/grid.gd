@@ -70,7 +70,7 @@ func probe(coordinate: Vector2i):
 	var tile_pos: Vector2i = _coord_to_axial_hex(coordinate)
 	return grid[tile_pos.x][tile_pos.y]
 
-
+""" Old Code -> Moved to Building controller
 # Grid interface for placing buildings on the grid
 func order_building(coordinate: Vector2i):
 	var tile_hex: Vector2i = _coord_to_axial_hex(coordinate)
@@ -81,8 +81,8 @@ func order_building(coordinate: Vector2i):
 	else:
 		print("Failed in updating, cord: ", tile_cord, ", tile cord:, ", tile_cord)
 		return [false, tile_cord]
-		
-		
+"""
+""" Old Code -> Moved to Meeple controller
 # Grid interface for spawning meeples on the grid
 func order_meeple_spawn(coordinate: Vector2i):
 	var tile_hex: Vector2i = _coord_to_axial_hex(coordinate)
@@ -93,7 +93,7 @@ func order_meeple_spawn(coordinate: Vector2i):
 	else:
 		print("Failed in updating @ requested coord: ", coordinate, ", @ hex: ", tile_hex, ", and hex coord: ", tile_cord)
 		return [false, tile_cord]
-		
+"""	
 		
 func _ready():
 	for q in range(GRID_COUNT.x):
@@ -101,24 +101,24 @@ func _ready():
 		for r in range(GRID_COUNT.y):
 			row.append(tile.new(Vector2i(q, r)))
 		grid.append(row)	
-	
-#func draw_hex(center: Vector2, size: float, color: Color) -> void:
-	#var points: PackedVector2Array = []
-	#for i in range(6):
-		#var angle = deg_to_rad(60 * i - 30) # pointy-top
-		#points.append(center + Vector2(cos(angle), sin(angle)) * size)
+	_draw()
+func draw_hex(center: Vector2, size: float, color: Color) -> void:
+	var points: PackedVector2Array = []
+	for i in range(6):
+		var angle = deg_to_rad(60 * i - 30) # pointy-top
+		points.append(center + Vector2(cos(angle), sin(angle)) * size)
 #
-	#for i in range(6):
-		#draw_line(points[i], points[(i + 1) % 6], color, 1.0)
+	for i in range(6):
+		draw_line(points[i], points[(i + 1) % 6], color, 1.0)
 
 # FOR TESTING!
-func _process(delta):
-	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-		order_meeple_spawn(Vector2i(get_global_mouse_position()))
+#func _process(delta):
+	#if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
+		#order_meeple_spawn(Vector2i(get_global_mouse_position()))
 	#
-#func _draw():
-	#for q in range(GRID_COUNT.x):
-		#for r in range(GRID_COUNT.y):
-			#var hex = Vector2i(q, r)
-			#var center = _axial_hex_to_coord(hex)
-			#draw_hex(center, HEX_SIZE, Color.GRAY)
+func _draw():
+	for q in range(GRID_COUNT.x):
+		for r in range(GRID_COUNT.y):
+			var hex = Vector2i(q, r)
+			var center = _axial_hex_to_coord(hex)
+			draw_hex(center, HEX_SIZE, Color.GRAY)

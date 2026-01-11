@@ -18,6 +18,7 @@ var buildingDraggin = null
 var buildings = [] 
 
 var teammates = [] #list of teammates
+var grid # the grid controller
 var playerID = 0
 
 
@@ -62,31 +63,14 @@ func _on_farm_button_released():
 	buildingDraggin = null
 	
 	#If not placeable, REMOVED
-	if !buildings[buildings.size() - 1][2].is_placeable():
+	if !is_placeable(buildings[buildings.size() - 1][2]):
 		buildings.pop_back()[2].queue_free()
 		return
 	buildings[buildings.size() - 1][2].fake = false
+	buildings[buildings.size() - 1][2].global_position = grid._axial_hex_to_coord(grid._coord_to_axial_hex(get_global_mouse_position()))
+	buildings[buildings.size() - 1][1] = grid._coord_to_axial_hex(get_global_mouse_position())
+	grid._update_grid(grid._coord_to_axial_hex(get_global_mouse_position()), 2)
 	money -= 500
-	
-func _process(delta): #runs every tick
-	if buildingDraggin != null: #Code actually dragging the farm around
-		buildings[buildings.size() - 1][2].global_position = get_global_mouse_position()
-		if !buildings[buildings.size() - 1][2].is_placeable():
-			buildings[buildings.size() - 1][2].shapey.modulate = Color(250, 0, 4) #RED
-		else:
-			buildings[buildings.size() - 1][2].shapey.modulate = Color(1, 1, 1)  # Reset to white
-
-	for m in buildings: #Doing tick stuff for each building
-		if m[0] == "Farm" and !m[2].fake:
-			m[2].generateIncome(self, delta)
-		elif m[0] == "Barracks" and !m[2].fake:
-			m[2].spawn(self.teammates[0],delta,m[1])
-	hud.updateMoney(money) #updates money amount
-	
-
-func addMoney(moneyChange): #Changing money
-	money += moneyChange
-	hud.updateMoney(money)
 	
 func _on_barracks_button_pressed():
 	if money < 1000:
@@ -96,7 +80,7 @@ func _on_barracks_button_pressed():
 
 	#Adding the barracksto be dragged to the list of buildings
 	# hashtag-No way this will cause errors in the future
-	var instance = barracks_prefab.instantiate() #New FAKE money farm
+	var instance = barracks_prefab.instantiate() #New FAKE barracks
 	instance.fake = true
 	var toAdd = ["Barracks", Vector2(0,0), instance]
 	
@@ -104,6 +88,7 @@ func _on_barracks_button_pressed():
 	add_child(instance) #Adding the instance
 	
 	buildings.push_back(toAdd) 
+	
 func _on_barracks_button_released():
 	
 	if buildingDraggin != "Barracks" or money < 1000:
@@ -112,11 +97,63 @@ func _on_barracks_button_released():
 	buildingDraggin = null
 	
 	#If not placeable, REMOVED
-	if !buildings[buildings.size() - 1][2].is_placeable():
+	if !is_placeable(buildings[buildings.size() - 1][2]):
 		buildings.pop_back()[2].queue_free()
 		return
 	buildings[buildings.size() - 1][2].fake = false
-	buildings[buildings.size() - 1][1] = get_global_mouse_position()
-	print("Barracks Placed: " + str(buildings[buildings.size() - 1][2].get_global_position()))
+	buildings[buildings.size() - 1][2].global_position = grid._axial_hex_to_coord(grid._coord_to_axial_hex(get_global_mouse_position()))
+	buildings[buildings.size() - 1][1] = grid._coord_to_axial_hex(get_global_mouse_position())
+	
+	
+	grid._update_grid(grid._coord_to_axial_hex(get_global_mouse_position()), 2)
+	var tempVector = grid._coord_to_axial_hex(get_global_mouse_position())
+	tempVector.x += 1
+	grid._update_grid(tempVector, 1)
+	
 	money -= 1000
 	
+	
+func _process(delta): #runs every tick
+	if buildingDraggin != null: #Code actually dragging the building around
+		buildings[buildings.size() - 1][2].global_position = get_global_mouse_position()
+		if !is_placeable(buildings[buildings.size() - 1][2]):
+			buildings[buildings.size() - 1][2].shapey.modulate = Color(250, 0, 4) #RED
+		else:
+			buildings[buildings.size() - 1][2].shapey.modulate = Color(1, 1, 1)  # Reset to white
+
+	for m in buildings: #Doing tick stuff for each building
+		if m[0] == "Farm" and !m[2].fake:
+			m[2].generateIncome(self, delta)
+		elif m[0] == "Barracks" and !m[2].fake:
+			m[2].spawn(self.teammates[0],delta,m[1], grid)
+	hud.updateMoney(money) #updates money amount
+	
+
+func addMoney(moneyChange): #Changing money
+	money += moneyChange
+	hud.updateMoney(money)
+	
+
+func is_placeable(_building) -> bool: #Only for if a body is FAKE
+	
+	
+	if grid.probe(get_global_mouse_position()).classification == 0:
+		
+		return true
+	else:
+		return false
+		
+	
+	
+	""" Old Code -> Updated to right above
+	var space_state = get_world_2d().direct_space_state
+	var query = PhysicsShapeQueryParameters2D.new()
+	
+	query.shape = $RigidBody2D/CollisionShape2D.shape
+	query.transform = $RigidBody2D/CollisionShape2D.global_transform
+	query.collide_with_areas = true
+	query.collide_with_bodies = true
+	query.exclude = [$RigidBody2D.get_rid()]
+	var result = space_state.intersect_shape(query)
+	return result.is_empty()  # True = no collision, so placeable
+	"""

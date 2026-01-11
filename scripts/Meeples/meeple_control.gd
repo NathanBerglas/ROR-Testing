@@ -14,14 +14,18 @@ var MEEPLE_ID_INDEX = 0
 var MEEPLE_POS_INDEX = 1
 var MEEPLE_HP_INDEX = 2
 
-var unorderedMeeples = [[]]
+var unorderedMeeples = []
 var group: Array[Array] = [[]]
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
 var groupColours = [Color(1,0,0)]
 var permGroupColour = [Color(0,0,3), Color(0,3,0), Color(3,3,0), Color(3,0,3),Color(0,3,3)]
 
 #Team mates for this player and what team they are on
-var teammates = [] 
+var teammates = []
+
+#The grid
+var grid
+
 #var playerID = 0
 #logic used for the cool selcting box
 var selecting = Vector2(0,0)
@@ -44,7 +48,8 @@ func _process(delta): #Runs every tick
 	time += delta
 	#if playerID == multiplayer.get_unique_id():
 	
-	#Goes through every meeple and sets them to their colour
+	#Goes through every meeple and sets them to their colour and resets their 
+	mergeAllMeeples()
 	for g in range(0,group.size()):
 		for node in range(0,group[g].size()):
 			if group[g][node].selected:
@@ -55,32 +60,32 @@ func _process(delta): #Runs every tick
 				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
 		var instance = meeple_prefab.instantiate()
+		
 	
 		
 		# Set instance's data
 		instance.UNIQUEID = MEEPLE_ID_COUNTER
 		MEEPLE_ID_COUNTER += 1
 		
-		instance.global_position = get_global_mouse_position()
+		instance.global_position = grid._axial_hex_to_coord(grid._coord_to_axial_hex(get_global_mouse_position()))
+		
 		#instance.target = group_targets[0]
 		
 		# Create instance
 		add_child(instance)
 		set_id(instance)
 		
-		var newMeeple = []
-		newMeeple.push_back(instance.UNIQUEID)
-		newMeeple.push_back(instance.global_position)
-		newMeeple.push_back(instance.HP)
+
 		
-		unorderedMeeples.push_back(newMeeple)
+		unorderedMeeples.push_back(instance)
 		group[0].push_back(instance)
 		#print("Spawned meeple")
 		
 		
+		
 	#Orders all meeples to a location
 	elif Input.is_action_just_pressed("super_order"):
-		group_targets[0] = get_global_mouse_position()
+		group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(get_global_mouse_position()))
 		targetMarker.global_position = group_targets[0]
 		
 		for m in group[0]:
@@ -169,7 +174,7 @@ func update_selection_box():
 
 #Order all the selected meeples to that place
 func _on_order_button_pressed():
-	group_targets[0] = RCLICKMENU.get_global_position()
+	group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(RCLICKMENU.get_global_position()))
 	targetMarker.global_position = group_targets[0]
 	for g in group:		
 		for m in g:
@@ -243,8 +248,8 @@ func set_id(node):
 func equalize(otherController):
 	
 	cleanNodes(otherController)
-	
 	updatePos(otherController)
+	
 func get_group():
 	return group
 func get_group_targets():
@@ -301,3 +306,64 @@ func updatePos(meepleList):
 			for n1 in unorderedMeeples:
 				if n1[MEEPLE_ID_INDEX] == n.UNIQUEID:
 					n.set_global_position(n1[MEEPLE_POS_INDEX])
+					
+func mergeAllMeeples():
+	var vectorsSeen = []
+	var vectorsSaved = []
+	var found = false
+	for i in range(unorderedMeeples.size()):
+		
+		if atDest(unorderedMeeples[i]):
+			for v in vectorsSeen:
+				if v == grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()):
+					vectorsSaved.push_back(grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
+					found = true
+			if !found:
+				vectorsSeen.push_back(grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
+			found = false
+	
+	for v in vectorsSaved:
+		var base = null
+		var n = 0
+		var i = 0
+		while i < (unorderedMeeples.size()):
+			
+			if grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()) == v:
+				if base == null:
+					base = unorderedMeeples[i]
+				else:
+					n += unorderedMeeples[i].HP
+					var id = unorderedMeeples[i].UNIQUEID
+					freeMeeple(id)
+					i -= 1
+					
+					
+					
+			i += 1
+		if base != null:
+			base.HP += n
+
+
+
+	print(vectorsSeen)
+	print(vectorsSaved)
+	
+func atDest(meeple):
+	if meeple.dest == null:
+		return true
+	else:
+		return false
+
+
+func freeMeeple(id):
+	for i in range(unorderedMeeples.size()):
+		if unorderedMeeples[i].UNIQUEID == id:
+			unorderedMeeples.pop_at(i).queue_free()
+			break
+	for i in range(group.size()):
+		for k in range(group[i].size()):
+			if group[i][k].UNIQUEID == id:
+				group[i].pop_at(k).queue_free()
+				return
+			
+			

@@ -1,7 +1,7 @@
 extends Node2D
 
 @onready var rb = $RigidBody2D
-
+@onready var label = $RigidBody2D/Label
 
 @export var sprite: Sprite2D
 
@@ -19,15 +19,16 @@ var size = 1 #Size of the ARMY hashtag troops slay
 var groupNum = 0
 var min_distance = 9 # Squared
 var pos = Vector2(0,0)
-var HP = 100
+var HP = 1
 
 func _physics_process(delta): #runs on each meeple every tick
+	label.text = str(HP)
 	pos = self.rb.get_global_position()
 	
 		
 	if (dest != null): #if a meeple has somewhere to go, goes to it
 		_go_to_target(delta)
-		
+	
 	#if dest != null and closeEnough(): #meeple reaches destination
 		#dest = null
 	
@@ -65,3 +66,9 @@ func _go_to_target(delta):
 		var force = to_target.normalized() * min(acceleration, abs(speed_towards_target-speed) / delta) # If acceleration would overshoot
 		rb.apply_central_force(force)
 		
+	
+	if closeEnough():
+		rb.linear_velocity = Vector2.ZERO
+		rb.angular_velocity = 0.0
+		rb.set_global_position(dest)
+		dest = null

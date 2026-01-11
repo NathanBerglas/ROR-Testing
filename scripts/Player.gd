@@ -8,6 +8,8 @@ func _ready() -> void:
 
 	$MeepleControl.teammates.push_back($BuildingControl)
 	$BuildingControl.teammates.push_back($MeepleControl)
+	$MeepleControl.grid = $Grid
+	$BuildingControl.grid = $Grid
 	$BuildingControl/buildingHud.visible = true
 	
 	
