@@ -18,12 +18,12 @@ var UNIQUEID = null #Unique Id for every meeple on a team
 var size = 1 #Size of the ARMY hashtag troops slay
 var groupNum = 0
 var min_distance = 9 # Squared
-var pos = Vector2(0,0)
+var pos = Vector2i(0, 0)
 var HP = 1
 
 func _physics_process(delta): #runs on each meeple every tick
 	label.text = str(HP)
-	pos = self.rb.get_global_position()
+	
 	
 		
 	if (dest != null): #if a meeple has somewhere to go, goes to it

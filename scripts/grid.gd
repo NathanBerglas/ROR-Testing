@@ -27,6 +27,20 @@ func _update_grid(hex: Vector2i, classification: int):
 	else: # This grid point is not empty!
 		return false # Throw error
 
+#Added by Jacob -> External script that doesn't care about rules, set tile to that classification
+#Chat if needed
+func update_grid(hex: Vector2i, classification: int):
+	var tile_to_update = grid[hex.x][hex.y]
+	print(classification)
+	grid[hex.x][hex.y] = tile.new(tile_to_update.hex, classification)
+	print(grid[hex.x][hex.y].classification)
+	
+	
+#Added by Jacob -> Prob by takes axial Hex
+func axial_probe(coordinate: Vector2i):
+	var tile_pos: Vector2i = coordinate
+	return grid[tile_pos.x][tile_pos.y]
+
 
 # Takes the precise hex location and properly rounds it
 func _hex_round(frac: Vector2) -> Vector2i:

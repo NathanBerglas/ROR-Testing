@@ -5,6 +5,7 @@ extends Node2D
 @onready var selection_box = $ColorRect
 @onready var RCLICKORDER = $VBoxContainer/Order
 @onready var RCLICKGROUP = $VBoxContainer/Group
+@onready var RCLICKATTACK= $VBoxContainer/Attack
 @onready var RCLICKMENU = $VBoxContainer
 
 var time = 0
@@ -43,13 +44,15 @@ func _ready() -> void:
 	RCLICKGROUP.button_up.connect(_on_group_button_released)
 	RCLICKORDER.button_down.connect(_on_order_button_pressed)
 	RCLICKORDER.button_up.connect(_on_order_button_released)
+	RCLICKATTACK.button_down.connect(_on_attack_button_pressed)
+	RCLICKATTACK.button_up.connect(_on_attack_button_released)
 	
 func _process(delta): #Runs every tick
 	time += delta
 	#if playerID == multiplayer.get_unique_id():
 	
 	#Goes through every meeple and sets them to their colour and resets their 
-	mergeAllMeeples()
+	cleanMeeples()
 	for g in range(0,group.size()):
 		for node in range(0,group[g].size()):
 			if group[g][node].selected:
@@ -136,7 +139,7 @@ func _process(delta): #Runs every tick
 			var rect = Rect2(selection_box.global_position, selection_box.size)
 			for g in group.size():
 				for m in group[g].size():
-					if rect.has_point(group[g][m].pos):
+					if rect.has_point(group[g][m].rb.get_global_position()):
 						group[g][m].selected = true
 						
 						if g > 0:
@@ -214,6 +217,18 @@ func _on_group_button_pressed():
 func _on_group_button_released():
 	RCLICKMENU.visible = false
 	
+#Sends the meeple to attack the hex if there is something there
+func _on_attack_button_pressed():
+	group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(RCLICKMENU.get_global_position()))
+	targetMarker.global_position = group_targets[0]
+	for g in group:		
+		for m in g:
+			if m.selected:
+				m.dest = group_targets[0]
+				m.selected = false
+				
+func _on_attack_button_released(): #Menu gone :(
+	RCLICKMENU.visible = false
 func removeEmptyGroups(): #Gets rid of all groups with no meeples
 	var cap = group.size()
 	var i = 0
@@ -307,11 +322,31 @@ func updatePos(meepleList):
 				if n1[MEEPLE_ID_INDEX] == n.UNIQUEID:
 					n.set_global_position(n1[MEEPLE_POS_INDEX])
 					
-func mergeAllMeeples():
+func cleanMeeples():
 	var vectorsSeen = []
 	var vectorsSaved = []
+	var gridVectorsSeen = []
 	var found = false
+	
+	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
+	#It then sets all vectors seen to have a meeple in them in the grid
 	for i in range(unorderedMeeples.size()):
+		if unorderedMeeples[i].pos != grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()):
+
+			if grid.axial_probe(unorderedMeeples[i].pos).classification == 3:
+				
+				grid.update_grid(unorderedMeeples[i].pos, 0)
+			unorderedMeeples[i].pos = grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position())
+		gridVectorsSeen.push_back(grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
+	
+	for v in gridVectorsSeen:
+		if grid.axial_probe(v).classification == 0:
+			grid.update_grid(v, 3)
+			
+		
+	for i in range(unorderedMeeples.size()):
+		
+		
 		
 		if atDest(unorderedMeeples[i]):
 			for v in vectorsSeen:
