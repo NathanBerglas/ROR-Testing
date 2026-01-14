@@ -16,10 +16,10 @@ var MEEPLE_POS_INDEX = 1
 var MEEPLE_HP_INDEX = 2
 
 var unorderedMeeples = []
-var group: Array[Array] = [[]]
+var nextGroupID = 1
 var group_targets: Array[Vector2] = [Vector2(1000,500)]
 var groupColours = [Color(1,0,0)]
-var permGroupColour = [Color(0,0,3), Color(0,3,0), Color(3,3,0), Color(3,0,3),Color(0,3,3)]
+var permGroupColour = [Color(1,0,0), Color(0,0,3), Color(0,3,0), Color(3,3,0), Color(3,0,3),Color(0,3,3)]
 
 #Team mates for this player and what team they are on
 var teammates = []
@@ -53,13 +53,11 @@ func _process(delta): #Runs every tick
 	
 	#Goes through every meeple and sets them to their colour and resets their 
 	cleanMeeples()
-	for g in range(0,group.size()):
-		for node in range(0,group[g].size()):
-			if group[g][node].selected:
-				group[g][node].highlight(Color(3,3,3))
-			else:
-				group[g][node].remove_highlight(groupColours[g])
-				
+	for g in range(0,unorderedMeeples.size()):
+		if unorderedMeeples[g].selected:
+			unorderedMeeples[g].highlight(Color(3,3,3))
+		else:
+			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum])
 				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
 		var instance = meeple_prefab.instantiate()
@@ -79,9 +77,8 @@ func _process(delta): #Runs every tick
 		set_id(instance)
 		
 
-		
 		unorderedMeeples.push_back(instance)
-		group[0].push_back(instance)
+		
 		#print("Spawned meeple")
 		
 		
@@ -91,8 +88,9 @@ func _process(delta): #Runs every tick
 		group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(get_global_mouse_position()))
 		targetMarker.global_position = group_targets[0]
 		
-		for m in group[0]:
-			m.dest = group_targets[0]
+		for m in unorderedMeeples:
+			if m.groupNum == 0:
+				m.dest = group_targets[0]
 			
 	
 	#Opens up the right click menu
@@ -118,33 +116,37 @@ func _process(delta): #Runs every tick
 		selectingTime += delta
 		if selectingTime < 0.25: #No selecting box
 			var hit = false
-			
-			#Goes through every group to select every meeple 
-			#in the selected meeple's group
-			for g in group.size(): 
-				for m in group[g].size():
-					if group[g][m].hasMouse():
-						group[g][m].selected = true
-						hit = true
-						
-						if g > 0:
-							for i in group[g]:
-								i.selected = true
-			if hit == false:
-				for g in group:
-					for m in g:
-						m.selected = false
+			var groupHit = null
+			#iterates through all meeples to find the clicked meeples group
+			#it selects all meeples in the group
+			for m in unorderedMeeples: 
+				if m.hasMouse():
+					hit = true
+					m.selected = true
+					if m.groupNum > 0:
+						groupHit = m.groupNum
+					break
+			for m in unorderedMeeples:
+				if m.groupNum == groupHit:
+					m.selected = true
+			if hit == false:		
+				for m in unorderedMeeples:
+					m.selected = false
 		else:
 			#Same thing but for all meeples in the rectangle
 			var rect = Rect2(selection_box.global_position, selection_box.size)
-			for g in group.size():
-				for m in group[g].size():
-					if rect.has_point(group[g][m].rb.get_global_position()):
-						group[g][m].selected = true
-						
-						if g > 0:
-							for i in group[g]:
-								i.selected = true
+			var groupsHit = []
+			for m in unorderedMeeples:
+				if rect.has_point(m.rb.get_global_position()):
+					m.selected = true
+					groupsHit.push_back(m.groupNum)
+			
+			for g in groupsHit: #Needs a redo -> at worst its O(n^2)
+				if g == 0:
+					continue
+				for m in unorderedMeeples:
+					if m.groupNum == g:
+						m.selected = true
 					
 					
 		selecting = false #No more selecting :(
@@ -179,11 +181,11 @@ func update_selection_box():
 func _on_order_button_pressed():
 	group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(RCLICKMENU.get_global_position()))
 	targetMarker.global_position = group_targets[0]
-	for g in group:		
-		for m in g:
-			if m.selected:
-				m.dest = group_targets[0]
-				m.selected = false
+	for m in unorderedMeeples:
+		if m.selected:
+			m.dest = group_targets[0]
+			m.selected = false
+
 				
 func _on_order_button_released(): #Menu gone :(
 	RCLICKMENU.visible = false
@@ -192,26 +194,17 @@ func _on_order_button_released(): #Menu gone :(
 #For real tho, it kinda fire
 func _on_group_button_pressed():
 	
-	group.push_back([])
+	var hit = false
+	for m in unorderedMeeples:
+		if m.selected:
+			hit = true
+			m.groupNum = nextGroupID
+			m.highlight(permGroupColour[nextGroupID])
+	if hit:
+		nextGroupID += 1
 	
-	for g in group:
-		
-		var m = 0
-		var cap = g.size()
-		while m < cap:
-			if g[m].selected == true:
-				var n = g.pop_at(m)
-				groupColours.push_back(colourNotIn())
-				n.highlight(groupColours[group.size() - 1])
-				group[group.size() - 1].push_back(n)
-				#print("Put a node in group: " + str(group.size() - 1))
-				m -= 1
-				cap -= 1
-			m += 1
-	removeEmptyGroups()
-	#print("Groups look like: " + str(group))
-	for g in group:
-		print(str(g.size()))
+	for m in unorderedMeeples:
+		print("Meeple ID: " + str(m.UNIQUEID) + ", Group Number: " + str(m.groupNum))
 		
 		
 func _on_group_button_released():
@@ -219,16 +212,12 @@ func _on_group_button_released():
 	
 #Sends the meeple to attack the hex if there is something there
 func _on_attack_button_pressed():
-	group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(RCLICKMENU.get_global_position()))
-	targetMarker.global_position = group_targets[0]
-	for g in group:		
-		for m in g:
-			if m.selected:
-				m.dest = group_targets[0]
-				m.selected = false
+	print()
 				
 func _on_attack_button_released(): #Menu gone :(
 	RCLICKMENU.visible = false
+
+"""
 func removeEmptyGroups(): #Gets rid of all groups with no meeples
 	var cap = group.size()
 	var i = 0
@@ -240,7 +229,8 @@ func removeEmptyGroups(): #Gets rid of all groups with no meeples
 			i -= 1
 			cap -= 1
 		i += 1
-		
+
+"""
 func colourNotIn(): #Returns a colour for a group
 	#print("looking for one")
 	var found = false
@@ -259,14 +249,17 @@ func set_id(node):
 	node.UNIQUEID = MEEPLE_ID_COUNTER
 	MEEPLE_ID_COUNTER += 1
 
-
+""" Multiplayer Shit
 func equalize(otherController):
 	
 	cleanNodes(otherController)
 	updatePos(otherController)
 	
+"""
+"""
 func get_group():
 	return group
+"""
 func get_group_targets():
 	return group_targets
 func get_groupColours():
@@ -298,7 +291,7 @@ func cleanNodes(meepleList):
 			newMeepleInfo.push_back(instance.HP)
 			
 			unorderedMeeples.push_back(newMeepleInfo)
-			group[0].push_back(instance)
+
 			
 			
 		elif meepleList[x][MEEPLE_ID_INDEX] != unorderedMeeples[x][MEEPLE_ID_INDEX]:
@@ -311,6 +304,8 @@ func cleanNodes(meepleList):
 	while x < unorderedMeeples.size():
 		unorderedMeeples.pop_at(x)
 
+
+""" Multiplayer shit
 func updatePos(meepleList):
 	var x = 1
 	if meepleList == null: return
@@ -321,8 +316,10 @@ func updatePos(meepleList):
 			for n1 in unorderedMeeples:
 				if n1[MEEPLE_ID_INDEX] == n.UNIQUEID:
 					n.set_global_position(n1[MEEPLE_POS_INDEX])
+"""
 					
-func cleanMeeples():
+					
+func cleanMeeples(): #Updates the Grid and merges meeples
 	var vectorsSeen = []
 	var vectorsSaved = []
 	var gridVectorsSeen = []
@@ -393,11 +390,7 @@ func freeMeeple(id):
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
 			unorderedMeeples.pop_at(i).queue_free()
-			break
-	for i in range(group.size()):
-		for k in range(group[i].size()):
-			if group[i][k].UNIQUEID == id:
-				group[i].pop_at(k).queue_free()
-				return
+			return
+
 			
 			
