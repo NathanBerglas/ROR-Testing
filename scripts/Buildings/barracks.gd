@@ -25,7 +25,7 @@ func spawn(p, delta, pos, grid): #Generates meeple every 5 seconds
 		add_child(instance)
 		p.set_id(instance)
 		
-		instance.set_global_position(grid._axial_hex_to_coord(tempVector))
+		instance.set_global_position(grid.axial_hex_to_coord(tempVector))
 			
 		p.unorderedMeeples.push_back(instance)
 		p.group[0].push_back(instance)

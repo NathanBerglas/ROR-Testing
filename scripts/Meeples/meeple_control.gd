@@ -68,7 +68,7 @@ func _process(delta): #Runs every tick
 		instance.UNIQUEID = MEEPLE_ID_COUNTER
 		MEEPLE_ID_COUNTER += 1
 		
-		instance.global_position = grid._axial_hex_to_coord(grid._coord_to_axial_hex(get_global_mouse_position()))
+		instance.global_position = grid.hex_center(get_global_mouse_position())
 		
 		#instance.target = group_targets[0]
 		
@@ -85,7 +85,7 @@ func _process(delta): #Runs every tick
 		
 	#Orders all meeples to a location
 	elif Input.is_action_just_pressed("super_order"):
-		group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(get_global_mouse_position()))
+		group_targets[0] = grid.hex_center(get_global_mouse_position())
 		targetMarker.global_position = group_targets[0]
 		
 		for m in unorderedMeeples:
@@ -179,7 +179,7 @@ func update_selection_box():
 
 #Order all the selected meeples to that place
 func _on_order_button_pressed():
-	group_targets[0] = grid._axial_hex_to_coord(grid._coord_to_axial_hex(RCLICKMENU.get_global_position()))
+	group_targets[0] = grid.hex_center(RCLICKMENU.get_global_position())
 	targetMarker.global_position = group_targets[0]
 	for m in unorderedMeeples:
 		if m.selected:
@@ -328,13 +328,13 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
 	#It then sets all vectors seen to have a meeple in them in the grid
 	for i in range(unorderedMeeples.size()):
-		if unorderedMeeples[i].pos != grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()):
+		if unorderedMeeples[i].pos != grid.coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()):
 
 			if grid.axial_probe(unorderedMeeples[i].pos).classification == 3:
 				
 				grid.update_grid(unorderedMeeples[i].pos, 0)
-			unorderedMeeples[i].pos = grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position())
-		gridVectorsSeen.push_back(grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
+			unorderedMeeples[i].pos = grid.coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position())
+		gridVectorsSeen.push_back(grid.coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
 	
 	for v in gridVectorsSeen:
 		if grid.axial_probe(v).classification == 0:
@@ -347,11 +347,11 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 		
 		if atDest(unorderedMeeples[i]):
 			for v in vectorsSeen:
-				if v == grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()):
-					vectorsSaved.push_back(grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
+				if v == grid.coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()):
+					vectorsSaved.push_back(grid.coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
 					found = true
 			if !found:
-				vectorsSeen.push_back(grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
+				vectorsSeen.push_back(grid.coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()))
 			found = false
 	
 	for v in vectorsSaved:
@@ -360,7 +360,7 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 		var i = 0
 		while i < (unorderedMeeples.size()):
 			
-			if grid._coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()) == v:
+			if grid.coord_to_axial_hex(unorderedMeeples[i].rb.get_global_position()) == v:
 				if base == null:
 					base = unorderedMeeples[i]
 				else:
