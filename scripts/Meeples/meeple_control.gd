@@ -212,7 +212,17 @@ func _on_group_button_released():
 	
 #Sends the meeple to attack the hex if there is something there
 func _on_attack_button_pressed():
-	print()
+	var attackLoc = grid.coord_to_axial_hex(RCLICKMENU.get_global_position())
+	
+	for m in unorderedMeeples:
+		if m.selected:
+			
+			
+			print(grid.coord_to_axial_hex(m.rb.get_global_position()) - Vector2i(attackLoc))
+			#m.dest = grid.hex_center(attackLoc)
+			m.selected = false
+	
+	
 				
 func _on_attack_button_released(): #Menu gone :(
 	RCLICKMENU.visible = false
