@@ -348,7 +348,7 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 		if m.path:
 			for n in m.path:
 				if (grid.probe(n).classification == 2):
-					var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false)
+					var tempPath = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false)
 					m.path = []
 					for h in tempPath:
 						m.path.append(grid.axial_hex_to_coord(h))
