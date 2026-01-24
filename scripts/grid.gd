@@ -149,7 +149,7 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean):
 		astar.set_point_disabled(end_id, false)
 		
 	
-	var path_ids = astar.get_id_path(start_id, end_id, true) # maybe allow partial paths?
+	var path_ids = astar.get_id_path(start_id, end_id, partialPathBoolean) # maybe allow partial paths?
 	if path_ids.size() == 0:
 		return [start_hex]
 	var path_hexes: Array[Vector2i] = []

@@ -185,7 +185,7 @@ func _on_order_button_pressed():
 	
 	for m in unorderedMeeples:
 		if m.selected:
-			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false)
+			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), true)
 			m.path = []
 			for h in tempPath:
 				m.path.append(grid.axial_hex_to_coord(h))
@@ -223,7 +223,7 @@ func _on_attack_button_pressed():
 		if m.selected:
 			
 			
-			print(grid.coord_to_axial_hex(m.rb.get_global_position()) - Vector2i(attackLoc))
+			
 			#m.dest = grid.hex_center(attackLoc)
 			m.selected = false
 	
@@ -359,8 +359,8 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 				grid.update_grid(m.pos, 0)
 		
 			m.pos = grid.coord_to_axial_hex(m.rb.get_global_position())
-		else:
-			gridVectorsSeen.push_back(grid.coord_to_axial_hex(m.rb.get_global_position()))
+		
+		gridVectorsSeen.push_back(m.pos)
 	
 	for v in gridVectorsSeen:
 		if grid.axial_probe(v).classification == 0:
