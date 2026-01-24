@@ -10,6 +10,7 @@ func _ready() -> void:
 	$BuildingControl.teammates.push_back($MeepleControl)
 	$MeepleControl.grid = $Grid
 	$BuildingControl.grid = $Grid
+	
 	$BuildingControl/buildingHud.visible = true
 	
 	

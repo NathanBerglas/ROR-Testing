@@ -25,19 +25,13 @@ class tile:
 	var traversable = true
 	var traversal_difficulty = 1.0 # Must be nonzero for AStar (i think?)
 	var biome = 0 # 0 is undefined biome
+	var objectInside = null
 	func _init(hex, _classification = 0):
 		self.hex = hex
 		self.classification = _classification
 		self.traversable = (classification == 0) # Only traversable if empty
 
-# Internal script to edit the grid, this is for placing a building, moving a meeple, etc.
-func _update_grid(hex: Vector2i, classification: int):
-	var tile_to_update = grid[hex.x][hex.y]
-	if tile_to_update.classification == 0:
-		grid[hex.x][hex.y] = tile.new(tile_to_update.hex, classification)
-		return true
-	else: # This grid point is not empty!
-		return false # Throw error
+
 
 #Added by Jacob -> External script that doesn't care about rules, set tile to that classification
 #Chat if needed
@@ -47,6 +41,8 @@ func update_grid(hex: Vector2i, classification: int):
 	grid[hex.x][hex.y] = tile.new(tile_to_update.hex, classification)
 	if classification != 0:
 		astar.set_point_disabled(_hex_to_id(hex), true)
+	else:
+		astar.set_point_disabled(_hex_to_id(hex), false)
 	#print(grid[hex.x][hex.y].classification)
 
 #Added by Jacob -> Prob by takes axial Hex
@@ -90,7 +86,7 @@ func coord_to_axial_hex(coordinate: Vector2i):
 	if _hex_in_bounds(Vector2i(q, r)):
 		return _hex_round(Vector2(q, r))
 	else:
-		print("Hex out of bound for coordinates: ", coordinate)
+		#print("Hex out of bound for coordinates: ", coordinate)
 		return Vector2i(-1, -1)
 
 func axial_hex_to_coord(hex: Vector2i):
@@ -117,14 +113,16 @@ func update_astar():
 		for r in range(GRID_COUNT.y):
 			var t: tile = grid[q][r]
 			var id = _hex_to_id(t.hex)
-			astar.add_point(_hex_to_id(t.hex), t.hex, t.traversal_difficulty)
+			astar.add_point(id, t.hex, t.traversal_difficulty)
 			if !t.traversable: # Tile is not traversable
 				astar.set_point_disabled(id, true)
 				
 	for q in range(GRID_COUNT.x):
 		for r in range(GRID_COUNT.y):
+			
 			var t: tile = grid[q][r]
 			var id = _hex_to_id(t.hex)
+			#print(id)
 			if !t.traversable:
 				continue
 			for direction in HEX_DIRS:
@@ -132,26 +130,39 @@ func update_astar():
 				if !_hex_in_bounds(next_hex):
 					continue
 				var next_tile = grid[next_hex.x][next_hex.y]
-				if !next_tile.traversable:
-					astar.connect_points(id, _hex_to_id(next_tile.hex), false)
+				if next_tile.traversable:
+					astar.connect_points(id, _hex_to_id(next_hex), false)
+					#print(id, " --> ", _hex_to_id(next_hex))
 
-func find_path(start_coord: Vector2i, end_coord: Vector2i):
-	var start_hex = coord_to_axial_hex(start_coord)
+
+func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean):
+	
 	var start_id = _hex_to_id(start_hex)
-	var end_hex = coord_to_axial_hex(end_coord)
 	var end_id = _hex_to_id(end_hex)
-	
+	astar.set_point_disabled(start_id, false)
 	# Check that destined grid spot is available
-	if !(grid[end_hex.x][end_hex.y].classification == 0) or !astar.is_point_disabled(start_id) or !astar.is_point_disabled(end_id):
-		return []
 	
-	var path_ids = astar.get_id_path(start_id, end_id, false) # Do not allow partial paths
+	#if (grid[end_hex.x][end_hex.y].classification == 2):
+		#return [start_hex]
+	
+	if (grid[end_hex.x][end_hex.y].classification == 3):
+		astar.set_point_disabled(end_id, false)
+		
+	
+	var path_ids = astar.get_id_path(start_id, end_id, true) # maybe allow partial paths?
+	if path_ids.size() == 0:
+		return [start_hex]
 	var path_hexes: Array[Vector2i] = []
 	
-	for id in path_ids: # Unflatten path_ids
+
+	for id in path_ids: # Unflatten path_ids\
+		
 		var q: int = id % GRID_COUNT.x
 		var r: int = id / GRID_COUNT.x
 		path_hexes.append(Vector2i(q, r))
+		
+	if (grid[end_hex.x][end_hex.y].classification == 3):
+		astar.set_point_disabled(end_id, true)
 	return path_hexes
 
 func _ready():
@@ -161,6 +172,7 @@ func _ready():
 			row.append(tile.new(Vector2i(q, r)))
 		grid.append(row)
 	update_astar()
+	
 
 func draw_hex(center: Vector2, size: float, color: Color) -> void:
 	var points: PackedVector2Array = []

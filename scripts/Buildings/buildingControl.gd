@@ -69,7 +69,7 @@ func _on_farm_button_released():
 	buildings[buildings.size() - 1][2].fake = false
 	buildings[buildings.size() - 1][2].global_position = grid.hex_center(get_global_mouse_position())
 	buildings[buildings.size() - 1][1] = grid.coord_to_axial_hex(get_global_mouse_position())
-	grid._update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2)
+	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2)
 	money -= 500
 	
 func _on_barracks_button_pressed():
@@ -105,10 +105,10 @@ func _on_barracks_button_released():
 	buildings[buildings.size() - 1][1] = grid.coord_to_axial_hex(get_global_mouse_position())
 	
 	
-	grid._update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2)
+	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2)
 	var tempVector = grid.coord_to_axial_hex(get_global_mouse_position())
 	tempVector.x += 1
-	grid._update_grid(tempVector, 1)
+	grid.update_grid(tempVector, 1)
 	
 	money -= 1000
 	
