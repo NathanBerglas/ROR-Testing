@@ -12,3 +12,10 @@ freeze = true
 [node name="Sprite2D" type="Sprite2D" parent="RigidBody2D"]
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("2_1vdwa")
+
+[node name="HP_BAR" type="ProgressBar" parent="."]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

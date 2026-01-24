@@ -1,16 +1,14 @@
 extends Building
 @onready var shapey = $RigidBody2D/Sprite2D
-
+@onready var HPBar = $HP_BAR
 
 var spawnTimer = 0 #Tracking when to give troops
 
 
 
-func _ready(): #I EXIST!
-	if !self.fake:
-		print("Hi")
+#func _ready(): #I EXIST!
 
-
+	
 func spawn(p, delta, pos, grid): #Generates meeple every 5 seconds
 	if self.fake: return
 	
@@ -32,3 +30,9 @@ func spawn(p, delta, pos, grid): #Generates meeple every 5 seconds
 		
 		spawnTimer = 0
 	
+func updateHPBar():
+	if self.fake:
+		HPBar.visible = false
+	else:
+		HPBar.visible = true
+	HPBar.value = self.hp

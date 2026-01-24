@@ -114,6 +114,8 @@ func _on_barracks_button_released():
 	
 	
 func _process(delta): #runs every tick
+	for b in buildings:
+		b[2].updateHPBar()
 	if buildingDraggin != null: #Code actually dragging the building around
 		buildings[buildings.size() - 1][2].global_position = get_global_mouse_position()
 		if !is_placeable(buildings[buildings.size() - 1][2]):
