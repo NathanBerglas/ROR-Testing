@@ -185,7 +185,7 @@ func _on_order_button_pressed():
 	
 	for m in unorderedMeeples:
 		if m.selected:
-			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), true)
+			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false)
 			m.path = []
 			for h in tempPath:
 				m.path.append(grid.axial_hex_to_coord(h))
@@ -221,10 +221,15 @@ func _on_attack_button_pressed():
 	
 	for m in unorderedMeeples:
 		if m.selected:
-			
-			
-			
-			#m.dest = grid.hex_center(attackLoc)
+			var tile = grid.axial_probe(attackLoc)
+			if grid.axial_probe(attackLoc).objectsInside.size() > 0:
+				m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
+				var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true)
+				m.path = []
+				for h in tempPath:
+					m.path.append(grid.axial_hex_to_coord(h))
+				
+				#m.dest = grid.hex_center(attackLoc)
 			m.selected = false
 	
 	
@@ -340,31 +345,34 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 	var vectorsSaved = []
 	var gridVectorsSeen = []
 	var found = false
-
+	
 		
 	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
 	#It then sets all vectors seen to have a meeple in them in the grid
 	for m in unorderedMeeples:
+		m.shouldBeMoving = true
 		if m.path:
-			for n in m.path:
-				if (grid.probe(n).classification == 2):
+			for i in range (m.path.size()):
+			
+				if (grid.probe(m.path[i]).classification == 2  or (grid.probe(m.path[i]).classification == 3 and i != m.path.size() - 1)):
+					#if grid.probe(m.path[i]).classification == 3 and i == 0:
+					#	if grid.probe(m.path[i]).objectsInside[0].path:
+						#	m.shouldBeMoving = false
+						#	break
 					var tempPath = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false)
 					m.path = []
 					for h in tempPath:
 						m.path.append(grid.axial_hex_to_coord(h))
+					break
 		if m.pos != grid.coord_to_axial_hex(m.rb.get_global_position()):
 			
 			
 			if grid.axial_probe(m.pos).classification == 3:
-				grid.update_grid(m.pos, 0)
+				grid.update_grid(m.pos, 0, [])
 		
 			m.pos = grid.coord_to_axial_hex(m.rb.get_global_position())
-		
+		grid.update_grid(m.pos, 3, [m])
 		gridVectorsSeen.push_back(m.pos)
-	
-	for v in gridVectorsSeen:
-		if grid.axial_probe(v).classification == 0:
-			grid.update_grid(v, 3)
 			
 		
 	for i in range(unorderedMeeples.size()):

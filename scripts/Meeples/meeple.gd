@@ -10,6 +10,17 @@ extends Node2D
 @export var speed: float = 200
 @export var acceleration: float = 300
 
+
+const HEX_DIRS := [
+	Vector2i(1, 0),
+	Vector2i(1, -1),
+	Vector2i(0, -1),
+	Vector2i(-1, 0),
+	Vector2i(-1, 1),
+	Vector2i(0, 1),
+]
+
+var attackTimer = 0
 var selected = false #Determines if a meeple is selected
 var path = null #destination of a meeple
 var shouldBeMoving = true
@@ -20,12 +31,19 @@ var groupNum = 0
 var min_distance = 9 # Squared
 var pos = Vector2i(0, 0)
 var HP = 1
+var attackTarget = null
+var attackRange = 1
+
 
 func _process(delta): #runs on each meeple every tick
 	label.text = str(HP)
 	
 	
-		
+	if attackTarget:
+		if inAttackRange(attackTarget.pos):
+			attack(attackTarget, delta)
+			
+	
 	if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
 		_go_to_target(delta)
 	
@@ -35,6 +53,7 @@ func _process(delta): #runs on each meeple every tick
 	
 func closeEnough(): #checking if a meeple is close enough to their destination
 	var dist = rb.global_position - path[0]
+
 	if ((dist.x * dist.x) < 3 and (dist.y * dist.y) < 3):
 		return true
 	return false
@@ -64,7 +83,6 @@ func _go_to_target(delta):
 	
 	var to_target = path[0] - rb.global_position
 	var dist = to_target.length_squared()
-	
 	var speed_towards_target = rb.linear_velocity.dot(to_target.normalized())
 	
 	if dist > min_distance and speed_towards_target < speed: # Checks if meeple is close to target point
@@ -76,7 +94,31 @@ func _go_to_target(delta):
 		rb.linear_velocity = Vector2.ZERO
 		rb.angular_velocity = 0.0
 		rb.set_global_position(path[0])
+	
 		path.pop_at(0)
 		if path.size() == 0:
 			path = null
-		
+
+
+func attack(target, delta):
+	
+	attackTimer += delta
+	if attackTimer >= 1:
+		attackTimer = 0	
+		if path == null:
+			target.hp -= size * 10
+		else:
+			target.hp -= int(size * 5)
+	
+	if target.hp <= 0:
+		attackTarget = null
+	
+func inAttackRange(target):
+	var distToTarget = pos - target
+	
+	for v in HEX_DIRS: #Need to change based on varying range
+		if distToTarget == v:
+			return true
+			
+	return false
+	

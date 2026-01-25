@@ -9,7 +9,7 @@ var spawnTimer = 0 #Tracking when to give troops
 #func _ready(): #I EXIST!
 
 	
-func spawn(p, delta, pos, grid): #Generates meeple every 5 seconds
+func spawn(p, delta, position, grid): #Generates meeple every 5 seconds
 	if self.fake: return
 	
 	spawnTimer += delta
@@ -17,7 +17,7 @@ func spawn(p, delta, pos, grid): #Generates meeple every 5 seconds
 		var instance = p.meeple_prefab.instantiate()
 		instance.UNIQUEID = p.MEEPLE_ID_COUNTER
 		p.MEEPLE_ID_COUNTER += 1
-		var tempVector = pos
+		var tempVector = position
 		tempVector.x += 1
 		
 		add_child(instance)

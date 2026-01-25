@@ -20,7 +20,7 @@ var buildings = []
 var teammates = [] #list of teammates
 var grid # the grid controller
 var playerID = 0
-
+var idTracker = 0
 
 func _ready(): #Runs on start, connects buttons
 	farmButton.button_down.connect(_on_farm_button_pressed)
@@ -39,19 +39,23 @@ func _on_farm_button_pressed():
 	if money < 500:
 		print("Ya Broke")
 		return
+	
+	
 	buildingDraggin = "Farm"
 	#money -= 500
 	#Adding the farm to be dragged to the list of buildings
 	# hashtag-No way this will cause errors in the future
 	var instance = farm_prefab.instantiate() #New FAKE money farm
 	instance.fake = true
+	instance.type = "Farm"
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
-	var toAdd = ["Farm", get_global_mouse_position(), instance]
-	
+	#var toAdd = ["Farm", get_global_mouse_position(), instance]
+	instance.BUILDING_UNIQUE_ID = idTracker
+	idTracker += 1
 	instance.global_position = get_global_mouse_position()
 	add_child(instance) #Adding the instance
 	
-	buildings.push_back(toAdd) 
+	buildings.push_back(instance) 
 	
 
 #finishes dragging the farm and places
@@ -63,13 +67,15 @@ func _on_farm_button_released():
 	buildingDraggin = null
 	
 	#If not placeable, REMOVED
-	if !is_placeable(buildings[buildings.size() - 1][2]):
-		buildings.pop_back()[2].queue_free()
+	if !is_placeable(buildings[buildings.size() - 1]):
+		buildings.pop_back().queue_free()
 		return
-	buildings[buildings.size() - 1][2].fake = false
-	buildings[buildings.size() - 1][2].global_position = grid.hex_center(get_global_mouse_position())
-	buildings[buildings.size() - 1][1] = grid.coord_to_axial_hex(get_global_mouse_position())
-	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2)
+	buildings[buildings.size() - 1].fake = false
+	buildings[buildings.size() - 1].global_position = grid.hex_center(get_global_mouse_position())
+	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(get_global_mouse_position())
+	
+	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2, [buildings[buildings.size() - 1]])
+	print("Added Farm")
 	money -= 500
 	
 func _on_barracks_button_pressed():
@@ -77,17 +83,19 @@ func _on_barracks_button_pressed():
 		print("Ya Broke")
 		return
 	buildingDraggin = "Barracks"
-
+	
 	#Adding the barracksto be dragged to the list of buildings
 	# hashtag-No way this will cause errors in the future
 	var instance = barracks_prefab.instantiate() #New FAKE barracks
 	instance.fake = true
-	var toAdd = ["Barracks", Vector2(0,0), instance]
-	
+	#var toAdd = ["Barracks", Vector2(0,0), instance]
+	instance.type = "Barracks"
 	instance.global_position = get_global_mouse_position()
+	instance.BUILDING_UNIQUE_ID = idTracker
+	idTracker += 1
 	add_child(instance) #Adding the instance
 	
-	buildings.push_back(toAdd) 
+	buildings.push_back(instance) 
 	
 func _on_barracks_button_released():
 	
@@ -97,37 +105,38 @@ func _on_barracks_button_released():
 	buildingDraggin = null
 	
 	#If not placeable, REMOVED
-	if !is_placeable(buildings[buildings.size() - 1][2]):
-		buildings.pop_back()[2].queue_free()
+	if !is_placeable(buildings[buildings.size() - 1]):
+		buildings.pop_back().queue_free()
 		return
-	buildings[buildings.size() - 1][2].fake = false
-	buildings[buildings.size() - 1][2].global_position = grid.hex_center(get_global_mouse_position())
-	buildings[buildings.size() - 1][1] = grid.coord_to_axial_hex(get_global_mouse_position())
+	buildings[buildings.size() - 1].fake = false
+	buildings[buildings.size() - 1].global_position = grid.hex_center(get_global_mouse_position())
+	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(get_global_mouse_position())
 	
 	
-	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2)
+	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2, [buildings[buildings.size() - 1]])
 	var tempVector = grid.coord_to_axial_hex(get_global_mouse_position())
 	tempVector.x += 1
-	grid.update_grid(tempVector, 1)
+	grid.update_grid(tempVector, 1, ["Training Ground"])
 	
 	money -= 1000
 	
 	
 func _process(delta): #runs every tick
+	cleanBuildings()
 	for b in buildings:
-		b[2].updateHPBar()
+		b.updateHPBar()
 	if buildingDraggin != null: #Code actually dragging the building around
-		buildings[buildings.size() - 1][2].global_position = get_global_mouse_position()
-		if !is_placeable(buildings[buildings.size() - 1][2]):
-			buildings[buildings.size() - 1][2].shapey.modulate = Color(250, 0, 4) #RED
+		buildings[buildings.size() - 1].global_position = get_global_mouse_position()
+		if !is_placeable(buildings[buildings.size() - 1]):
+			buildings[buildings.size() - 1].shapey.modulate = Color(250, 0, 4) #RED
 		else:
-			buildings[buildings.size() - 1][2].shapey.modulate = Color(1, 1, 1)  # Reset to white
+			buildings[buildings.size() - 1].shapey.modulate = Color(1, 1, 1)  # Reset to white
 
 	for m in buildings: #Doing tick stuff for each building
-		if m[0] == "Farm" and !m[2].fake:
-			m[2].generateIncome(self, delta)
-		elif m[0] == "Barracks" and !m[2].fake:
-			m[2].spawn(self.teammates[0],delta,m[1], grid)
+		if m.type == "Farm" and !m.fake:
+			m.generateIncome(self, delta)
+		elif m.type == "Barracks" and !m.fake:
+			m.spawn(self.teammates[0],delta,m.pos, grid)
 	hud.updateMoney(money) #updates money amount
 	
 
@@ -135,7 +144,9 @@ func addMoney(moneyChange): #Changing money
 	money += moneyChange
 	hud.updateMoney(money)
 	
-
+func takeDamage(b, x):
+	b.hp -= x
+	
 func is_placeable(_building) -> bool: #Only for if a body is FAKE
 	
 	
@@ -145,8 +156,29 @@ func is_placeable(_building) -> bool: #Only for if a body is FAKE
 	else:
 		return false
 		
+
+
+func cleanBuildings():
 	
+	for b in buildings:
+		if b.hp <= 0:
+			freeBuilding(b.BUILDING_UNIQUE_ID)
+			
+
+
+
+func freeBuilding(ID):
 	
+	for i in range(buildings.size()):
+		if buildings[i].BUILDING_UNIQUE_ID == ID:
+			grid.update_grid(buildings[i].pos, 0, [])
+			buildings.pop_at(i).queue_free()
+			return
+
+
+
+
+
 	""" Old Code -> Updated to right above
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsShapeQueryParameters2D.new()

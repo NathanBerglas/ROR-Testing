@@ -25,7 +25,7 @@ class tile:
 	var traversable = true
 	var traversal_difficulty = 1.0 # Must be nonzero for AStar (i think?)
 	var biome = 0 # 0 is undefined biome
-	var objectInside = null
+	var objectsInside = []
 	func _init(hex, _classification = 0):
 		self.hex = hex
 		self.classification = _classification
@@ -35,15 +35,18 @@ class tile:
 
 #Added by Jacob -> External script that doesn't care about rules, set tile to that classification
 #Chat if needed
-func update_grid(hex: Vector2i, classification: int):
+func update_grid(hex: Vector2i, classification: int, objects):
 	var tile_to_update = grid[hex.x][hex.y]
+	
 	#print(classification)
 	grid[hex.x][hex.y] = tile.new(tile_to_update.hex, classification)
+	grid[hex.x][hex.y].objectsInside = objects
 	if classification != 0:
 		astar.set_point_disabled(_hex_to_id(hex), true)
 	else:
 		astar.set_point_disabled(_hex_to_id(hex), false)
 	#print(grid[hex.x][hex.y].classification)
+
 
 #Added by Jacob -> Prob by takes axial Hex
 func axial_probe(coordinate: Vector2i):
@@ -160,7 +163,9 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean):
 		var q: int = id % GRID_COUNT.x
 		var r: int = id / GRID_COUNT.x
 		path_hexes.append(Vector2i(q, r))
-		
+	
+	#if path_hexes[0] == start_hex:
+		#path_hexes.pop_at(0)
 	if (grid[end_hex.x][end_hex.y].classification == 3):
 		astar.set_point_disabled(end_id, true)
 	return path_hexes
