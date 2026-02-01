@@ -138,7 +138,7 @@ func update_astar():
 					#print(id, " --> ", _hex_to_id(next_hex))
 
 
-func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean):
+func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attackingBoolean):
 	
 	var start_id = _hex_to_id(start_hex)
 	var end_id = _hex_to_id(end_hex)
@@ -148,7 +148,7 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean):
 	#if (grid[end_hex.x][end_hex.y].classification == 2):
 		#return [start_hex]
 	
-	if (grid[end_hex.x][end_hex.y].classification == 3):
+	if (grid[end_hex.x][end_hex.y].classification == 3 and !attackingBoolean):
 		astar.set_point_disabled(end_id, false)
 		
 	

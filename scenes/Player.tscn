@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://dhecsdio6ymnp"]
+[gd_scene format=3 uid="uid://dhecsdio6ymnp"]
 
 [ext_resource type="PackedScene" uid="uid://8s5fbc42yax2" path="res://scenes/Meeples/meepleControl.tscn" id="1_3li8b"]
 [ext_resource type="Script" uid="uid://c5g8gaakh6ukg" path="res://scripts/Player.gd" id="1_mdl7e"]
@@ -6,14 +6,14 @@
 [ext_resource type="PackedScene" uid="uid://bbjr8sh5hxnjt" path="res://scenes/camera.tscn" id="3_qu4a1"]
 [ext_resource type="PackedScene" uid="uid://dl2hwpslhw3xd" path="res://scenes/grid.tscn" id="5_qu4a1"]
 
-[node name="Player" type="Node2D"]
+[node name="Player" type="Node2D" unique_id=1618287504]
 script = ExtResource("1_mdl7e")
 
-[node name="MeepleControl" parent="." instance=ExtResource("1_3li8b")]
+[node name="MeepleControl" parent="." unique_id=553136144 instance=ExtResource("1_3li8b")]
 
-[node name="BuildingControl" parent="." instance=ExtResource("2_mdl7e")]
+[node name="BuildingControl" parent="." unique_id=1989412738 instance=ExtResource("2_mdl7e")]
 
-[node name="Camera" parent="." instance=ExtResource("3_qu4a1")]
+[node name="Camera" parent="." unique_id=732688784 instance=ExtResource("3_qu4a1")]
 position = Vector2(577, 323)
 
-[node name="Grid" parent="." instance=ExtResource("5_qu4a1")]
+[node name="Grid" parent="." unique_id=1554468060 instance=ExtResource("5_qu4a1")]

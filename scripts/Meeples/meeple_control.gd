@@ -90,7 +90,7 @@ func _process(delta): #Runs every tick
 		
 		for m in unorderedMeeples:
 			if m.groupNum == 0:
-				m.path = grid.find_path(m.rb.get_global_position(), dest, true)
+				m.path = grid.find_path(m.rb.get_global_position(), dest, true, false)
 			
 	
 	#Opens up the right click menu
@@ -185,7 +185,7 @@ func _on_order_button_pressed():
 	
 	for m in unorderedMeeples:
 		if m.selected:
-			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false)
+			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
 			m.path = []
 			for h in tempPath:
 				m.path.append(grid.axial_hex_to_coord(h))
@@ -224,7 +224,7 @@ func _on_attack_button_pressed():
 			var tile = grid.axial_probe(attackLoc)
 			if grid.axial_probe(attackLoc).objectsInside.size() > 0:
 				m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
-				var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true)
+				var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
 				m.path = []
 				for h in tempPath:
 					m.path.append(grid.axial_hex_to_coord(h))
@@ -346,7 +346,14 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 	var gridVectorsSeen = []
 	var found = false
 	
-		
+	for m in unorderedMeeples:
+		if m.path == null and m.attackTarget != null and !m.inAttackRange(m.attackTarget.pos):
+			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), m.attackTarget.pos, true, true)
+			m.path = []
+			for h in tempPath:
+				m.path.append(grid.axial_hex_to_coord(h))
+		if m.HP <= 0:
+			freeMeeple(m.UNIQUEID)
 	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
 	#It then sets all vectors seen to have a meeple in them in the grid
 	for m in unorderedMeeples:
@@ -359,7 +366,7 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 					#	if grid.probe(m.path[i]).objectsInside[0].path:
 						#	m.shouldBeMoving = false
 						#	break
-					var tempPath = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false)
+					var tempPath = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false, false)
 					m.path = []
 					for h in tempPath:
 						m.path.append(grid.axial_hex_to_coord(h))
