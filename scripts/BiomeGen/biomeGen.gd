@@ -1,21 +1,20 @@
 extends Node2D
 
 # Main Area
-@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
-@export var COLS: int = 192
-var PIXELS_PER_TILE: int
+#@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
+#@export var COLS: int = 192
+#var PIXELS_PER_TILE: int
 
 # Map Area
-@export var BORDER_RESOLUTION: int = 100
-var MAP_RESOLUTION: Vector2i
-var MAP_COLS: int
-var MAP_ROWS: int
+@export var BORDER_RESOLUTION: int = 10
+@export var PIXELS_PER_TILE: int = 10
+var MAP_RESOLUTION: Vector2i = Vector2i(192, 108)
 
 # Gen Data
 @export var gen_data: JSON
 
 #Hardcode
-@export var origin_radius = 100*100 # Squared
+@export var origin_radius = 10*10 # Squared
 @export var biome_colours: Array[Color] = [Color.BLACK, Color.GREEN_YELLOW, Color.SKY_BLUE, Color.SANDY_BROWN, Color.WHEAT, Color.FOREST_GREEN, Color.LIGHT_GREEN, Color.ROYAL_BLUE]
 
 # Debugging
@@ -26,25 +25,33 @@ const max_poisson_attempts_1d: int = 100
 const max_poisson_attempts_2d: int = 100
 const sphere_packing_constant: float = 0.7
 
+func point_chunk_print(point_chunk) -> void:
+	var chunk_array = point_chunk[1]
+	var chunk_dim = point_chunk[2]
+	for col in chunk_dim[0]:
+		for row in chunk_dim[1]:
+			print("Chunk (",col, ", ", row, ")")
+			print(chunk_array[col-1][row-1])
+
 func _ready() -> void:
 	var previous_time = Time.get_ticks_msec()
 	var ellapsed = 0
 	# Main Area
-	PIXELS_PER_TILE = int(SCREEN_RESOLUTION.x / COLS)
+	#PIXELS_PER_TILE = int(SCREEN_RESOLUTION.x / COLS)
 
 	# Map Area
-	MAP_RESOLUTION = Vector2i(SCREEN_RESOLUTION.x + BORDER_RESOLUTION, SCREEN_RESOLUTION.y + 2 * BORDER_RESOLUTION)
-	MAP_COLS = MAP_RESOLUTION.x / PIXELS_PER_TILE
-	MAP_ROWS = MAP_RESOLUTION.y / PIXELS_PER_TILE
+	#MAP_RESOLUTION = Vector2i(SCREEN_RESOLUTION.x + BORDER_RESOLUTION, SCREEN_RESOLUTION.y + 2 * BORDER_RESOLUTION)
+	#MAP_RESOLUTION.x = MAP_RESOLUTION.x / PIXELS_PER_TILE
+	#MAP_RESOLUTION.y = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
 	var data = get_data()
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
-	#print("Data gotten: ", ellapsed)
+	print("Data gotten: ", ellapsed)
 	var total_point_chunk = _generate_points(data[0], data[1], data[2], data[3], data[4], data[5], data[6])
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
-	#print("Blue points generated: ", ellapsed)
+	print("Blue points generated: ", ellapsed)
 	var red_point_chunk = _generate_points(data[0], data[1], data[2], data[3], data[4], data[5], data[6])
 	for pr: Vector3 in red_point_chunk[0]:
 		pr.x = MAP_RESOLUTION.x + (MAP_RESOLUTION.x - pr.x)
@@ -61,11 +68,13 @@ func _ready() -> void:
 	previous_time = Time.get_ticks_msec()
 	print("Mesh generated: ", ellapsed)
 	_show_points(total_point_chunk[0])
+	point_chunk_print(total_point_chunk)
+	print("DONE!")
 
 func _show_points(points: PackedVector3Array):
 	for p in points:
 		var instance = target.instantiate()
-		instance.global_position = Vector2(p.x,p.y)
+		instance.global_position = Vector2(p.x, p.y) * PIXELS_PER_TILE
 		instance.modulate = biome_colours[p.z] * 0.9
 		add_child(instance)
 
@@ -163,7 +172,7 @@ func get_data() -> Array:
 		sizes.append(feature["sizes"])  # already an Array
 	
 	# Scaled based on desired resolution
-	var scaling_factor: Vector2 = Vector2(SCREEN_RESOLUTION.x / gen_screen_resolution.x, SCREEN_RESOLUTION.y / gen_screen_resolution.y)
+	var scaling_factor: Vector2 = Vector2(MAP_RESOLUTION.x / gen_screen_resolution.x, MAP_RESOLUTION.y / gen_screen_resolution.y)
 	for f in sizes.size():
 		for s in sizes[f].size():
 			sizes[f][s] = int(sizes[f][s] * scaling_factor.length())
@@ -179,7 +188,8 @@ func get_data() -> Array:
 		number_of_features += occurences[f]
 		
 	# Return min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes
-	return [sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, gen_depth, sub_occurences, sizes]
+	return [sqrt((MAP_RESOLUTION.x * MAP_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, gen_depth, sub_occurences, sizes]
+	#return [sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, gen_depth, sub_occurences, sizes]
 	
 #Returns [PackedVector3Array, Array[Array], Vector2i]
 func _generate_points(min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes) -> Array:
@@ -189,18 +199,18 @@ func _generate_points(min_distance, features, spawn_area, occurences, gen_depth,
 	#var min_distance: float = sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)) # The minimum distance any two points can be
 	var chunks: Array[Array] # Each point is placed in a chunk. Each chunk is exactly min_distance_x wide starting from min (stretches to max)
 	var chunk_length: float = min_distance / 0.70711  # sqrt(2) * min_distance
-	var chunk_count: Vector2i = Vector2i(2 * int(ceil(MAP_RESOLUTION.x / chunk_length)), int(ceil(MAP_RESOLUTION.y / chunk_length)))
+	var chunk_count: Vector2i = Vector2i(1 + 2 * int(ceil(MAP_RESOLUTION.x / chunk_length)), 1 + int(ceil(MAP_RESOLUTION.y / chunk_length)))
 	
 	# Initialize the chunks array
-	for cx: int in chunk_count.x + 1:
+	for cx: int in chunk_count.x:
 		chunks.push_back([])
-		for cy: int in chunk_count.y + 1:
+		for cy: int in chunk_count.y:
 			chunks[cx].push_back([])
 
 	for f in features.size():
+		var top_left: Vector2i = Vector2i(spawn_area[f][0][0], spawn_area[f][0][1])
+		var bottom_right: Vector2i = Vector2i(spawn_area[f][1][0], spawn_area[f][1][1])
 		for occ in occurences[f]:
-			var top_left: Vector2i = Vector2i(spawn_area[f][0][0], spawn_area[f][0][1])
-			var bottom_right: Vector2i = Vector2i(spawn_area[f][1][0], spawn_area[f][1][1])
 			var point: Vector2i = _poisson_dd_2d(top_left, bottom_right, min_distance, chunks)
 			var global_point = point + Vector2i(BORDER_RESOLUTION, BORDER_RESOLUTION)# Shift by the border
 			# Put occurence in points and in chunks
@@ -248,8 +258,8 @@ func _generate_mesh(chunks: Array, chunk_count: Vector2i):
 	var indices = PackedInt32Array()
 	
 	# Generates mesh
-	for row: int in MAP_ROWS:
-		for col: int in MAP_COLS*2:
+	for row: int in MAP_RESOLUTION.y:
+		for col: int in 2*MAP_RESOLUTION.x:
 			var x: int = col * quad_size
 			var y: int = row * quad_size
 			
@@ -264,8 +274,8 @@ func _generate_mesh(chunks: Array, chunk_count: Vector2i):
 			# Calculate the closest feature to this point
 			var closest_feature = Vector2(-1, -1) # distance squared, feature id
 			var current_chunk = Vector2i(
-				int(x / (2 * MAP_RESOLUTION.x / chunk_count.x)),
-				int(y / (MAP_RESOLUTION.y / chunk_count.y)))
+				int(col / (2 * MAP_RESOLUTION.x / chunk_count.x)),
+				int(row / (MAP_RESOLUTION.y / chunk_count.y)))
 			var d_d = 2 # The range of chunks to check (-d_d < chunk < d_dd)
 			
 			while closest_feature.x == -1 and d_d < chunk_count.x:
@@ -280,13 +290,15 @@ func _generate_mesh(chunks: Array, chunk_count: Vector2i):
 									break
 								if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
 									closest_feature = Vector2(distance,p.z)
-				d_d += 1
+				if (closest_feature.x == -1):
+					d_d += 1
+					print("D_D must be upped for Col:", col, " and row: ", row)
 				
 			# Generate the color for the whole quad
 			var color = biome_colours[closest_feature.y]
-			if (sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (2 * MAP_RESOLUTION.x - col * PIXELS_PER_TILE)
-			or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE) or sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE)):
-				color = Color.DARK_BLUE
+			#if (sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (2 * MAP_RESOLUTION.x - col * PIXELS_PER_TILE)
+			#or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE) or sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE)):
+			#	color = Color.DARK_BLUE
 			
 			colors.append_array([color, color, color, color])
 			# Define two triangles (quad = 2 triangles)
