@@ -430,5 +430,57 @@ func freeMeeple(id):
 			unorderedMeeples.pop_at(i).queue_free()
 			return
 
-			
-			
+'''
+Meeple Move Algorithm: MMA (Without swapping / re-pathfinding, merging, and attacking)
+
+--------------------------------------------------
+				MEEPLE_CONTROL:
+--------------------------------------------------
+
+~~~ On Every Tick: ~~~
+1. Is this tick a Meeple Tick?
+	Yes: Run Meeple Tick
+	No: Continue
+
+~~~ On Movement Commmand: ~~~
+1. For each Meeple: M_i:
+	1. Call find_path in GRID
+		If Path Found: Updated M_i's path and set them as waiting (For hex_ingress)
+
+--------------------------------------------------
+				GRID:
+--------------------------------------------------
+
+~~~ On hex_ingress: ~~~
+1. Is hex occupied, or is there an existing queue to enter this hex?
+	Yes:	Add meeple to queue to enter that hex -> Return false
+	No:		Update grid to occupy new hex and call hex_egress -> Return true (Approve Access)
+
+~~~ On hex_egress: ~~~
+1. Remove meeple from hex -> Does this hex have a queue?
+	Yes:	Pop a meeple out from the front of the queue -> Update grid to occupy new hex with that meeple if it -> Call egress_granted on that meeple
+	No:		Continue
+--------------------------------------------------
+				MEEPLE:
+--------------------------------------------------
+
+~~~ On Every Meeple Tick: ~~~
+1. Does the meeple have the moving or waiting flag?
+	Yes: 	Break
+	No: 	Continue
+2. Check if the meeple has path / next hex to travel to?:
+	Yes: Call hex_ingress in GRID on new hex
+		True (Gained Access): Set flag moving to true -> break
+		False (Denied Access): Set flag waiting to true -> Continue
+	No: 	Continue
+
+~~~ On Every Physics Tick: ~~~
+1. Does the meeple have the moving flag?
+	Yes:	Move towards target hex -> Has the meeple arrived at the hex?
+		Yes:	Pop current hex from path -> Set meeple moving flag to false -> break
+		No:		Continue
+	No: 	Continue
+
+~~~ On egress_granted: ~~~
+1. Set waiting flag to false -> Set flag moving to true -> break
+'''
