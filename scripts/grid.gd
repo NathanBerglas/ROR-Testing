@@ -46,6 +46,7 @@ func update_grid(hex: Vector2i, classification: int, objects):
 	else:
 		astar.set_point_disabled(_hex_to_id(hex), false)
 	#print(grid[hex.x][hex.y].classification)
+	queue_redraw()
 
 
 #Added by Jacob -> Prob by takes axial Hex
@@ -183,14 +184,26 @@ func draw_hex(center: Vector2, size: float, color: Color) -> void:
 	var points: PackedVector2Array = []
 	for i in range(6):
 		var angle = deg_to_rad(60 * i - 30) # pointy-top
-		points.append(center + Vector2(cos(angle), sin(angle)) * size)
-#
+		points.append(center + Vector2(cos(angle), sin(angle)) * size * 0.975)
 	for i in range(6):
-		draw_line(points[i], points[(i + 1) % 6], color, 1.0)
+		draw_line(points[i], points[(i + 1) % 6], color, size*0.02)
+	var border_points: PackedVector2Array = []
+	for i in range(6):
+		var angle = deg_to_rad(60 * i - 30) # pointy-top
+		border_points.append(center + Vector2(cos(angle), sin(angle)) * size)
+	for i in range(6):
+		draw_line(border_points[i], border_points[(i + 1) % 6], Color(0.2, 0.2, 0.2, 1.0), size*0.025)
 	#
 func _draw():
 	for q in range(GRID_COUNT.x):
 		for r in range(GRID_COUNT.y):
 			var hex = Vector2i(q, r)
 			var center = axial_hex_to_coord(hex)
-			draw_hex(center, HEX_SIZE, Color.GRAY)
+			if grid[hex.x][hex.y].classification == 0:
+				draw_hex(center, HEX_SIZE, Color.DARK_GRAY)
+			elif grid[hex.x][hex.y].classification == 1:
+				draw_hex(center, HEX_SIZE, Color.DARK_RED)
+			elif grid[hex.x][hex.y].classification == 2:
+				draw_hex(center, HEX_SIZE, Color.SEA_GREEN)
+			elif grid[hex.x][hex.y].classification == 3:
+				draw_hex(center, HEX_SIZE, Color.PALE_VIOLET_RED)

@@ -16,11 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="ROR Testing"
 run/main_scene="uid://cqyjg1x55n0jr"
-<<<<<<< HEAD
 config/features=PackedStringArray("4.6", "Forward Plus")
-=======
-config/features=PackedStringArray("4.4", "Forward Plus")
->>>>>>> tmp
 boot_splash/image="uid://bts1p38b5qivq"
 config/icon="res://assets/icon.svg"
 
