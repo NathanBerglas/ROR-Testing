@@ -1,7 +1,6 @@
 extends Node2D
+class_name meeple
 
-@onready var rb = $RigidBody2D
-@onready var label = $RigidBody2D/Label
 
 @export var sprite: Sprite2D
 
@@ -20,7 +19,8 @@ const HEX_DIRS := [
 	Vector2i(0, 1),
 ]
 
-var attackTimer = 0
+var label = null
+var rb = null
 var selected = false #Determines if a meeple is selected
 var path = null #destination of a meeple
 var shouldBeMoving = true
@@ -31,17 +31,11 @@ var groupNum = 0
 var min_distance = 9 # Squared
 var pos = Vector2i(0, 0)
 var HP = 1
-var attackTarget = null
-var attackRange = 1
+
 var type = "Meeple"
 
 func _process(delta): #runs on each meeple every tick
 	label.text = str(HP)
-	
-	
-	if attackTarget:
-		if inAttackRange(attackTarget.pos):
-			attack(attackTarget, delta)
 	
 	if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
 		_go_to_target(delta)
@@ -68,10 +62,10 @@ func hasMouse(): #Checks if the mouse is within the meeple
 	return false
 	
 
-func highlight(colour):
+func highlight(colour, sprite):
 	sprite.modulate = colour  # White Highlight
 	
-func remove_highlight(colour):
+func remove_highlight(colour, sprite):
 	sprite.modulate = colour  # Red highlight
 # Marches Meeple to Target
 
@@ -97,42 +91,3 @@ func _go_to_target(delta):
 		path.pop_at(0)
 		if path.size() == 0:
 			path = null
-
-
-func attack(target, delta):
-	attackTimer += delta
-	if attackTimer >= 1:
-		attackTimer = 0
-		if target.type == "Meeple":
-			if path == null:
-				target.HP -= HP * 2
-			else:
-				target.HP -= int(HP)
-			
-			if target.HP <= 0:
-				attackTarget = null
-			
-			
-		else:
-			if path == null:
-				target.hp -= size * 10
-			else:
-				target.hp -= int(size * 5)
-			
-			if target.hp <= 0:
-				attackTarget = null
-				
-		
-		
-		
-func inAttackRange(target):
-	if target == null:
-		return false
-	var distToTarget = pos - target
-	
-	for v in HEX_DIRS: #Need to change based on varying range
-		if distToTarget == v:
-			return true
-			
-	return false
-	

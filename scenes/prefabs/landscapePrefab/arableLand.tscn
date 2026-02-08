@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://cyobk0wdymhvp"]
+
+[ext_resource type="Texture2D" uid="uid://baapuuox4nymx" path="res://assets/arableLand.png" id="1_byhhi"]
+
+[node name="ArableLand" type="Node2D" unique_id=351091082]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1749620909]
+z_index = -1
+texture = ExtResource("1_byhhi")

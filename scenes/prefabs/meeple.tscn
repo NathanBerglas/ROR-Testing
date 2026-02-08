@@ -1,32 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dlf1n01bma0ir"]
+[gd_scene format=3 uid="uid://dlf1n01bma0ir"]
 
-[ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeple.png" id="1_qxbsp"]
 [ext_resource type="Script" uid="uid://cx0a0omc2dv20" path="res://scripts/Meeples/meeple.gd" id="1_y4nmv"]
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
-friction = 0.0
-
-[node name="Meeple" type="Node2D" node_paths=PackedStringArray("sprite")]
+[node name="Meeple" type="Node2D" unique_id=934984987 node_paths=PackedStringArray("sprite")]
 script = ExtResource("1_y4nmv")
-sprite = NodePath("RigidBody2D/Sprite2D")
-
-[node name="RigidBody2D" type="RigidBody2D" parent="."]
-physics_material_override = SubResource("PhysicsMaterial_y4nmv")
-gravity_scale = 0.0
-lock_rotation = true
-linear_damp = 2.0
-
-[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D"]
-modulate = Color(0.748403, 0.607353, 0, 0.407843)
-texture_filter = 1
-texture_repeat = 1
-scale = Vector2(0.25, 0.25)
-texture = ExtResource("1_qxbsp")
-
-[node name="Label" type="Label" parent="RigidBody2D"]
-offset_left = -9.0
-offset_top = -12.0
-offset_right = 9.0
-offset_bottom = 11.0
-horizontal_alignment = 1
-vertical_alignment = 1
+sprite = NodePath("")
