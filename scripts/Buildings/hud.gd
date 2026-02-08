@@ -3,5 +3,11 @@ extends CanvasLayer
 var farmButtonPos = Vector2(470.0, 1.0)
 
 
-func updateMoney(money): #Updates the money displayed
-	$Money.text = "Money: " + str(money) 
+func updateFood(food): #Updates the money displayed
+	$Food.text = "Food: " + str(food) 
+	
+func updateWood(lumber): #Updates the money displayed
+	$Lumber.text = "Lumber: " + str(lumber) 
+	
+func updateStone(stone): #Updates the money displayed
+	$Stone.text = "Stone: " + str(stone) 

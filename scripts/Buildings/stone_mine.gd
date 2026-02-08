@@ -1,8 +1,8 @@
 extends Building
-@onready var shapey = $RigidBody2D/Sprite2D
+@onready var shapey = $Sprite2D
 @onready var HPBar = $HP_BAR
 
-var moneyTimer = 0 #Tracking when to give $$$
+var stoneTimer = 0 #Tracking when to give $$$
 
 
 
@@ -11,13 +11,13 @@ var moneyTimer = 0 #Tracking when to give $$$
 
 
 
-func generateIncome(p, delta): #Generates income every 10 seconds
+func generateStone(p, delta): #Generates income every 10 seconds
 	if self.fake: return
 	
-	moneyTimer += delta
-	if moneyTimer >= 10:
-		p.addMoney(200)
-		moneyTimer = 0
+	stoneTimer += delta
+	if stoneTimer >= 10:
+		p.addStone(200)
+		stoneTimer = 0
 	
 	
 func updateHPBar():

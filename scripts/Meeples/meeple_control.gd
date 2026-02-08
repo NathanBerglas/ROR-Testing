@@ -1,7 +1,7 @@
 extends Node2D
 
 @export var targetMarker: Sprite2D
-@export var meeple_prefab: PackedScene
+@export var infrantry_prefab: PackedScene
 @onready var selection_box = $ColorRect
 @onready var RCLICKORDER = $VBoxContainer/Order
 @onready var RCLICKGROUP = $VBoxContainer/Group
@@ -55,17 +55,17 @@ func _process(delta): #Runs every tick
 	cleanMeeples()
 	for g in range(0,unorderedMeeples.size()):
 		if unorderedMeeples[g].selected:
-			unorderedMeeples[g].highlight(Color(3,3,3))
+			unorderedMeeples[g].highlight(Color(3,3,3), unorderedMeeples[g].sprite)
 		else:
-			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum])
+			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum], unorderedMeeples[g].sprite)
 				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-		var instance = meeple_prefab.instantiate()
+		var instance = infrantry_prefab.instantiate()
 		
 	
 		
 		# Set instance's data
-		instance.UNIQUEID = MEEPLE_ID_COUNTER
+		instance.set_id(MEEPLE_ID_COUNTER)
 		MEEPLE_ID_COUNTER += 1
 		
 		instance.global_position = grid.hex_center(get_global_mouse_position())
@@ -178,7 +178,7 @@ func update_selection_box():
 	selection_box.size = size
 
 func spawn_meeple(position):
-	var instance = meeple_prefab.instantiate()
+	var instance = infrantry_prefab.instantiate()
 	instance.UNIQUEID = MEEPLE_ID_COUNTER
 	MEEPLE_ID_COUNTER += 1
 	
@@ -215,7 +215,7 @@ func _on_group_button_pressed():
 		if m.selected:
 			hit = true
 			m.groupNum = nextGroupID
-			m.highlight(permGroupColour[nextGroupID])
+			m.highlight(permGroupColour[nextGroupID], m.sprite)
 	if hit:
 		nextGroupID += 1
 	
@@ -305,7 +305,7 @@ func cleanNodes(meepleList):
 	
 	while x < meepleList.size():
 		if x >= unorderedMeeples.size():
-			var instance = meeple_prefab.instantiate()
+			var instance = infrantry_prefab.instantiate()
 			
 			instance.UNIQUEID = meepleList[x][MEEPLE_ID_INDEX]
 			
@@ -323,8 +323,8 @@ func cleanNodes(meepleList):
 			
 			unorderedMeeples.push_back(newMeepleInfo)
 
-			
-			
+
+
 		elif meepleList[x][MEEPLE_ID_INDEX] != unorderedMeeples[x][MEEPLE_ID_INDEX]:
 			for n in unorderedMeeples:
 				if n[MEEPLE_ID_INDEX]== meepleList[x][MEEPLE_ID_INDEX]:

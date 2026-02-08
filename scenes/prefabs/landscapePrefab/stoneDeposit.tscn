@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bey5vvkq0u1fp"]
+
+[ext_resource type="Texture2D" uid="uid://bn7a8ppak3vpt" path="res://assets/stoneDeposit.png" id="1_6tvfc"]
+
+[node name="StoneDeposit" type="Node2D" unique_id=207019524]
+z_index = -1
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=942231609]
+texture = ExtResource("1_6tvfc")

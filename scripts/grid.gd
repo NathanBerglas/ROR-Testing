@@ -3,9 +3,12 @@ extends Node2D
 # Grid constants
 @export var HEX_SIZE: float = 100
 @export var GRID_COUNT: Vector2i = Vector2i(19,11)
-
+@export var arable_land_prefab: PackedScene
+@export var forest_prefab: PackedScene
+@export var stone_deposit_prefab: PackedScene
 const SQRT_3 = 1.73205080757
 
+var created = false
 var grid: Array = []
 
 const HEX_DIRS := [
@@ -19,6 +22,11 @@ const HEX_DIRS := [
 
 var astar = AStar2D.new()
 
+const TILE_TYPE_CHANCES = 15
+const ARABLE_CHANCE = 10
+const FOREST_CHANCE = 9
+const STONE_CHANCE = 8
+
 class tile:
 	var hex: Vector2i # (q, r)
 	var classification: int = 0 # 0 is empty, 1 is obstruction, 2 is building, and 3 is meeple
@@ -26,11 +34,24 @@ class tile:
 	var traversal_difficulty = 1.0 # Must be nonzero for AStar (i think?)
 	var biome = 0 # 0 is undefined biome
 	var objectsInside = []
+	var type: String
 	func _init(hex, _classification = 0):
 		self.hex = hex
 		self.classification = _classification
 		self.traversable = (classification == 0) # Only traversable if empty
-
+		var random = randi_range(0,TILE_TYPE_CHANCES) # 
+		
+		
+		if random == ARABLE_CHANCE:
+			self.type = "ARABLE"
+		elif random == FOREST_CHANCE:
+			self.type = "FOREST"
+		elif random == STONE_CHANCE:
+			self.type = "STONE"
+		else:
+			self.type = "BASIC_BITCH"
+			
+		
 
 
 #Added by Jacob -> External script that doesn't care about rules, set tile to that classification
@@ -39,7 +60,9 @@ func update_grid(hex: Vector2i, classification: int, objects):
 	var tile_to_update = grid[hex.x][hex.y]
 	
 	#print(classification)
-	grid[hex.x][hex.y] = tile.new(tile_to_update.hex, classification)
+	
+	grid[hex.x][hex.y].classification = classification ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE 
+	grid[hex.x][hex.y].traversable = classification
 	grid[hex.x][hex.y].objectsInside = objects
 	if classification != 0:
 		astar.set_point_disabled(_hex_to_id(hex), true)
@@ -49,7 +72,7 @@ func update_grid(hex: Vector2i, classification: int, objects):
 	queue_redraw()
 
 
-#Added by Jacob -> Prob by takes axial Hex
+#Added by Jacob -> Probe by takes axial Hex
 func axial_probe(coordinate: Vector2i):
 	var tile_pos: Vector2i = coordinate
 	return grid[tile_pos.x][tile_pos.y]
@@ -175,7 +198,25 @@ func _ready():
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
 		for r in range(GRID_COUNT.y):
-			row.append(tile.new(Vector2i(q, r)))
+			var tileToCreate = tile.new(Vector2i(q, r))
+			row.append(tileToCreate)
+			
+			if tileToCreate.type == "ARABLE":
+				var instance = arable_land_prefab.instantiate()
+				# Set instance's data
+				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
+				add_child(instance)
+			elif tileToCreate.type == "FOREST":
+				var instance = forest_prefab.instantiate()
+				# Set instance's data
+				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
+				add_child(instance)
+			elif tileToCreate.type == "STONE":
+				var instance = stone_deposit_prefab.instantiate()
+				# Set instance's data
+				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
+				add_child(instance)
+		
 		grid.append(row)
 	update_astar()
 	
@@ -195,6 +236,7 @@ func draw_hex(center: Vector2, size: float, color: Color) -> void:
 		draw_line(border_points[i], border_points[(i + 1) % 6], Color(0.2, 0.2, 0.2, 1.0), size*0.025)
 	#
 func _draw():
+	
 	for q in range(GRID_COUNT.x):
 		for r in range(GRID_COUNT.y):
 			var hex = Vector2i(q, r)

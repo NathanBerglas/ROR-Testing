@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bvicor1lw62ay"]
+
+[ext_resource type="Script" uid="uid://c2c525006en2n" path="res://scripts/Buildings/resource_hub.gd" id="1_ptywy"]
+[ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/centralHub.png" id="2_ptywy"]
+
+[node name="ResourceHub" type="Node2D" unique_id=1057711618]
+script = ExtResource("1_ptywy")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_ptywy")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=991196017]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

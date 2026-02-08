@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://crdqwkqqtjfod"]
+
+[ext_resource type="Script" uid="uid://53ovkefetts5" path="res://scripts/Buildings/farm.gd" id="1_tkmxi"]
+[ext_resource type="Texture2D" uid="uid://chvsahw5yjflm" path="res://assets/farm.png" id="2_lj33w"]
+
+[node name="Farm" type="Node2D" unique_id=1057711618]
+script = ExtResource("1_tkmxi")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_lj33w")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=991196017]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

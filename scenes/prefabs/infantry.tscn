@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://cc7tksw7agcxo"]
+
+[ext_resource type="Script" uid="uid://b32p4q6vmg88j" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
+[ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeple.png" id="2_dyv7s"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
+friction = 0.0
+
+[node name="infantry" type="Node2D" unique_id=2020084538]
+script = ExtResource("1_5wvjh")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=1991257517]
+physics_material_override = SubResource("PhysicsMaterial_y4nmv")
+gravity_scale = 0.0
+lock_rotation = true
+linear_damp = 2.0
+
+[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D" unique_id=1552316814]
+modulate = Color(0.748403, 0.607353, 0, 0.407843)
+texture_filter = 1
+texture_repeat = 1
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_dyv7s")
+
+[node name="Label" type="Label" parent="RigidBody2D" unique_id=723761028]
+offset_left = -9.0
+offset_top = -12.0
+offset_right = 9.0
+offset_bottom = 11.0
+horizontal_alignment = 1
+vertical_alignment = 1
