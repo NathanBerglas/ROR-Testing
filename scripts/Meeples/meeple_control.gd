@@ -458,14 +458,23 @@ Meeple Move Algorithm: MMA (Without attacking)
 
 ~~~ On Movement Commmand: ~~~
 1. Call find_path in GRID
-	Path Found: Set meeple's path to newly found path
+	Path Found: Set meeple's path to newly found path -> Continue
 	Path Not Found: Break
 
 ~~~ On meeple_start_merge: ~~~
-1. Set target meeple waiting flag to true
+1. Set target meeple waiting flag to true -> Continue
 
 ~~~ On meeple_end_merge: ~~~
-1. Increase target meeple's health by the incoming meeple's health
+1. Increase target meeple's health by the incoming meeple's health -> Continue
+
+~~~ On egress_granted: ~~~
+1. Set meeple's waiting flag to false -> Set meeple's flag moving to true -> Continue
+
+~~~ On attack_target_move: ~~~
+1. For each meeple M_i:
+	Is M_i attacking the moving meeple?
+		Yes: 	Call On Movement Command to adjacent hex to meeple's new hex
+		No: 	Continue
 
 --------------------------------------------------
 				GRID:
@@ -488,9 +497,10 @@ Meeple Move Algorithm: MMA (Without attacking)
 	No:		Return Redirected
 
 ~~~ On hex_egress: ~~~
-1. Remove meeple from hex -> Does this hex have a queue?
-	Yes:	Pop a meeple out from the front of the queue -> Update grid to occupy new hex with that meeple if it -> Call egress_granted on that meeple
+1. Pop meeple from hex -> Does the hex have a queue?
+	Yes:	Pop a meeple out from the front of the queue -> Update grid to occupy new hex with that meeple if it
 	No:		Continue
+2. Call attack_target_move on enemy MEEPLE_CONTROL and pass the popped meeple -> Call egress_granted providing the meeple which egressed -> Continue
 
 --------------------------------------------------
 				MEEPLE:
@@ -516,7 +526,4 @@ Meeple Move Algorithm: MMA (Without attacking)
 2. Does the hex that the meeple arrived in already have another meeple?
 	Yes:	Call meeple_end_merge -> Delete Self
 	No: 	Pop current hex from path -> Set moving flag to false -> Break
-
-~~~ On egress_granted: ~~~
-1. Set waiting flag to false -> Set flag moving to true -> break
 '''
