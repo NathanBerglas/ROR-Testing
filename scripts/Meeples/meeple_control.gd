@@ -445,7 +445,7 @@ func freeMeeple(id):
 			return
 
 '''
-Meeple Move Algorithm: MMA (Without swapping / re-pathfinding, merging, and attacking)
+Meeple Move Algorithm: MMA (Without attacking)
 
 --------------------------------------------------
 				MEEPLE_CONTROL:
@@ -457,23 +457,41 @@ Meeple Move Algorithm: MMA (Without swapping / re-pathfinding, merging, and atta
 	No: Continue
 
 ~~~ On Movement Commmand: ~~~
-1. For each Meeple: M_i:
-	1. Call find_path in GRID
-		If Path Found: Updated M_i's path and set them as waiting (For hex_ingress)
+1. Call find_path in GRID
+	Path Found: Set meeple's path to newly found path
+	Path Not Found: Break
+
+~~~ On meeple_start_merge: ~~~
+1. Set target meeple waiting flag to true
+
+~~~ On meeple_end_merge: ~~~
+1. Increase target meeple's health by the incoming meeple's health
 
 --------------------------------------------------
 				GRID:
 --------------------------------------------------
 
 ~~~ On hex_ingress: ~~~
-1. Is hex occupied, or is there an existing queue to enter this hex?
-	Yes:	Add meeple to queue to enter that hex -> Return false
-	No:		Update grid to occupy new hex and call hex_egress -> Return true (Approve Access)
+1. Is there an existing queue to enter this hex?
+	Yes:	Add meeple to queue to enter that hex -> Return Approved
+	No:		Continue
+2. Is hex occupied?
+	Yes: Is the hex's classification that of a meeple?
+		Yes: 	Continue
+		No:		Return Redirected
+	No: 	Update grid to occupy new hex -> Return Approved
+4. Is the final hex of the path of the meeple that is requesting ingress the same as the final hex of the path of meeple in the hex?
+	Yes: 	Call meeple_start_merge -> Return Approved
+	No: 	Continue
+3. Does the meeple in this hex have a path?
+	Yes:	Add meeple to queue to enter that hex -> Return Pending
+	No:		Return Redirected
 
 ~~~ On hex_egress: ~~~
 1. Remove meeple from hex -> Does this hex have a queue?
 	Yes:	Pop a meeple out from the front of the queue -> Update grid to occupy new hex with that meeple if it -> Call egress_granted on that meeple
 	No:		Continue
+
 --------------------------------------------------
 				MEEPLE:
 --------------------------------------------------
@@ -484,16 +502,20 @@ Meeple Move Algorithm: MMA (Without swapping / re-pathfinding, merging, and atta
 	No: 	Continue
 2. Check if the meeple has path / next hex to travel to?:
 	Yes: Call hex_ingress in GRID on new hex
-		True (Gained Access): Set flag moving to true -> break
-		False (Denied Access): Set flag waiting to true -> Continue
+		Approved:	Call hex_egress -> Set flag moving to true -> Break
+		Pending:	Set flag waiting to true -> Break
+		Redirected: Call find_path in GRID -> Update Meeple path to new path -> Call hex_ingress in GRID on new hex -> Break
 	No: 	Continue
 
 ~~~ On Every Physics Tick: ~~~
 1. Does the meeple have the moving flag?
 	Yes:	Move towards target hex -> Has the meeple arrived at the hex?
-		Yes:	Pop current hex from path -> Set meeple moving flag to false -> break
-		No:		Continue
-	No: 	Continue
+		Yes:	Continue
+		No:		Break
+	No: 	Break
+2. Does the hex that the meeple arrived in already have another meeple?
+	Yes:	Call meeple_end_merge -> Delete Self
+	No: 	Pop current hex from path -> Set moving flag to false -> Break
 
 ~~~ On egress_granted: ~~~
 1. Set waiting flag to false -> Set flag moving to true -> break
