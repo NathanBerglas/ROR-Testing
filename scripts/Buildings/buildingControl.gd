@@ -178,8 +178,7 @@ func freeBuilding(ID):
 
 
 
-
-	""" Old Code -> Updated to right above
+""" Old Code -> Updated to right above
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsShapeQueryParameters2D.new()
 	
@@ -190,4 +189,4 @@ func freeBuilding(ID):
 	query.exclude = [$RigidBody2D.get_rid()]
 	var result = space_state.intersect_shape(query)
 	return result.is_empty()  # True = no collision, so placeable
-	"""
+"""
