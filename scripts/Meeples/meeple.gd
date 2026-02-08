@@ -2,8 +2,6 @@ extends Node2D
 class_name meeple
 
 
-@export var sprite: Sprite2D
-
 
 @export var area_2d: Area2D
 @export var speed: float = 200
@@ -21,6 +19,7 @@ const HEX_DIRS := [
 
 var label = null
 var rb = null
+var sprite = null
 var selected = false #Determines if a meeple is selected
 var path = null #destination of a meeple
 var shouldBeMoving = true
@@ -62,10 +61,10 @@ func hasMouse(): #Checks if the mouse is within the meeple
 	return false
 	
 
-func highlight(colour, sprite):
+func highlight(colour):
 	sprite.modulate = colour  # White Highlight
 	
-func remove_highlight(colour, sprite):
+func remove_highlight(colour):
 	sprite.modulate = colour  # Red highlight
 # Marches Meeple to Target
 

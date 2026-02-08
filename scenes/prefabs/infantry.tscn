@@ -1,12 +1,13 @@
 [gd_scene format=3 uid="uid://cc7tksw7agcxo"]
 
-[ext_resource type="Script" uid="uid://b32p4q6vmg88j" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
+[ext_resource type="Script" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
 [ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeple.png" id="2_dyv7s"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
 friction = 0.0
 
 [node name="infantry" type="Node2D" unique_id=2020084538]
+z_index = 1
 script = ExtResource("1_5wvjh")
 
 [node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=1991257517]

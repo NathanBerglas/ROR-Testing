@@ -49,15 +49,16 @@ func _ready() -> void:
 	
 func _process(delta): #Runs every tick
 	time += delta
+
 	#if playerID == multiplayer.get_unique_id():
 	
 	#Goes through every meeple and sets them to their colour and resets their 
 	cleanMeeples()
 	for g in range(0,unorderedMeeples.size()):
 		if unorderedMeeples[g].selected:
-			unorderedMeeples[g].highlight(Color(3,3,3), unorderedMeeples[g].sprite)
+			unorderedMeeples[g].highlight(Color(3,3,3))
 		else:
-			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum], unorderedMeeples[g].sprite)
+			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum])
 				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
 		var instance = infrantry_prefab.instantiate()
@@ -473,8 +474,11 @@ Meeple Move Algorithm: MMA (Without attacking)
 ~~~ On attack_target_move: ~~~
 1. For each meeple M_i:
 	Is M_i attacking the moving meeple?
-		Yes: 	Call On Movement Command to adjacent hex to meeple's new hex
-		No: 	Continue
+		Yes: 	Continue
+		No: 	Break
+2. Does this meeple have attack move?
+	Yes:	Call On Movement Command to adjacent hex to meeple's new hex
+	No: 	Remove meeple attack target
 
 --------------------------------------------------
 				GRID:
@@ -485,10 +489,13 @@ Meeple Move Algorithm: MMA (Without attacking)
 	Yes:	Add meeple to queue to enter that hex -> Return Approved
 	No:		Continue
 2. Is hex occupied?
-	Yes: Is the hex's classification that of a meeple?
+	Yes: Is the hex's classificatReturnion that of a meeple?
 		Yes: 	Continue
 		No:		Return Redirected
 	No: 	Update grid to occupy new hex -> Return Approved
+4. What team is the meeple in the new hex?
+	Meeple's Team:	Continue
+	Enemy Team:		Return Attacking
 4. Is the final hex of the path of the meeple that is requesting ingress the same as the final hex of the path of meeple in the hex?
 	Yes: 	Call meeple_start_merge -> Return Approved
 	No: 	Continue
@@ -507,7 +514,7 @@ Meeple Move Algorithm: MMA (Without attacking)
 --------------------------------------------------
 
 ~~~ On Every Meeple Tick: ~~~
-1. Does the meeple have the moving or waiting flag?
+1. Does the meeple have the moving flag, waiting flag, or attack target?
 	Yes: 	Break
 	No: 	Continue
 2. Check if the meeple has path / next hex to travel to?:
@@ -515,6 +522,7 @@ Meeple Move Algorithm: MMA (Without attacking)
 		Approved:	Call hex_egress -> Set flag moving to true -> Break
 		Pending:	Set flag waiting to true -> Break
 		Redirected: Call find_path in GRID -> Update Meeple path to new path -> Call hex_ingress in GRID on new hex -> Break
+		Attacking: 	Set attack target to meeple in the new hex
 	No: 	Continue
 
 ~~~ On Every Physics Tick: ~~~

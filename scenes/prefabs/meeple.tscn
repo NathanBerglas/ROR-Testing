@@ -2,6 +2,5 @@
 
 [ext_resource type="Script" uid="uid://cx0a0omc2dv20" path="res://scripts/Meeples/meeple.gd" id="1_y4nmv"]
 
-[node name="Meeple" type="Node2D" unique_id=934984987 node_paths=PackedStringArray("sprite")]
+[node name="Meeple" type="Node2D" unique_id=934984987]
 script = ExtResource("1_y4nmv")
-sprite = NodePath("")

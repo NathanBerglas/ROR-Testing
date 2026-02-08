@@ -2,7 +2,7 @@ extends Node2D
 
 # Grid constants
 @export var HEX_SIZE: float = 100
-@export var GRID_COUNT: Vector2i = Vector2i(19,11)
+@export var GRID_COUNT: Vector2i = Vector2i(50,40)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
@@ -23,9 +23,9 @@ const HEX_DIRS := [
 var astar = AStar2D.new()
 
 const TILE_TYPE_CHANCES = 15
-const ARABLE_CHANCE = 10
-const FOREST_CHANCE = 9
-const STONE_CHANCE = 8
+const ARABLE_CHANCE = 1
+const FOREST_CHANCE = 2
+const STONE_CHANCE = 3
 
 class tile:
 	var hex: Vector2i # (q, r)
