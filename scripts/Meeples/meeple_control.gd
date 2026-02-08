@@ -177,6 +177,17 @@ func update_selection_box():
 	selection_box.global_position = top_left
 	selection_box.size = size
 
+func spawn_meeple(position):
+	var instance = meeple_prefab.instantiate()
+	instance.UNIQUEID = MEEPLE_ID_COUNTER
+	MEEPLE_ID_COUNTER += 1
+	
+	add_child(instance)
+	set_id(instance)
+	instance.set_global_position(grid.axial_hex_to_coord(position))
+	unorderedMeeples.push_back(instance)
+	
+	
 #Order all the selected meeples to that place
 func _on_order_button_pressed():
 	
@@ -336,23 +347,24 @@ func updatePos(meepleList):
 			for n1 in unorderedMeeples:
 				if n1[MEEPLE_ID_INDEX] == n.UNIQUEID:
 					n.set_global_position(n1[MEEPLE_POS_INDEX])
-"""
 					
+"""
 
-	
+
 func cleanMeeples(): #Updates the Grid and merges meeples
 	var vectorsSeen = []
 	var vectorsSaved = []
 	var gridVectorsSeen = []
 	var found = false
-	
 	for m in unorderedMeeples:
+		
 		if m.path == null and m.attackTarget != null and !m.inAttackRange(m.attackTarget.pos):
 			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), m.attackTarget.pos, true, true)
 			m.path = []
 			for h in tempPath:
 				m.path.append(grid.axial_hex_to_coord(h))
 		if m.HP <= 0:
+			
 			freeMeeple(m.UNIQUEID)
 	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
 	#It then sets all vectors seen to have a meeple in them in the grid
@@ -404,6 +416,7 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 				else:
 					n += unorderedMeeples[i].HP
 					var id = unorderedMeeples[i].UNIQUEID
+					
 					freeMeeple(id)
 					i -= 1
 					
@@ -425,6 +438,7 @@ func atDest(meeple):
 
 
 func freeMeeple(id):
+	
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
 			unorderedMeeples.pop_at(i).queue_free()
