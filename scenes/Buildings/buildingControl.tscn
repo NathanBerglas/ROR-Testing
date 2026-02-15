@@ -16,6 +16,8 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cq801"]
+
 [node name="BuildingControl" type="Node2D" unique_id=390504468]
 script = ExtResource("1_kvhp6")
 farm_prefab = ExtResource("2_fbp8a")
@@ -171,3 +173,13 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 metadata/_edit_use_anchors_ = true
+
+[node name="RclickMenuResourceHub" type="VBoxContainer" parent="." unique_id=890369603]
+z_index = 2
+offset_right = 199.0
+offset_bottom = 66.0
+
+[node name="manageCaravansButton" type="Button" parent="RclickMenuResourceHub" unique_id=1297992487]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_cq801")
+text = "1- Manage Caravans"

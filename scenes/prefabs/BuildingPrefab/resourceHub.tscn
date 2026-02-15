@@ -1,10 +1,14 @@
 [gd_scene format=3 uid="uid://bvicor1lw62ay"]
 
 [ext_resource type="Script" uid="uid://c2c525006en2n" path="res://scripts/Buildings/resource_hub.gd" id="1_ptywy"]
+[ext_resource type="PackedScene" uid="uid://cjbl8iopdsxjb" path="res://scenes/Buildings/manageCaravanButton.tscn" id="2_4a1a5"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/centralHub.png" id="2_ptywy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ptywy"]
 
 [node name="ResourceHub" type="Node2D" unique_id=1057711618]
 script = ExtResource("1_ptywy")
+manageCaravanButton = ExtResource("2_4a1a5")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
 scale = Vector2(0.4, 0.4)
@@ -16,3 +20,13 @@ offset_top = -89.0
 offset_right = 82.0
 offset_bottom = -65.0
 show_percentage = false
+
+[node name="manageCaravans" type="VBoxContainer" parent="." unique_id=159111704]
+z_index = 2
+offset_right = 199.0
+offset_bottom = 66.0
+
+[node name="newCaravanButton" type="Button" parent="manageCaravans" unique_id=416117789]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ptywy")
+text = "1 - New Caravan Route"
