@@ -1,10 +1,18 @@
 extends Node2D
 @onready var hud = $buildingHud
+
 @onready var farmButton = $buildingHud/FarmButton
 @onready var stoneMineButton = $buildingHud/StoneMineButton
 @onready var lumberJackButton = $buildingHud/LumberJackButton
 @onready var resourceHubButton = $buildingHud/ResourceHubButton
 @onready var barracksButton = $buildingHud/BarracksButton
+
+@onready var selection_box = $ColorRect
+
+@onready var RCLICKMENU = $RclickMenuResourceHub
+@onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
+
+
 @export var farm_prefab: PackedScene
 @export var lumberJack_prefab: PackedScene
 @export var stoneMine_prefab: PackedScene
@@ -28,7 +36,8 @@ var buildings = []
 var teammates = [] #list of teammates
 var grid # the grid controller
 var playerID = 0
-var idTracker = 0
+var buildingIDTracker = 0
+var caravanIDTracker = 1
 
 func _ready(): #Runs on start, connects buttons
 	farmButton.button_down.connect(_on_farm_button_pressed)
@@ -51,9 +60,30 @@ func _ready(): #Runs on start, connects buttons
 	barracksButton.button_up.connect(_on_barracks_button_released)
 	barracksButton.custom_minimum_size = Vector2(121.6,120)
 	
+	manageCaravansButton.button_down.connect(_on_manageCaravans_button_pressed)
+	manageCaravansButton.button_up.connect(_on_manageCaravans_button_released)
+	
+	RCLICKMENU.visible = false
+
 	#print(playerID)
 	
 
+
+func _on_manageCaravans_button_pressed():
+	if RCLICKMENU.visible == false:
+		return
+	
+	
+func _on_manageCaravans_button_released():
+	if RCLICKMENU.visible == false:
+		return
+	var resourceHubAtLocation = grid.probe(RCLICKMENU.get_global_position()).objectsInside[0]
+	resourceHubAtLocation.manageCaravanMenu.visible = true
+	resourceHubAtLocation.manageCaravanMenu.set_global_position(RCLICKMENU.get_global_position())
+	
+	
+	RCLICKMENU.visible = false
+	
 #Start dragging the farm if has enough money
 func _on_farm_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
@@ -70,8 +100,8 @@ func _on_farm_button_pressed():
 	instance.type = "Farm"
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	#var toAdd = ["Farm", get_global_mouse_position(), instance]
-	instance.BUILDING_UNIQUE_ID = idTracker
-	idTracker += 1
+	instance.BUILDING_UNIQUE_ID = buildingIDTracker
+	buildingIDTracker += 1
 	instance.global_position = get_global_mouse_position()
 	add_child(instance) #Adding the instance
 	
@@ -117,8 +147,8 @@ func _on_lumberJack_button_pressed():
 	instance.type = "LumberJack"
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	#var toAdd = ["Farm", get_global_mouse_position(), instance]
-	instance.BUILDING_UNIQUE_ID = idTracker
-	idTracker += 1
+	instance.BUILDING_UNIQUE_ID = buildingIDTracker
+	buildingIDTracker += 1
 	instance.global_position = get_global_mouse_position()
 	add_child(instance) #Adding the instance
 	
@@ -163,8 +193,8 @@ func _on_stoneMine_button_pressed():
 	instance.type = "StoneMine"
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	#var toAdd = ["Farm", get_global_mouse_position(), instance]
-	instance.BUILDING_UNIQUE_ID = idTracker
-	idTracker += 1
+	instance.BUILDING_UNIQUE_ID = buildingIDTracker
+	buildingIDTracker += 1
 	instance.global_position = get_global_mouse_position()
 	add_child(instance) #Adding the instance
 	
@@ -210,8 +240,8 @@ func _on_resourceHub_button_pressed():
 	instance.type = "ResourceHub"
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	#var toAdd = ["Farm", get_global_mouse_position(), instance]
-	instance.BUILDING_UNIQUE_ID = idTracker
-	idTracker += 1
+	instance.BUILDING_UNIQUE_ID = buildingIDTracker
+	buildingIDTracker += 1
 	instance.global_position = get_global_mouse_position()
 	add_child(instance) #Adding the instance
 	
@@ -253,8 +283,8 @@ func _on_barracks_button_pressed():
 	#var toAdd = ["Barracks", Vector2(0,0), instance]
 	instance.type = "Barracks"
 	instance.global_position = get_global_mouse_position()
-	instance.BUILDING_UNIQUE_ID = idTracker
-	idTracker += 1
+	instance.BUILDING_UNIQUE_ID = buildingIDTracker
+	buildingIDTracker += 1
 	add_child(instance) #Adding the instance
 	
 	buildings.push_back(instance) 
@@ -287,6 +317,14 @@ func _on_barracks_button_released():
 	
 func _process(delta): #runs every tick
 	cleanBuildings()
+	#Opens up the right click menu
+	if Input.is_action_just_pressed("right_click_menu"):
+		if grid.probe(get_global_mouse_position()).objectsInside.size() > 0 and grid.probe(get_global_mouse_position()).objectsInside[0].type == "ResourceHub":
+			RCLICKMENU.set_global_position(get_global_mouse_position())
+			RCLICKMENU.visible = true
+		else:
+			RCLICKMENU.visible = false
+		
 	for b in buildings:
 		b.updateHPBar()
 	if buildingDraggin != null: #Code actually dragging the building around

@@ -96,8 +96,12 @@ func _process(delta): #Runs every tick
 	
 	#Opens up the right click menu
 	elif Input.is_action_just_pressed("right_click_menu"):
-		RCLICKMENU.set_global_position(get_global_mouse_position())
-		RCLICKMENU.visible = true
+		if grid.probe(get_global_mouse_position()).classification != 2:
+			RCLICKMENU.set_global_position(get_global_mouse_position())
+			RCLICKMENU.visible = true
+		else:
+			RCLICKMENU.visible = false
+		
 	
 	#Starts the selction process
 	elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
