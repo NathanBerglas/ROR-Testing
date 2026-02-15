@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://w5sjmbbv6a8b"]
+
+[ext_resource type="Texture2D" uid="uid://tnx1nxxeor7u" path="res://assets/blank_hex.png" id="1_b1s25"]
+[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hex_border.png" id="2_oli5t"]
+
+[node name="HexPrefab" type="Node2D" unique_id=811786069]
+
+[node name="Base" type="Sprite2D" parent="." unique_id=2075656035]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("1_b1s25")
+
+[node name="Border" type="Sprite2D" parent="." unique_id=1367156687]
+scale = Vector2(0.098, 0.098)
+texture = ExtResource("2_oli5t")

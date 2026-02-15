@@ -2,7 +2,7 @@ extends Node2D
 
 # Grid constants
 @export var HEX_SIZE: float = 100
-@export var GRID_COUNT: Vector2i = Vector2i(50,40)
+@export var GRID_COUNT: Vector2i = Vector2i(19,11)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
@@ -10,6 +10,9 @@ const SQRT_3 = 1.73205080757
 
 var created = false
 var grid: Array = []
+
+@export var hex_prefab: PackedScene
+
 
 const HEX_DIRS := [
 	Vector2i(1, 0),
@@ -29,6 +32,7 @@ const STONE_CHANCE = 3
 
 class tile:
 	var hex: Vector2i # (q, r)
+	var hex_pf: Node
 	var classification: int = 0 # 0 is empty, 1 is obstruction, 2 is building, and 3 is meeple
 	var traversable = true
 	var traversal_difficulty = 1.0 # Must be nonzero for AStar (i think?)
@@ -50,32 +54,36 @@ class tile:
 			self.type = "STONE"
 		else:
 			self.type = "BASIC_BITCH"
-			
-		
 
 
 #Added by Jacob -> External script that doesn't care about rules, set tile to that classification
 #Chat if needed
 func update_grid(hex: Vector2i, classification: int, objects):
 	var tile_to_update = grid[hex.x][hex.y]
-	
 	#print(classification)
-	
-	grid[hex.x][hex.y].classification = classification ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE 
-	grid[hex.x][hex.y].traversable = classification
-	grid[hex.x][hex.y].objectsInside = objects
+	tile_to_update.classification = classification ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE 
+	tile_to_update.traversable = classification
+	tile_to_update.objectsInside = objects
 	if classification != 0:
 		astar.set_point_disabled(_hex_to_id(hex), true)
 	else:
 		astar.set_point_disabled(_hex_to_id(hex), false)
-	#print(grid[hex.x][hex.y].classification)
-	queue_redraw()
+	#print(tile_to_update.classification)
+	if tile_to_update.classification == 0:
+		tile_to_update.hex_pf.get_node("Border").modulate = Color.DARK_GRAY 
+	elif tile_to_update.classification == 1:
+		tile_to_update.hex_pf.get_node("Border").modulate = Color.DARK_RED 
+	elif tile_to_update.classification == 2:
+		tile_to_update.hex_pf.get_node("Border").modulate = Color.SEA_GREEN
+	elif tile_to_update.classification == 3:
+		tile_to_update.hex_pf.get_node("Border").modulate = Color.PALE_VIOLET_RED
 
 
 #Added by Jacob -> Probe by takes axial Hex
 func axial_probe(coordinate: Vector2i):
 	var tile_pos: Vector2i = coordinate
 	return grid[tile_pos.x][tile_pos.y]
+
 
 # Takes the precise hex location and properly rounds it
 func _hex_round(frac: Vector2) -> Vector2i:
@@ -100,10 +108,10 @@ func _hex_round(frac: Vector2) -> Vector2i:
 
 	return Vector2i(rx, rz)
 
+
 func _hex_in_bounds(hex: Vector2i) -> bool:
 	return hex.x >= 0 and hex.y >= 0 \
 		and hex.x < GRID_COUNT.x and hex.y < GRID_COUNT.y
-
 
 
 # Takes the coordinates, ie. pixel position on map and coverts it to a hex position, ie. (q, r)
@@ -116,21 +124,26 @@ func coord_to_axial_hex(coordinate: Vector2i):
 		#print("Hex out of bound for coordinates: ", coordinate)
 		return Vector2i(-1, -1)
 
+
 func axial_hex_to_coord(hex: Vector2i):
 	var x: float = HEX_SIZE * SQRT_3 * (hex.x + hex.y * 0.5)
 	var y: float = HEX_SIZE * 1.5 * hex.y
 	return Vector2(x, y)
 
+
 func hex_center(coordinate: Vector2i):
 	return axial_hex_to_coord(coord_to_axial_hex(coordinate))
+
 
 # Allow external scripts to check if a grid is empty, has a meeple, building, etc.
 func probe(coordinate: Vector2i):
 	var tile_pos: Vector2i = coord_to_axial_hex(coordinate)
 	return grid[tile_pos.x][tile_pos.y]
 
+
 # For AStar indexing. Simply flattens hex
 func _hex_to_id(hex: Vector2i) -> int:
+	
 	return hex.y * GRID_COUNT.x + hex.x
 
 func update_astar():
@@ -219,33 +232,43 @@ func _ready():
 		
 		grid.append(row)
 	update_astar()
-	
+	# Draw Grid
+	for row in grid:
+		for h in row:
+			var q = h.hex.x
+			var r = h.hex.y
+			var new_hex = hex_prefab.instantiate()
+			new_hex.position = axial_hex_to_coord(Vector2i(q, r))
+			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2
+			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
+			self.add_child(new_hex)
+			h.hex_pf = new_hex
 
-func draw_hex(center: Vector2, size: float, color: Color) -> void:
-	var points: PackedVector2Array = []
-	for i in range(6):
-		var angle = deg_to_rad(60 * i - 30) # pointy-top
-		points.append(center + Vector2(cos(angle), sin(angle)) * size * 0.975)
-	for i in range(6):
-		draw_line(points[i], points[(i + 1) % 6], color, size*0.02)
-	var border_points: PackedVector2Array = []
-	for i in range(6):
-		var angle = deg_to_rad(60 * i - 30) # pointy-top
-		border_points.append(center + Vector2(cos(angle), sin(angle)) * size)
-	for i in range(6):
-		draw_line(border_points[i], border_points[(i + 1) % 6], Color(0.2, 0.2, 0.2, 1.0), size*0.025)
+
+#func draw_hex(center: Vector2, size: float, color: Color) -> void:
+	#var points: PackedVector2Array = []
+	#for i in range(6):
+		#var angle = deg_to_rad(60 * i - 30) # pointy-top
+		#points.append(center + Vector2(cos(angle), sin(angle)) * size * 0.975)
+	#for i in range(6):
+		#draw_line(points[i], points[(i + 1) % 6], color, size*0.02)
+	#var border_points: PackedVector2Array = []
+	#for i in range(6):
+		#var angle = deg_to_rad(60 * i - 30) # pointy-top
+		#border_points.append(center + Vector2(cos(angle), sin(angle)) * size)
+	#for i in range(6):
+		#draw_line(border_points[i], border_points[(i + 1) % 6], Color(0.2, 0.2, 0.2, 1.0), size*0.025)
 	#
-func _draw():
-	
-	for q in range(GRID_COUNT.x):
-		for r in range(GRID_COUNT.y):
-			var hex = Vector2i(q, r)
-			var center = axial_hex_to_coord(hex)
-			if grid[hex.x][hex.y].classification == 0:
-				draw_hex(center, HEX_SIZE, Color.DARK_GRAY)
-			elif grid[hex.x][hex.y].classification == 1:
-				draw_hex(center, HEX_SIZE, Color.DARK_RED)
-			elif grid[hex.x][hex.y].classification == 2:
-				draw_hex(center, HEX_SIZE, Color.SEA_GREEN)
-			elif grid[hex.x][hex.y].classification == 3:
-				draw_hex(center, HEX_SIZE, Color.PALE_VIOLET_RED)
+#func _draw():
+	#for q in range(GRID_COUNT.x):
+		#for r in range(GRID_COUNT.y):
+			#var hex = Vector2i(q, r)
+			#var center = axial_hex_to_coord(hex)
+			#if grid[hex.x][hex.y].classification == 0:
+				#draw_hex(center, HEX_SIZE, Color.DARK_GRAY)
+			#elif grid[hex.x][hex.y].classification == 1:
+				#draw_hex(center, HEX_SIZE, Color.DARK_RED)
+			#elif grid[hex.x][hex.y].classification == 2:
+				#draw_hex(center, HEX_SIZE, Color.SEA_GREEN)
+			#elif grid[hex.x][hex.y].classification == 3:
+				#draw_hex(center, HEX_SIZE, Color.PALE_VIOLET_RED)

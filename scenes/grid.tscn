@@ -4,9 +4,11 @@
 [ext_resource type="PackedScene" uid="uid://cyobk0wdymhvp" path="res://scenes/prefabs/landscapePrefab/arableLand.tscn" id="2_w88cy"]
 [ext_resource type="PackedScene" uid="uid://dg77d0mctts7" path="res://scenes/prefabs/landscapePrefab/forest.tscn" id="3_gnlqp"]
 [ext_resource type="PackedScene" uid="uid://bey5vvkq0u1fp" path="res://scenes/prefabs/landscapePrefab/stoneDeposit.tscn" id="4_jaoqn"]
+[ext_resource type="PackedScene" uid="uid://w5sjmbbv6a8b" path="res://scenes/prefabs/hex_prefab.tscn" id="5_jaoqn"]
 
 [node name="Grid" type="Node2D" unique_id=1852769152]
 script = ExtResource("1_t5fjg")
 arable_land_prefab = ExtResource("2_w88cy")
 forest_prefab = ExtResource("3_gnlqp")
 stone_deposit_prefab = ExtResource("4_jaoqn")
+hex_prefab = ExtResource("5_jaoqn")
