@@ -9,10 +9,10 @@ func _ready() -> void:
 	
 
 func _on_button_pressed():
-	parentObject.caravanManage(id)
+	print("Doing stuff")
 	
 func _on_button_released():
-	print("Doing stuff")
+	parentObject.manageCaravan(id)
 
 func set_id(id):
 	self.id = id

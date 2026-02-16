@@ -2,7 +2,7 @@ extends Node2D
 
 # Grid constants
 @export var HEX_SIZE: float = 100
-@export var GRID_COUNT: Vector2i = Vector2i(19,11)
+@export var GRID_COUNT: Vector2i = Vector2i(25,20)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene

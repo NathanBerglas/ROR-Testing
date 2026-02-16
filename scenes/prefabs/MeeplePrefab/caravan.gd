@@ -6,6 +6,8 @@ var woodCarrying = 0
 var foodCarrying = 0
 var stoneCarrying = 0
 
+var pathwayNodes = []
+var tempPathwayNodes = []
 
 func _ready():
 	self.rb = $RigidBody2D
