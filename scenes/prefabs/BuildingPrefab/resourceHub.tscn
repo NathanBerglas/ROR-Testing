@@ -3,12 +3,16 @@
 [ext_resource type="Script" uid="uid://c2c525006en2n" path="res://scripts/Buildings/resource_hub.gd" id="1_ptywy"]
 [ext_resource type="PackedScene" uid="uid://cjbl8iopdsxjb" path="res://scenes/Buildings/manageCaravanButton.tscn" id="2_4a1a5"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/centralHub.png" id="2_ptywy"]
+[ext_resource type="PackedScene" uid="uid://ckihem7no8ate" path="res://scenes/prefabs/BuildingPrefab/caravanTarget.tscn" id="3_26xkw"]
+[ext_resource type="PackedScene" uid="uid://yaght1yrplnl" path="res://scenes/prefabs/MeeplePrefab/caravan.tscn" id="4_ylua4"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ptywy"]
 
 [node name="ResourceHub" type="Node2D" unique_id=1057711618]
 script = ExtResource("1_ptywy")
 manageCaravanButton = ExtResource("2_4a1a5")
+caravanTarget = ExtResource("3_26xkw")
+caravan = ExtResource("4_ylua4")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
 scale = Vector2(0.4, 0.4)

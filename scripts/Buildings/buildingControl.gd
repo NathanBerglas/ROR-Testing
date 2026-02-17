@@ -319,6 +319,7 @@ func beginDragging(buildingName):
 	#var toAdd = ["Farm", get_global_mouse_position(), instance]
 	instance.BUILDING_UNIQUE_ID = buildingIDTracker
 	buildingIDTracker += 1
+	instance.controller = self
 	instance.global_position = get_global_mouse_position()
 	add_child(instance) #Adding the instance
 	

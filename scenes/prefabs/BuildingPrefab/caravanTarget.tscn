@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://ckihem7no8ate"]
+
+[ext_resource type="Texture2D" uid="uid://d1srqj2qwky1a" path="res://assets/caravanTarget.png" id="1_hp2fd"]
+[ext_resource type="Script" uid="uid://bxe7xwosy1ugt" path="res://scenes/prefabs/BuildingPrefab/caravan_target.gd" id="2_uunyl"]
+
+[node name="Target" type="Sprite2D" unique_id=1876901742]
+texture_filter = 1
+texture_repeat = 1
+texture = ExtResource("1_hp2fd")
+script = ExtResource("2_uunyl")
+
+[node name="Label" type="Label" parent="." unique_id=1577004341]
+offset_left = -7.28378
+offset_top = -13.317075
+offset_right = 32.71622
+offset_bottom = 9.682925
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "hi"
