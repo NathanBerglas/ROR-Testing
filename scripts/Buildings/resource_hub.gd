@@ -11,10 +11,19 @@ extends Building
 @onready var removeRouteButton = $managingCarvanMenu/removeRouteButton
 
 @export var manageCaravanButton: PackedScene
+@export var caravanTarget: PackedScene
+@export var caravan: PackedScene
+
+const CARAVAN_WAIT_TIMER = 2
+
 
 var manageCaravanButtonIDTracker = 1
 
 var managedCaravans = []
+var managedRoutes = []
+var tempRoute = []
+var tempTargets = []
+
 var managedCaravanButtons = []
 
 var routeManaging = 0
@@ -32,10 +41,37 @@ func _ready():
 	manageCaravanMenu.visible = false
 	managingCaravanMenu.visible = false
 
-func _process(_delta):
+func _process(delta):
 	if Input.is_action_just_pressed("right_click_menu"):
+		if managingCaravanMenu.visible == true:
+			_on_finishManaging_button_released()
 		manageCaravanMenu.visible = false
 		managingCaravanMenu.visible = false
+	if Input.is_action_just_pressed("select"):
+		if routeManaging != 0 and controller.grid.coord_to_axial_hex(get_global_mouse_position()) != controller.grid.coord_to_axial_hex(self.get_global_position()):
+			if tempRoute.size() < 3:
+				tempRoute.append(controller.grid.hex_center(get_global_mouse_position()))
+				var instance = caravanTarget.instantiate()
+				add_child(instance)
+				instance.label.text = str(tempRoute.size())
+				instance.set_global_position(controller.grid.hex_center(get_global_mouse_position()))
+				tempTargets.append(instance)
+	var p = 0
+	for r in managedRoutes:
+		if r[0] != -1:
+			r[0] += delta
+			print(r[0])
+			if r[0] > CARAVAN_WAIT_TIMER:
+				r[0] = -1
+				sendCaravan(r, p)
+		p += 1
+	for c in managedCaravans: #When Caravans return home
+		if c.path == null or c.path.size() == 0:
+			if c.routeRemoved == false:
+				managedRoutes[c.UNIQUEID - 1][0] = 0
+			freeCaravan(c.UNIQUEID)
+			
+
 func _on_newCaravan_button_pressed():
 	if manageCaravanMenu.visible == false:
 		return
@@ -56,7 +92,7 @@ func _on_newCaravan_button_released():
 	manageCaravanMenu.add_child(instance)
 	
 	instance.parentObject = self
-	instance.text = str(instance.id) + " - Manage Caravan " + str(instance.id)
+	instance.text = str(instance.id + 1) + " - Manage Caravan " + str(instance.id)
 	managedCaravanButtons.push_back(instance)
 	
 	manageCaravanMenu.visible = false
@@ -64,37 +100,64 @@ func _on_newCaravan_button_released():
 	manageCaravan(instance.id)
 
 func _on_finishManaging_button_pressed():
-	print("Hi")
+	var what = "huh"
 	
 func _on_finishManaging_button_released():
 	if managingCaravanMenu.visible == false:
 		return
-	routeManaging = 0
+	
 	managingCaravanMenu.visible = false
+	var tempArray = []
+	if routeManaging > managedRoutes.size():
+		tempArray.append(0)
+	else:
+		tempArray.append(managedRoutes[routeManaging - 1][0])
+	for v in tempRoute:
+		tempArray.append(v)
+	if routeManaging > managedRoutes.size():
+		managedRoutes.append(tempArray)
+	else:
+		managedRoutes[routeManaging - 1] = tempArray
+	tempRoute = []
+	var i = 0
+	while i < tempTargets.size():
+		tempTargets.pop_at(i).queue_free()
+	print(managedRoutes)
+	routeManaging = 0
 
 
 func _on_removeRoute_button_pressed():
-	print("Hi")
+	var what = "huh"
 	
 func _on_removeRoute_button_released():
 	if managingCaravanMenu.visible == false:
 		return
 	removeRoute(routeManaging)
+	for c in managedCaravans:
+		if c.UNIQUEID == routeManaging:
+			c.routeRemoved = true
+	routeManaging = 0
 	managingCaravanMenu.visible = false
 	
 
 func removeRoute(idToRemove):
-	
 	var i = 0
 	while i < managedCaravanButtons.size():
 		if managedCaravanButtons[i].id == idToRemove:
 			managedCaravanButtons.pop_at(i).queue_free()
 		i += 1
-
+	managedRoutes.pop_at(idToRemove - 1)
+	var max = 1
 	for r in managedCaravanButtons:
 		if r.id > idToRemove:
+			if r.id > max:
+				max = r.id
 			r.id -= 1 #This feels wierd, maybe dont do this
-		
+			r.text = str(r.id + 1) + " - Manage Caravan " + str(r.id)
+	manageCaravanButtonIDTracker = max
+	var t = 0
+	while t < tempTargets.size():
+		tempTargets.pop_at(i).queue_free()
 	
 func manageCaravan(id):
 	manageCaravanMenu.visible = false
@@ -106,6 +169,30 @@ func manageCaravan(id):
 	tempVectorYay.y -= 20
 	managingCaravanMenu.set_global_position(tempVectorYay)
 
+
+	
+func sendCaravan(route, routeID):
+	var instance = caravan.instantiate()
+	var tempPath = []
+	
+	var i = 1
+	while i < route.size():
+		tempPath.append(route[i])
+		i += 1
+	
+	tempPath.append(self.get_global_position())
+	
+	instance.path = tempPath
+	instance.UNIQUEID = routeID
+	add_child(instance)
+	managedCaravans.append(instance)
+
+func freeCaravan(caravanID):
+	var i = 0
+	while i < managedCaravans.size():
+		if managedCaravans[i].UNIQUEID == caravanID:
+			managedCaravans.pop_at(i).queue_free()
+		i += 1
 func updateHPBar():
 	if self.fake:
 		HPBar.visible = false

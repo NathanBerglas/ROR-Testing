@@ -12,3 +12,4 @@ var hp = 100
 var type = ""
 var pos = null
 var BUILDING_UNIQUE_ID = 0
+var controller = null

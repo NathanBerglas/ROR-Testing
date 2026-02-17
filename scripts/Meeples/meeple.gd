@@ -23,7 +23,7 @@ var sprite = null
 var selected = false #Determines if a meeple is selected
 var path = null #destination of a meeple
 var shouldBeMoving = true
-var UNIQUEID = null #Unique Id for every meeple on a team
+var UNIQUEID = null #Unique Id for every meeple on a team by unit type
 #When I say Unique, I mean UNIQUE
 var size = 1 #Size of the ARMY hashtag troops slay
 var groupNum = 0
