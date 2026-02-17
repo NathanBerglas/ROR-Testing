@@ -2,6 +2,7 @@ extends Control
 @onready var button = $"."
 
 var id = 0
+var routeNumber = 0
 var parentObject = null
 func _ready() -> void:
 	button.button_down.connect(_on_button_pressed)

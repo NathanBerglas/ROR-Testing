@@ -18,6 +18,7 @@ const CARAVAN_WAIT_TIMER = 2
 
 
 var manageCaravanButtonIDTracker = 1
+var routeNumTracker = 1
 
 var managedCaravans = []
 var managedRoutes = []
@@ -56,19 +57,26 @@ func _process(delta):
 				instance.label.text = str(tempRoute.size())
 				instance.set_global_position(controller.grid.hex_center(get_global_mouse_position()))
 				tempTargets.append(instance)
-	var p = 0
+	
 	for r in managedRoutes:
-		if r[0] != -1:
-			r[0] += delta
+		if r[0][0] != -1:
+			r[0][0] += delta
 			print(r[0])
-			if r[0] > CARAVAN_WAIT_TIMER:
-				r[0] = -1
-				sendCaravan(r, p)
-		p += 1
+			if r[0][0] > CARAVAN_WAIT_TIMER:
+				r[0][0] = -1
+				sendCaravan(r, r[0][1])
+
+		
 	for c in managedCaravans: #When Caravans return home
 		if c.path == null or c.path.size() == 0:
+			
 			if c.routeRemoved == false:
-				managedRoutes[c.UNIQUEID - 1][0] = 0
+				for r in managedRoutes:
+					
+					
+					if r[0][1] == c.UNIQUEID:
+						r[0][0] = 0
+
 			freeCaravan(c.UNIQUEID)
 			
 
@@ -85,6 +93,8 @@ func _on_newCaravan_button_released():
 	var instance = manageCaravanButton.instantiate()	
 	# Set instance's data
 	instance.set_id(manageCaravanButtonIDTracker)
+	instance.routeNumber = routeNumTracker
+	routeNumTracker += 1
 	manageCaravanButtonIDTracker += 1
 	#instance.target = group_targets[0]
 	# Create instance
@@ -92,7 +102,7 @@ func _on_newCaravan_button_released():
 	manageCaravanMenu.add_child(instance)
 	
 	instance.parentObject = self
-	instance.text = str(instance.id + 1) + " - Manage Caravan " + str(instance.id)
+	instance.text = str(instance.routeNumber + 1) + " - Manage Caravan " + str(instance.routeNumber)
 	managedCaravanButtons.push_back(instance)
 	
 	manageCaravanMenu.visible = false
@@ -109,20 +119,25 @@ func _on_finishManaging_button_released():
 	managingCaravanMenu.visible = false
 	var tempArray = []
 	if routeManaging > managedRoutes.size():
-		tempArray.append(0)
+		tempArray.append([0, routeManaging])
 	else:
-		tempArray.append(managedRoutes[routeManaging - 1][0])
+		for r in managedRoutes:
+			if r[0][1] == routeManaging:
+				tempArray.append([r[0][0], routeManaging])
+				
 	for v in tempRoute:
 		tempArray.append(v)
 	if routeManaging > managedRoutes.size():
 		managedRoutes.append(tempArray)
 	else:
-		managedRoutes[routeManaging - 1] = tempArray
+		for r in managedRoutes:
+			if r.id == routeManaging:
+				r = tempArray 
 	tempRoute = []
 	var i = 0
 	while i < tempTargets.size():
 		tempTargets.pop_at(i).queue_free()
-	print(managedRoutes)
+	
 	routeManaging = 0
 
 
@@ -142,19 +157,27 @@ func _on_removeRoute_button_released():
 
 func removeRoute(idToRemove):
 	var i = 0
+	var removingRoute = 0
 	while i < managedCaravanButtons.size():
 		if managedCaravanButtons[i].id == idToRemove:
+			removingRoute = managedCaravanButtons[i].routeNumber
 			managedCaravanButtons.pop_at(i).queue_free()
 		i += 1
-	managedRoutes.pop_at(idToRemove - 1)
+	i = 0
+	while i < managedRoutes.size():
+		if managedRoutes[i][0][1] == idToRemove:
+			managedRoutes.pop_at(i)
+			break
+		i += 1
+		
 	var max = 1
 	for r in managedCaravanButtons:
-		if r.id > idToRemove:
-			if r.id > max:
-				max = r.id
-			r.id -= 1 #This feels wierd, maybe dont do this
-			r.text = str(r.id + 1) + " - Manage Caravan " + str(r.id)
-	manageCaravanButtonIDTracker = max
+		if r.routeNumber > removingRoute:
+			if r.routeNumber > max:
+				max = r.routeNumber
+			r.routeNumber -= 1
+			r.text = str(r.routeNumber + 1) + " - Manage Caravan " + str(r.routeNumber)
+	routeNumTracker = max
 	var t = 0
 	while t < tempTargets.size():
 		tempTargets.pop_at(i).queue_free()
