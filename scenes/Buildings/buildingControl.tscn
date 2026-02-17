@@ -9,12 +9,14 @@
 [ext_resource type="Texture2D" uid="uid://chvsahw5yjflm" path="res://assets/farm.png" id="5_fbp8a"]
 [ext_resource type="Texture2D" uid="uid://dmme2pmdcs6we" path="res://assets/barracks.png" id="5_vw06n"]
 [ext_resource type="Texture2D" uid="uid://bmdh3cno6m74l" path="res://assets/stoneMine.png" id="7_gftes"]
+[ext_resource type="Texture2D" uid="uid://cnamqjcjw6sa1" path="res://assets/resourceBuildingMenuButton.png" id="8_3co7m"]
+[ext_resource type="Texture2D" uid="uid://b2jmavmsncpfu" path="res://assets/combatBuildingMenuButton.png" id="8_rj1gy"]
 [ext_resource type="Texture2D" uid="uid://bmjqv3d2068k3" path="res://assets/lumberJacks.png" id="8_w1qyp"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/centralHub.png" id="11_cq801"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_at16l"]
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_at16l"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cq801"]
 
@@ -45,6 +47,27 @@ theme_override_font_sizes/font_size = 40
 text = "Stone: 1000"
 metadata/_edit_use_anchors_ = true
 
+[node name="combatBuildingsLabel" type="Label" parent="buildingHud" unique_id=983631813]
+offset_left = 457.0
+offset_top = 136.0
+offset_right = 743.0
+offset_bottom = 249.0
+theme_override_font_sizes/font_size = 40
+text = "Opens Combat
+Building Menu"
+metadata/_edit_use_anchors_ = true
+
+[node name="resourceBuildingLabel" type="Label" parent="buildingHud" unique_id=1115077520]
+offset_left = 792.0
+offset_top = 137.0
+offset_right = 1104.0
+offset_bottom = 250.0
+theme_override_font_sizes/font_size = 40
+text = "Opens Resource
+Building Menu"
+horizontal_alignment = 1
+metadata/_edit_use_anchors_ = true
+
 [node name="Lumber" type="Label" parent="buildingHud" unique_id=1233910810]
 offset_left = 8.0
 offset_top = 56.0
@@ -54,68 +77,66 @@ theme_override_font_sizes/font_size = 40
 text = "Lumber: 1000"
 metadata/_edit_use_anchors_ = true
 
-[node name="FarmButtonLabel" type="Label" parent="buildingHud" unique_id=1757334247]
-offset_left = 443.0
-offset_top = 125.0
-offset_right = 619.0
-offset_bottom = 257.0
-theme_override_font_sizes/font_size = 30
-text = "Farm - 500F
-            500W
-            500S"
+[node name="resourceBuildingButton" type="Button" parent="buildingHud" unique_id=1378047722]
+offset_left = 870.0
+offset_top = 2.0
+offset_right = 1005.0
+offset_bottom = 137.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("8_3co7m")
+flat = true
+expand_icon = true
 metadata/_edit_use_anchors_ = true
 
-[node name="FarmButton" type="Button" parent="buildingHud" unique_id=1861200771]
-offset_left = 461.0
-offset_top = 2.0
-offset_right = 591.0
-offset_bottom = 130.0
+[node name="combatBuildingButton" type="Button" parent="buildingHud" unique_id=478958744]
+offset_left = 531.0
+offset_top = 4.0
+offset_right = 666.0
+offset_bottom = 139.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("8_rj1gy")
+flat = true
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="resourceBuildingHud" type="CanvasLayer" parent="." unique_id=1220890351]
+
+[node name="ScrollContainer" type="ScrollContainer" parent="resourceBuildingHud" unique_id=246695275]
+offset_left = 17.0
+offset_top = 177.0
+offset_right = 322.0
+offset_bottom = 896.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="resourceBuildingHud/ScrollContainer" unique_id=613882232]
+layout_mode = 2
+alignment = 1
+
+[node name="LumberJackButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=973437938]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
 theme_override_font_sizes/font_size = 43
 theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
-icon = ExtResource("5_fbp8a")
+text = "
+"
+icon = ExtResource("8_w1qyp")
+flat = true
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="ResourceHubButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=1643912074]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_font_sizes/font_size = 43
+theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
+icon = ExtResource("11_cq801")
 flat = true
 icon_alignment = 1
 expand_icon = true
 metadata/_edit_use_anchors_ = true
 
-[node name="BarracksButtonLabel" type="Label" parent="buildingHud" unique_id=1610006482]
-offset_left = 668.0
-offset_top = 124.0
-offset_right = 917.0
-offset_bottom = 256.0
-theme_override_font_sizes/font_size = 30
-text = "Barracks - 1000F
-                   1000W
-                   1000S"
-metadata/_edit_use_anchors_ = true
-
-[node name="BarracksButton" type="Button" parent="buildingHud" unique_id=2041240677]
-offset_left = 715.0
-offset_top = 1.0
-offset_right = 850.0
-offset_bottom = 134.0
-theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
-icon = ExtResource("5_vw06n")
-flat = true
-expand_icon = true
-metadata/_edit_use_anchors_ = true
-
-[node name="StoneMineButtonLabel2" type="Label" parent="buildingHud" unique_id=185697737]
-offset_left = 1203.0
-offset_top = 121.0
-offset_right = 1467.0
-offset_bottom = 253.0
-theme_override_font_sizes/font_size = 30
-text = "Stone Mine - 500F
-                       500W
-                       500S"
-metadata/_edit_use_anchors_ = true
-
-[node name="StoneMineButton" type="Button" parent="buildingHud" unique_id=1972255775]
-offset_left = 1253.0
-offset_top = 2.0
-offset_right = 1383.0
-offset_bottom = 130.0
+[node name="StoneMineButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=1972255775]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
 theme_override_font_sizes/font_size = 43
 theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
 icon = ExtResource("7_gftes")
@@ -124,54 +145,103 @@ icon_alignment = 1
 expand_icon = true
 metadata/_edit_use_anchors_ = true
 
-[node name="LumberJackButtonLabel" type="Label" parent="buildingHud" unique_id=1467269347]
-offset_left = 923.0
-offset_top = 122.0
-offset_right = 1195.0
-offset_bottom = 254.0
+[node name="FarmButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=1861200771]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_font_sizes/font_size = 43
+theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
+icon = ExtResource("5_fbp8a")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="closeResourceMenu" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=465479200]
+layout_mode = 2
+text = "Close"
+
+[node name="FarmButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1757334247]
+z_index = 1
+z_as_relative = false
+offset_left = 167.0
+offset_top = 593.0
+offset_right = 343.0
+offset_bottom = 725.0
+theme_override_font_sizes/font_size = 30
+text = "Farm - 500F
+            500W
+            500S"
+metadata/_edit_use_anchors_ = true
+
+[node name="StoneMineButtonLabel2" type="Label" parent="resourceBuildingHud" unique_id=185697737]
+offset_left = 159.0
+offset_top = 455.0
+offset_right = 423.0
+offset_bottom = 587.0
+theme_override_font_sizes/font_size = 30
+text = "Stone Mine - 500F
+                       500W
+                       500S"
+metadata/_edit_use_anchors_ = true
+
+[node name="LumberJackButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1467269347]
+visible = false
+offset_left = 163.0
+offset_top = 177.0
+offset_right = 435.0
+offset_bottom = 309.0
 theme_override_font_sizes/font_size = 30
 text = "LumberJack - 500F
                         500W
                         500S"
 metadata/_edit_use_anchors_ = true
 
-[node name="LumberJackButton" type="Button" parent="buildingHud" unique_id=973437938]
-offset_left = 989.0
-offset_top = 2.0
-offset_right = 1119.0
-offset_bottom = 130.0
-theme_override_font_sizes/font_size = 43
-theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
-icon = ExtResource("8_w1qyp")
-flat = true
-icon_alignment = 1
-expand_icon = true
-metadata/_edit_use_anchors_ = true
-
-[node name="ResourceHubButtonLabel" type="Label" parent="buildingHud" unique_id=1235039629]
-offset_left = 1467.0
-offset_top = 122.0
-offset_right = 1739.0
-offset_bottom = 254.0
+[node name="ResourceHubButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1235039629]
+offset_left = 160.0
+offset_top = 319.0
+offset_right = 481.0
+offset_bottom = 451.0
 theme_override_font_sizes/font_size = 30
 text = "Resource Hub - 5000F
                         	    5000W
                             5000S"
 metadata/_edit_use_anchors_ = true
 
-[node name="ResourceHubButton" type="Button" parent="buildingHud" unique_id=1643912074]
-anchors_preset = -1
-anchor_bottom = 0.0018518518
-offset_left = 1525.0
-offset_top = 2.0
-offset_right = 1655.0
-offset_bottom = 130.0
-theme_override_font_sizes/font_size = 43
-theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
-icon = ExtResource("11_cq801")
+[node name="combatBuildingHud" type="CanvasLayer" parent="." unique_id=485597457]
+
+[node name="ScrollContainer" type="ScrollContainer" parent="combatBuildingHud" unique_id=662035960]
+visible = false
+offset_left = 17.0
+offset_top = 177.0
+offset_right = 322.0
+offset_bottom = 896.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="combatBuildingHud/ScrollContainer" unique_id=770048414]
+layout_mode = 2
+alignment = 1
+
+[node name="BarracksButton" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=2041240677]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("5_vw06n")
 flat = true
-icon_alignment = 1
 expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="closeCombatMenu" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=98211182]
+layout_mode = 2
+text = "Close"
+
+[node name="BarracksButtonLabel" type="Label" parent="combatBuildingHud" unique_id=1610006482]
+offset_left = 160.0
+offset_top = 182.0
+offset_right = 409.0
+offset_bottom = 314.0
+theme_override_font_sizes/font_size = 30
+text = "Barracks - 1000F
+                   1000W
+                   1000S"
 metadata/_edit_use_anchors_ = true
 
 [node name="RclickMenuResourceHub" type="VBoxContainer" parent="." unique_id=890369603]

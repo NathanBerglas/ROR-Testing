@@ -1,7 +1,7 @@
 TO DO (prior to multi player):
 
 
-implement better building menu -> Jacob
+add defensive buildings/random buildings -> Jacob
 
 add nexus -> Jacob
 
@@ -20,7 +20,7 @@ add new army types -> need MMA first
 
 add heroes for general -> need new army types first
 
-add defensive buildings/random buildings -> Implement better building menu
+
 
 Decrees -> need defensive buildings, Nexus, finish resource hub shit, better building things
 
@@ -41,7 +41,9 @@ General Aces -> need heroes, biome gen, mobs
 
 
 
+FINISHED Stuff (for yay purposes):
 
+implement better building menu (kinda)
 
 
 

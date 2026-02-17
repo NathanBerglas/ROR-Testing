@@ -1,17 +1,34 @@
 extends Node2D
 @onready var hud = $buildingHud
 
-@onready var farmButton = $buildingHud/FarmButton
-@onready var stoneMineButton = $buildingHud/StoneMineButton
-@onready var lumberJackButton = $buildingHud/LumberJackButton
-@onready var resourceHubButton = $buildingHud/ResourceHubButton
-@onready var barracksButton = $buildingHud/BarracksButton
+@onready var farmButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/FarmButton
+@onready var stoneMineButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/StoneMineButton
+@onready var lumberJackButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/LumberJackButton
+@onready var resourceHubButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/ResourceHubButton
 
+@onready var farmLabel = $resourceBuildingHud/FarmButtonLabel
+@onready var stoneMineLabel = $resourceBuildingHud/StoneMineButtonLabel2
+@onready var lumberJackLabel = $resourceBuildingHud/LumberJackButtonLabel
+@onready var resourceHubLabel = $resourceBuildingHud/ResourceHubButtonLabel
+
+@onready var barracksButton = $combatBuildingHud/ScrollContainer/VBoxContainer/BarracksButton
+
+@onready var barracksLabel = $combatBuildingHud/BarracksButtonLabel
+@onready var closeCombatBuilding = $combatBuildingHud/ScrollContainer/VBoxContainer/closeCombatMenu
+
+@onready var combatBuildingMenu = $combatBuildingHud/ScrollContainer
+@onready var combatBuildingMenuButton = $buildingHud/combatBuildingButton
+
+@onready var resourceBuildingMenu = $resourceBuildingHud/ScrollContainer
+@onready var resourceBuildingMenuButton = $buildingHud/resourceBuildingButton
+@onready var closeResourceBuilding = $resourceBuildingHud/ScrollContainer/VBoxContainer/closeResourceMenu
 @onready var selection_box = $ColorRect
 
 @onready var RCLICKMENU = $RclickMenuResourceHub
 @onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
 
+@onready var combatBuildingLabel = $buildingHud/combatBuildingsLabel
+@onready var resourceBuildingLabel = $buildingHud/resourceBuildingLabel
 
 @export var farm_prefab: PackedScene
 @export var lumberJack_prefab: PackedScene
@@ -26,6 +43,9 @@ var food = 10000
 var wood = 10000
 var stone = 10000
 
+#All the buttons for resources
+var resourceButtons = []
+var combatButtons = []
 #Checking what type of building the player is dragging
 var buildingDraggin = null
 
@@ -42,32 +62,82 @@ var caravanIDTracker = 1
 func _ready(): #Runs on start, connects buttons
 	farmButton.button_down.connect(_on_farm_button_pressed)
 	farmButton.button_up.connect(_on_farm_button_released)
-	farmButton.custom_minimum_size = Vector2(121.6,120)
+
 	
 	lumberJackButton.button_down.connect(_on_lumberJack_button_pressed)
 	lumberJackButton.button_up.connect(_on_lumberJack_button_released)
-	lumberJackButton.custom_minimum_size = Vector2(121.6,120)
+
 	
 	stoneMineButton.button_down.connect(_on_stoneMine_button_pressed)
 	stoneMineButton.button_up.connect(_on_stoneMine_button_released)
-	stoneMineButton.custom_minimum_size = Vector2(121.6,120)
+
 	
 	resourceHubButton.button_down.connect(_on_resourceHub_button_pressed)
 	resourceHubButton.button_up.connect(_on_resourceHub_button_released)
-	resourceHubButton.custom_minimum_size = Vector2(121.6,120)
+
 	
 	barracksButton.button_down.connect(_on_barracks_button_pressed)
 	barracksButton.button_up.connect(_on_barracks_button_released)
-	barracksButton.custom_minimum_size = Vector2(121.6,120)
+	
 	
 	manageCaravansButton.button_down.connect(_on_manageCaravans_button_pressed)
 	manageCaravansButton.button_up.connect(_on_manageCaravans_button_released)
+	
+	resourceBuildingMenuButton.button_down.connect(_on_resourceBuildingMenu_button_pressed)
+	resourceBuildingMenuButton.button_up.connect(_on_resourceBuildingMenu_button_released)
+	
+	closeResourceBuilding.button_down.connect(_on_closeResourceMenu_button_pressed)
+	closeResourceBuilding.button_up.connect(_on_closeResourceMenu_button_released)
+	
+	combatBuildingMenuButton.button_down.connect(_on_combatBuildingMenu_button_pressed)
+	combatBuildingMenuButton.button_up.connect(_on_combatBuildingMenu_button_released)
+	
+	closeCombatBuilding.button_down.connect(_on_closeCombatMenu_button_pressed)
+	closeCombatBuilding.button_up.connect(_on_closeCombatMenu_button_released)
+	
+	farmLabel.visible = false
+	stoneMineLabel.visible = false
+	lumberJackLabel.visible = false
+	resourceHubLabel.visible = false
+	resourceBuildingMenu.visible = false
+	
+	resourceButtons.append([stoneMineButton, stoneMineLabel])
+	resourceButtons.append([farmButton, farmLabel])
+	resourceButtons.append([lumberJackButton, lumberJackLabel])
+	resourceButtons.append([resourceHubButton, resourceHubLabel])
+	
+	combatButtons.append([barracksButton, barracksLabel])
 	
 	RCLICKMENU.visible = false
 
 	#print(playerID)
 	
 
+func _on_combatBuildingMenu_button_pressed():
+	var what = "HUH"
+func _on_combatBuildingMenu_button_released():
+	combatBuildingMenu.visible = true
+	resourceBuildingMenu.visible = false
+	
+func _on_closeCombatMenu_button_pressed():
+	var what = "HUH"
+func _on_closeCombatMenu_button_released():
+	combatBuildingMenu.visible = false
+	
+	
+func _on_resourceBuildingMenu_button_pressed():
+	var what = "HUH"
+	
+func _on_resourceBuildingMenu_button_released():
+	resourceBuildingMenu.visible = true
+	combatBuildingMenu.visible = false
+
+func _on_closeResourceMenu_button_pressed():
+	var what = "huh"
+
+
+func _on_closeResourceMenu_button_released():
+	resourceBuildingMenu.visible = false
 
 func _on_manageCaravans_button_pressed():
 	if RCLICKMENU.visible == false:
@@ -198,6 +268,8 @@ func _on_barracks_button_released():
 	
 func _process(delta): #runs every tick
 	cleanBuildings()
+	hoveringText()
+	
 	#Opens up the right click menu
 	if Input.is_action_just_pressed("right_click_menu"):
 		if grid.probe(get_global_mouse_position()).objectsInside.size() > 0 and grid.probe(get_global_mouse_position()).objectsInside[0].type == "ResourceHub":
@@ -285,7 +357,26 @@ func cleanBuildings():
 			
 
 
-
+func hoveringText():
+	for button in combatButtons:
+		if button[0].is_hovered():
+			button[1].visible = true
+		else:
+			button[1].visible = false
+	for button in resourceButtons:
+		if button[0].is_hovered():
+			button[1].visible = true
+		else:
+			button[1].visible = false
+	if combatBuildingMenuButton.is_hovered():
+		combatBuildingLabel.visible = true
+	else:
+		combatBuildingLabel.visible = false
+	
+	if resourceBuildingMenuButton.is_hovered():
+		resourceBuildingLabel.visible = true
+	else:
+		resourceBuildingLabel.visible = false
 func freeBuilding(ID):
 	
 	for i in range(buildings.size()):
