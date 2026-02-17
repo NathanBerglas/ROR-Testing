@@ -1,9 +1,9 @@
 TO DO (prior to multi player):
 
 
-implement better building menu
+implement better building menu -> Jacob
 
-add nexus
+add nexus -> Jacob
 
 Biome gen -> Nate
 
