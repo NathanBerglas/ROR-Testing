@@ -1,0 +1,47 @@
+TO DO (prior to multi player):
+
+
+implement better building menu
+
+add nexus
+
+Biome gen -> Nate
+
+MMA -> Nate
+
+
+Ruins with runes -> need biome gen first
+
+Mobs -> Need biome gen first
+
+finish resource hub shit -> MMA
+
+add new army types -> need MMA first
+
+add heroes for general -> need new army types first
+
+add defensive buildings/random buildings -> Implement better building menu
+
+Decrees -> need defensive buildings, Nexus, finish resource hub shit, better building things
+
+
+
+
+Economist Aces -> need decrees, biome gen, mobs
+	1. Dictator - Freely change decrees
+	2. Oracle - Unlock new building, see x by x hexs anywhere
+	3. Geomancer - Change terrain?
+	4. Alchemist - Somehow alter resources for other resources
+
+General Aces -> need heroes, biome gen, mobs
+	1. Swap - totems swap locations of hexes
+	2. Portal - Portal from one hex to another hex
+	3. Time totems - Time can be "reset" in side of totem range
+	4. Hidden - hidden hexes
+
+
+
+
+
+
+
