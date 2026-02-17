@@ -1,16 +1,14 @@
 extends meeple
 
 
-
 var attackTimer = 0
-var attackTarget = null
 var attackRange = 1
 
 func _ready():
 	self.rb = $RigidBody2D
 	self.sprite = $RigidBody2D/Sprite2D
 	self.label = $RigidBody2D/Label
-	self.type = "Infrantry"
+	self.type = "Infantry"
 
 
 func _process(delta): #runs on each meeple every tick
@@ -21,8 +19,8 @@ func _process(delta): #runs on each meeple every tick
 		if inAttackRange(attackTarget.pos):
 			attack(attackTarget, delta)
 	
-	if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
-		_go_to_target(delta)
+	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
+		#_go_to_target(delta)
 	
 	#if dest != null and closeEnough(): #meeple reaches destination
 		#dest = null

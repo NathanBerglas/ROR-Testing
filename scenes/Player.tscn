@@ -12,7 +12,7 @@
 script = ExtResource("1_mdl7e")
 
 [node name="MeepleControl" parent="." unique_id=553136144 instance=ExtResource("1_3li8b")]
-infrantry_prefab = ExtResource("3_cw2d6")
+infantry_prefab = ExtResource("3_cw2d6")
 
 [node name="BuildingControl" parent="." unique_id=1989412738 instance=ExtResource("2_mdl7e")]
 resourceHub_prefab = ExtResource("4_70d11")

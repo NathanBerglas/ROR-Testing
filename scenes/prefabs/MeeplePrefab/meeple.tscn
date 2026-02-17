@@ -4,3 +4,5 @@
 
 [node name="Meeple" type="Node2D" unique_id=934984987]
 script = ExtResource("1_y4nmv")
+speed = null
+acceleration = null

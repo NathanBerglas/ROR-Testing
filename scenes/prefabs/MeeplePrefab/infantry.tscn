@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cc7tksw7agcxo"]
 
-[ext_resource type="Script" uid="uid://b32p4q6vmg88j" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
+[ext_resource type="Script" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
 [ext_resource type="Texture2D" uid="uid://div2aq3pn7qg3" path="res://assets/RedFootSoldier.png" id="2_5wvjh"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
@@ -17,7 +17,6 @@ lock_rotation = true
 linear_damp = 2.0
 
 [node name="Sprite2D" type="Sprite2D" parent="RigidBody2D" unique_id=1552316814]
-modulate = Color(0.748403, 0.607353, 0, 0.407843)
 texture_filter = 1
 texture_repeat = 1
 scale = Vector2(0.25, 0.25)

@@ -1,7 +1,7 @@
 extends Node2D
 
 @export var targetMarker: Sprite2D
-@export var infrantry_prefab: PackedScene
+@export var infantry_prefab: PackedScene
 @onready var selection_box = $ColorRect
 @onready var RCLICKORDER = $VBoxContainer/Order
 @onready var RCLICKGROUP = $VBoxContainer/Group
@@ -9,7 +9,8 @@ extends Node2D
 @onready var RCLICKMENU = $VBoxContainer
 
 var time = 0
-
+const MEEPLE_TICKS_PER_SECOND = 20
+var time_since_last_meeple_tick = 0
 #The list of meeple groups, their targets, and their colours
 var MEEPLE_ID_INDEX = 0
 var MEEPLE_POS_INDEX = 1
@@ -49,8 +50,11 @@ func _ready() -> void:
 	
 func _process(delta): #Runs every tick
 	time += delta
-
+	time_since_last_meeple_tick += delta
 	#if playerID == multiplayer.get_unique_id():
+	
+	if time_since_last_meeple_tick > 1 / MEEPLE_TICKS_PER_SECOND:
+		meeple_process()
 	
 	#Goes through every meeple and sets them to their colour and resets their 
 	cleanMeeples()
@@ -61,7 +65,7 @@ func _process(delta): #Runs every tick
 			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum])
 				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-		var instance = infrantry_prefab.instantiate()
+		var instance = infantry_prefab.instantiate()
 		
 	
 		
@@ -70,7 +74,6 @@ func _process(delta): #Runs every tick
 		MEEPLE_ID_COUNTER += 1
 		
 		instance.global_position = grid.hex_center(get_global_mouse_position())
-		
 		#instance.target = group_targets[0]
 		
 		# Create instance
@@ -168,6 +171,25 @@ func _process(delta): #Runs every tick
 					equalize(GameManager.Players[p].meepleInfo)
 	"""
 
+# Moves Meeples and checks if they've arrived at their destination
+func _physics_process(delta: float) -> void:
+	for m in unorderedMeeples:
+		if !m.shouldBeMoving:
+			return
+		var next_hex: Vector2 = m.path[0]
+		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
+		if (next_hex - m.global_position).length() >= m.speed * delta: # Not yet arrived
+			m.global_position += dir_to_next_hex * m.speed * delta
+			return
+		var next_hex_tile = grid.probe(m.path[0])
+		if (next_hex_tile.classification == 3):
+			grid.meeple_end_merge()
+			freeMeeple(m.UNIQUEID)
+		else:
+			m.path.pop(0)
+			m.shouldBeMoving = false
+
+
 #Updates the selction box to where the mouse is
 func update_selection_box():
 	var top_left = selecting
@@ -183,7 +205,7 @@ func update_selection_box():
 	selection_box.size = size
 
 func spawn_meeple(position):
-	var instance = infrantry_prefab.instantiate()
+	var instance = infantry_prefab.instantiate()
 	instance.UNIQUEID = MEEPLE_ID_COUNTER
 	MEEPLE_ID_COUNTER += 1
 	
@@ -310,7 +332,7 @@ func cleanNodes(meepleList):
 	
 	while x < meepleList.size():
 		if x >= unorderedMeeples.size():
-			var instance = infrantry_prefab.instantiate()
+			var instance = infantry_prefab.instantiate()
 			
 			instance.UNIQUEID = meepleList[x][MEEPLE_ID_INDEX]
 			
@@ -355,7 +377,6 @@ func updatePos(meepleList):
 					
 """
 
-
 func cleanMeeples(): #Updates the Grid and merges meeples
 	var vectorsSeen = []
 	var vectorsSaved = []
@@ -374,7 +395,7 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
 	#It then sets all vectors seen to have a meeple in them in the grid
 	for m in unorderedMeeples:
-		m.shouldBeMoving = true
+		#m.shouldBeMoving = true
 		if m.path:
 			for i in range (m.path.size()):
 			
@@ -440,7 +461,6 @@ func atDest(meeple):
 
 
 func freeMeeple(id):
-	
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
 			unorderedMeeples.pop_at(i).queue_free()
@@ -449,19 +469,40 @@ func freeMeeple(id):
 
 func meeple_end_merge():
 	return
+
+
+func meeple_process():
+	for m in unorderedMeeples:
+		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
+			return
+		if (len(m.path) > 0):
+			var ingress_result = grid.hex_ingress(m.path[0])
+			if (ingress_result == "Approved"):
+				grid.hex_egress()
+				m.shouldBeMoving = true
+				return
+			elif (ingress_result == "Pending"):
+				m.waiting = true
+				return
+			elif (ingress_result == "Attacking"):
+				m.attackTarget = true
+				return
+			else: # Redirected
+				m.path = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false, false)
+
 '''
-Meeple Move Algorithm: MMA (Without attacking)
+Meeple Move Algorithm: MMA
 
 --------------------------------------------------
 				MEEPLE_CONTROL:
 --------------------------------------------------
 
-~~~ On Every Tick: ~~~
+~~~ On Every Tick: ~~~ DONE
 1. Is this tick a Meeple Tick?
 	Yes: Run Meeple Tick
 	No: Continue
 
-~~~ On Movement Commmand: ~~~
+~~~ On Movement Commmand: ~~~ DONE
 1. Call find_path in GRID
 	Path Found: Set meeple's path to newly found path -> Continue
 	Path Not Found: Break
@@ -514,10 +555,10 @@ Meeple Move Algorithm: MMA (Without attacking)
 2. Call attack_target_move on enemy MEEPLE_CONTROL and pass the popped meeple -> Call egress_granted providing the meeple which egressed -> Continue
 
 --------------------------------------------------
-				MEEPLE:
+		For every meeple in MEEPLE_CONTROL:
 --------------------------------------------------
 
-~~~ On Every Meeple Tick: ~~~
+~~~ On Every Meeple Tick: ~~~ DONE
 1. Does the meeple have the moving flag, waiting flag, or attack target?
 	Yes: 	Break
 	No: 	Continue
@@ -529,7 +570,7 @@ Meeple Move Algorithm: MMA (Without attacking)
 		Attacking: 	Set attack target to meeple in the new hex
 	No: 	Continue
 
-~~~ On Every Physics Tick: ~~~
+~~~ On Every Physics Tick: ~~~ DONE
 1. Does the meeple have the moving flag?
 	Yes:	Move towards target hex -> Has the meeple arrived at the hex?
 		Yes:	Continue
