@@ -4,7 +4,7 @@ class_name meeple
 
 
 @export var area_2d: Area2D
-@export var speed: float = 200
+@export var speed: float = 20#0
 @export var acceleration: float = 300
 
 
@@ -36,13 +36,29 @@ var type = "Meeple"
 func _process(delta): #runs on each meeple every tick
 	label.text = str(HP)
 	
-	if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
-		_go_to_target(delta)
+	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
+	#	_go_to_target(delta)
 	
 	#if dest != null and closeEnough(): #meeple reaches destination
 		#dest = null
 	
+func _physics_process(delta: float) -> void:
+	if !shouldBeMoving:
+		return
+	var next_hex: Vector2 = path[0]
+	var dir_to_next_hex = (next_hex - global_position) / (next_hex - global_position).length()
+	if (next_hex - global_position).length() >= speed: # Not yet arrived
+		global_position += dir_to_next_hex * speed
+		return
 	
+	var next_hex_tile = grid.probe(path[0])
+	if (next_hex_tile.classification == 3):
+		grid.meeple_end_merge()
+		queue_free()
+	else:
+		path.pop(0)
+		shouldBeMoving = false
+		
 func closeEnough(): #checking if a meeple is close enough to their destination
 	var dist = rb.global_position - path[0]
 

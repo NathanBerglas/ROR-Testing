@@ -432,9 +432,6 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 			base.HP += n
 
 
-
-	
-	
 func atDest(meeple):
 	if meeple.path == null:
 		return true
@@ -449,6 +446,9 @@ func freeMeeple(id):
 			unorderedMeeples.pop_at(i).queue_free()
 			return
 
+
+func meeple_end_merge():
+	return
 '''
 Meeple Move Algorithm: MMA (Without attacking)
 

@@ -12,7 +12,7 @@ var created = false
 var grid: Array = []
 
 @export var hex_prefab: PackedScene
-
+const border_colours: PackedColorArray = [Color.DARK_GRAY, Color.DARK_RED, Color.SEA_GREEN, Color.STEEL_BLUE, Color.SKY_BLUE]
 
 const HEX_DIRS := [
 	Vector2i(1, 0),
@@ -33,19 +33,18 @@ const STONE_CHANCE = 3
 class tile:
 	var hex: Vector2i # (q, r)
 	var hex_pf: Node
-	var classification: int = 0 # 0 is empty, 1 is obstruction, 2 is building, and 3 is meeple
-	var traversable = true
-	var traversal_difficulty = 1.0 # Must be nonzero for AStar (i think?)
-	var biome = 0 # 0 is undefined biome
-	var objectsInside = []
-	var type: String
+	var classification: int = 0 # 0 is empty, 1 is obstruction, 2 is building, and 3 is stationary meeple, 4 is moving meeple
+	var traversable: bool = true
+	var traversal_difficulty: float = 1.0 # Must be nonzero for AStar (i think?)
+	var biome: int = 0 # 0 is undefined biome
+	var objectsInside: Array = []
+	var type: String = "NULL"
 	func _init(hex, _classification = 0):
 		self.hex = hex
 		self.classification = _classification
 		self.traversable = (classification == 0) # Only traversable if empty
-		var random = randi_range(0,TILE_TYPE_CHANCES) # 
-		
-		
+	
+		var random = randi_range(0,TILE_TYPE_CHANCES)
 		if random == ARABLE_CHANCE:
 			self.type = "ARABLE"
 		elif random == FOREST_CHANCE:
@@ -60,23 +59,11 @@ class tile:
 #Chat if needed
 func update_grid(hex: Vector2i, classification: int, objects):
 	var tile_to_update = grid[hex.x][hex.y]
-	#print(classification)
 	tile_to_update.classification = classification ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE 
-	tile_to_update.traversable = classification
+	tile_to_update.traversable = (classification==0 || classification==4)
 	tile_to_update.objectsInside = objects
-	if classification != 0:
-		astar.set_point_disabled(_hex_to_id(hex), true)
-	else:
-		astar.set_point_disabled(_hex_to_id(hex), false)
-	#print(tile_to_update.classification)
-	if tile_to_update.classification == 0:
-		tile_to_update.hex_pf.get_node("Border").modulate = Color.DARK_GRAY 
-	elif tile_to_update.classification == 1:
-		tile_to_update.hex_pf.get_node("Border").modulate = Color.DARK_RED 
-	elif tile_to_update.classification == 2:
-		tile_to_update.hex_pf.get_node("Border").modulate = Color.SEA_GREEN
-	elif tile_to_update.classification == 3:
-		tile_to_update.hex_pf.get_node("Border").modulate = Color.PALE_VIOLET_RED
+	astar.set_point_disabled(_hex_to_id(hex), !tile_to_update.traversable)
+	tile_to_update.hex_pf.get_node("Border").modulate = border_colours[tile_to_update.classification]
 
 
 #Added by Jacob -> Probe by takes axial Hex
@@ -143,35 +130,31 @@ func probe(coordinate: Vector2i):
 
 # For AStar indexing. Simply flattens hex
 func _hex_to_id(hex: Vector2i) -> int:
-	
 	return hex.y * GRID_COUNT.x + hex.x
+
 
 func update_astar():
 	astar.clear()
-	
 	for q in range(GRID_COUNT.x):
 		for r in range(GRID_COUNT.y):
 			var t: tile = grid[q][r]
 			var id = _hex_to_id(t.hex)
 			astar.add_point(id, t.hex, t.traversal_difficulty)
-			if !t.traversable: # Tile is not traversable
-				astar.set_point_disabled(id, true)
+			astar.set_point_disabled(id, !t.traversable)
 				
 	for q in range(GRID_COUNT.x):
 		for r in range(GRID_COUNT.y):
-			
 			var t: tile = grid[q][r]
 			var id = _hex_to_id(t.hex)
-			#print(id)
-			if !t.traversable:
-				continue
+			#if !t.traversable:
+			#	continue
 			for direction in HEX_DIRS:
 				var next_hex = t.hex + direction
 				if !_hex_in_bounds(next_hex):
 					continue
 				var next_tile = grid[next_hex.x][next_hex.y]
-				if next_tile.traversable:
-					astar.connect_points(id, _hex_to_id(next_hex), false)
+				#if next_tile.traversable:
+				astar.connect_points(id, _hex_to_id(next_hex), false)
 					#print(id, " --> ", _hex_to_id(next_hex))
 
 
@@ -188,31 +171,32 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attac
 	if (grid[end_hex.x][end_hex.y].classification == 3 and !attackingBoolean):
 		astar.set_point_disabled(end_id, false)
 		
-	
 	var path_ids = astar.get_id_path(start_id, end_id, partialPathBoolean) # maybe allow partial paths?
+	astar.set_point_disabled(end_id, !grid[end_hex.x][end_hex.y].traversable)
+	
 	if path_ids.size() == 0:
 		return [start_hex]
 	var path_hexes: Array[Vector2i] = []
-	
-
-	for id in path_ids: # Unflatten path_ids\
-		
+	for id in path_ids: # Unflatten path_ids
 		var q: int = id % GRID_COUNT.x
 		var r: int = id / GRID_COUNT.x
 		path_hexes.append(Vector2i(q, r))
-	
-	#if path_hexes[0] == start_hex:
-		#path_hexes.pop_at(0)
-	if (grid[end_hex.x][end_hex.y].classification == 3):
-		astar.set_point_disabled(end_id, true)
+		
 	return path_hexes
+	
 
 func _ready():
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
 		for r in range(GRID_COUNT.y):
 			var tileToCreate = tile.new(Vector2i(q, r))
-			row.append(tileToCreate)
+			
+			var new_hex = hex_prefab.instantiate()
+			new_hex.position = axial_hex_to_coord(Vector2i(q, r))
+			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2
+			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
+			self.add_child(new_hex)
+			tileToCreate.hex_pf = new_hex
 			
 			if tileToCreate.type == "ARABLE":
 				var instance = arable_land_prefab.instantiate()
@@ -230,45 +214,6 @@ func _ready():
 				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
 				add_child(instance)
 		
+			row.append(tileToCreate)
 		grid.append(row)
 	update_astar()
-	# Draw Grid
-	for row in grid:
-		for h in row:
-			var q = h.hex.x
-			var r = h.hex.y
-			var new_hex = hex_prefab.instantiate()
-			new_hex.position = axial_hex_to_coord(Vector2i(q, r))
-			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2
-			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
-			self.add_child(new_hex)
-			h.hex_pf = new_hex
-
-
-#func draw_hex(center: Vector2, size: float, color: Color) -> void:
-	#var points: PackedVector2Array = []
-	#for i in range(6):
-		#var angle = deg_to_rad(60 * i - 30) # pointy-top
-		#points.append(center + Vector2(cos(angle), sin(angle)) * size * 0.975)
-	#for i in range(6):
-		#draw_line(points[i], points[(i + 1) % 6], color, size*0.02)
-	#var border_points: PackedVector2Array = []
-	#for i in range(6):
-		#var angle = deg_to_rad(60 * i - 30) # pointy-top
-		#border_points.append(center + Vector2(cos(angle), sin(angle)) * size)
-	#for i in range(6):
-		#draw_line(border_points[i], border_points[(i + 1) % 6], Color(0.2, 0.2, 0.2, 1.0), size*0.025)
-	#
-#func _draw():
-	#for q in range(GRID_COUNT.x):
-		#for r in range(GRID_COUNT.y):
-			#var hex = Vector2i(q, r)
-			#var center = axial_hex_to_coord(hex)
-			#if grid[hex.x][hex.y].classification == 0:
-				#draw_hex(center, HEX_SIZE, Color.DARK_GRAY)
-			#elif grid[hex.x][hex.y].classification == 1:
-				#draw_hex(center, HEX_SIZE, Color.DARK_RED)
-			#elif grid[hex.x][hex.y].classification == 2:
-				#draw_hex(center, HEX_SIZE, Color.SEA_GREEN)
-			#elif grid[hex.x][hex.y].classification == 3:
-				#draw_hex(center, HEX_SIZE, Color.PALE_VIOLET_RED)

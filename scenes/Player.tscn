@@ -21,3 +21,4 @@ resourceHub_prefab = ExtResource("4_70d11")
 position = Vector2(577, 323)
 
 [node name="Grid" parent="." unique_id=1554468060 instance=ExtResource("5_qu4a1")]
+GRID_COUNT = Vector2i(190, 110)
