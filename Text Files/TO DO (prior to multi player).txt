@@ -14,7 +14,7 @@ Ruins with runes -> need biome gen first
 
 Mobs -> Need biome gen first
 
-finish resource hub shit -> MMA
+finish resource hub mechanics-> MMA
 
 add new army types -> need MMA first
 
@@ -44,6 +44,3 @@ General Aces -> need heroes, biome gen, mobs
 FINISHED Stuff (for yay purposes):
 
 implement better building menu (kinda)
-
-
-

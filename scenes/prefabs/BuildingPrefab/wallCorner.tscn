@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://btb83rswug0t1"]
+
+[ext_resource type="Script" uid="uid://d3l4icn2pv767" path="res://scripts/Buildings/wall_corner.gd" id="1_rbt3o"]
+[ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/WallCorner.png" id="2_0p5qk"]
+
+[node name="wallCorner" type="Node2D" unique_id=2129524693]
+script = ExtResource("1_rbt3o")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=365241787]
+freeze = true
+
+[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D" unique_id=1807959290]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_0p5qk")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=776780238]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

@@ -1,40 +1,60 @@
 extends Node2D
 @onready var hud = $buildingHud
 
+#Ensuring all of our prebabs and their buttons are loaded in
 @onready var farmButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/FarmButton
-@onready var stoneMineButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/StoneMineButton
-@onready var lumberJackButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/LumberJackButton
-@onready var resourceHubButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/ResourceHubButton
-
 @onready var farmLabel = $resourceBuildingHud/FarmButtonLabel
+@export var farm_prefab: PackedScene
+
+
+@onready var stoneMineButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/StoneMineButton
 @onready var stoneMineLabel = $resourceBuildingHud/StoneMineButtonLabel2
+@export var stoneMine_prefab: PackedScene
+
+
+@onready var lumberJackButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/LumberJackButton
 @onready var lumberJackLabel = $resourceBuildingHud/LumberJackButtonLabel
+@export var lumberJack_prefab: PackedScene
+
+
+@onready var resourceHubButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/ResourceHubButton
 @onready var resourceHubLabel = $resourceBuildingHud/ResourceHubButtonLabel
+@export var resourceHub_prefab: PackedScene
+
 
 @onready var barracksButton = $combatBuildingHud/ScrollContainer/VBoxContainer/BarracksButton
-
 @onready var barracksLabel = $combatBuildingHud/BarracksButtonLabel
-@onready var closeCombatBuilding = $combatBuildingHud/ScrollContainer/VBoxContainer/closeCombatMenu
+@export var barracks_prefab: PackedScene
 
+
+@onready var wallCornerButton = $combatBuildingHud/ScrollContainer/VBoxContainer/wallCornerButton
+@onready var wallCornerLabel = $combatBuildingHud/wallCornerButtonLabel
+@export var wallCorner_prefab: PackedScene
+@export var wallSegment_prefab: PackedScene
+
+#Combat building menu
 @onready var combatBuildingMenu = $combatBuildingHud/ScrollContainer
+@onready var closeCombatBuilding = $combatBuildingHud/ScrollContainer/VBoxContainer/closeCombatMenu
 @onready var combatBuildingMenuButton = $buildingHud/combatBuildingButton
+@onready var combatBuildingLabel = $buildingHud/combatBuildingsLabel
 
+#Resource building menu
 @onready var resourceBuildingMenu = $resourceBuildingHud/ScrollContainer
 @onready var resourceBuildingMenuButton = $buildingHud/resourceBuildingButton
 @onready var closeResourceBuilding = $resourceBuildingHud/ScrollContainer/VBoxContainer/closeResourceMenu
-@onready var selection_box = $ColorRect
-
-@onready var RCLICKMENU = $RclickMenuResourceHub
-@onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
-
-@onready var combatBuildingLabel = $buildingHud/combatBuildingsLabel
 @onready var resourceBuildingLabel = $buildingHud/resourceBuildingLabel
 
-@export var farm_prefab: PackedScene
-@export var lumberJack_prefab: PackedScene
-@export var stoneMine_prefab: PackedScene
-@export var resourceHub_prefab: PackedScene
-@export var barracks_prefab: PackedScene
+#IDK why this is here
+@onready var selection_box = $ColorRect
+
+#Menu for the resource hub
+@onready var RCLICK_ResourceHub = $RclickMenuResourceHub
+@onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
+
+
+
+
+
 
 
 
@@ -95,11 +115,15 @@ func _ready(): #Runs on start, connects buttons
 	closeCombatBuilding.button_down.connect(_on_closeCombatMenu_button_pressed)
 	closeCombatBuilding.button_up.connect(_on_closeCombatMenu_button_released)
 	
+	wallCornerButton.button_down.connect(_on_wallCorner_button_pressed)
+	wallCornerButton.button_up.connect(_on_wallCorner_button_released)
+
 	farmLabel.visible = false
 	stoneMineLabel.visible = false
 	lumberJackLabel.visible = false
 	resourceHubLabel.visible = false
 	resourceBuildingMenu.visible = false
+	wallCornerLabel.visible = false
 	
 	resourceButtons.append([stoneMineButton, stoneMineLabel])
 	resourceButtons.append([farmButton, farmLabel])
@@ -107,12 +131,47 @@ func _ready(): #Runs on start, connects buttons
 	resourceButtons.append([resourceHubButton, resourceHubLabel])
 	
 	combatButtons.append([barracksButton, barracksLabel])
-	
-	RCLICKMENU.visible = false
+	combatButtons.append([wallCornerButton, wallCornerLabel])
+	RCLICK_ResourceHub.visible = false
 
 	#print(playerID)
 	
 
+func _on_wallCorner_button_pressed():
+	if food < 50 or stone < 50 or wood < 50:
+		print("Ya Broke")
+		return
+	
+	
+	beginDragging("WallCorner")
+
+func _on_wallCorner_button_released():
+	if buildingDraggin != "WallCorner" or wood < 50 or stone < 50 or food < 50:
+		buildingDraggin = null
+		return
+	if finishDragging("WallCorner") == false:
+		return
+	var corner = buildings[buildings.size() - 1]
+	
+	for d in grid.HEX_DIRS:
+		var objectsInside = grid.axial_probe(grid.coord_to_axial_hex(corner.get_global_position()) + d).objectsInside
+		if objectsInside.size() > 0 and objectsInside[0].type == "WallCorner":
+			var direction = corner.get_global_position() - objectsInside[0].get_global_position()
+			var length = direction.length()
+			var midpoint = corner.get_global_position() + (direction * -1) / 2.0
+			
+			var instance = wallSegment_prefab.instantiate()
+			corner.add_child(instance)
+			
+			instance.rotation = direction.angle()
+			instance.set_global_position(midpoint)
+			instance.scale.x = length / 617
+			objectsInside[0].segments.append(instance)
+			
+	food -= 50
+	wood -= 50
+	stone -= 50
+	
 func _on_combatBuildingMenu_button_pressed():
 	var what = "HUH"
 func _on_combatBuildingMenu_button_released():
@@ -140,19 +199,19 @@ func _on_closeResourceMenu_button_released():
 	resourceBuildingMenu.visible = false
 
 func _on_manageCaravans_button_pressed():
-	if RCLICKMENU.visible == false:
+	if RCLICK_ResourceHub.visible == false:
 		return
 	
 	
 func _on_manageCaravans_button_released():
-	if RCLICKMENU.visible == false:
+	if RCLICK_ResourceHub.visible == false:
 		return
-	var resourceHubAtLocation = grid.probe(RCLICKMENU.get_global_position()).objectsInside[0]
+	var resourceHubAtLocation = grid.probe(RCLICK_ResourceHub.get_global_position()).objectsInside[0]
 	resourceHubAtLocation.manageCaravanMenu.visible = true
-	resourceHubAtLocation.manageCaravanMenu.set_global_position(RCLICKMENU.get_global_position())
+	resourceHubAtLocation.manageCaravanMenu.set_global_position(RCLICK_ResourceHub.get_global_position())
 	
 	
-	RCLICKMENU.visible = false
+	RCLICK_ResourceHub.visible = false
 	
 #Start dragging the farm if has enough money
 func _on_farm_button_pressed():
@@ -273,10 +332,11 @@ func _process(delta): #runs every tick
 	#Opens up the right click menu
 	if Input.is_action_just_pressed("right_click_menu"):
 		if grid.probe(get_global_mouse_position()).objectsInside.size() > 0 and grid.probe(get_global_mouse_position()).objectsInside[0].type == "ResourceHub":
-			RCLICKMENU.set_global_position(get_global_mouse_position())
-			RCLICKMENU.visible = true
+			RCLICK_ResourceHub.set_global_position(get_global_mouse_position())
+			RCLICK_ResourceHub.visible = true
 		else:
-			RCLICKMENU.visible = false
+			print("We vibin?")
+			RCLICK_ResourceHub.visible = false
 		
 	for b in buildings:
 		b.updateHPBar()
@@ -382,7 +442,13 @@ func freeBuilding(ID):
 	for i in range(buildings.size()):
 		if buildings[i].BUILDING_UNIQUE_ID == ID:
 			grid.update_grid(buildings[i].pos, 0, [])
-			buildings.pop_at(i).queue_free()
+			var object = buildings.pop_at(i)
+			if object.type == "WallCorner":
+				while object.segments.size() > 0:
+					object.segments.pop_at(0).queue_free()
+					
+			
+			object.queue_free()
 			return
 
 func beginDragging(buildingName):
@@ -392,6 +458,9 @@ func beginDragging(buildingName):
 	#Adding the farm to be dragged to the list of buildings
 	# hashtag-No way this will cause errors in the future
 	var instance = null
+	#Convert this into a list of each prefab, then have buildingName 
+	#passed in as an int representing its index in the list
+	
 	if buildingName == "Farm":
 		instance = farm_prefab.instantiate()
 	elif buildingName == "ResourceHub":
@@ -402,6 +471,8 @@ func beginDragging(buildingName):
 		instance = lumberJack_prefab.instantiate()
 	elif buildingName == "Barracks":
 		instance = barracks_prefab.instantiate()
+	elif buildingName == "WallCorner":
+		instance = wallCorner_prefab.instantiate()
 	 #New FAKE money farm
 	
 	instance.fake = true

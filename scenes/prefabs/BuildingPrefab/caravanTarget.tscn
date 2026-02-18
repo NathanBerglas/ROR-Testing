@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ckihem7no8ate"]
 
 [ext_resource type="Texture2D" uid="uid://d1srqj2qwky1a" path="res://assets/caravanTarget.png" id="1_hp2fd"]
-[ext_resource type="Script" uid="uid://bxe7xwosy1ugt" path="res://scenes/prefabs/BuildingPrefab/caravan_target.gd" id="2_uunyl"]
+[ext_resource type="Script" uid="uid://bxe7xwosy1ugt" path="res://scripts/Buildings/caravan_target.gd" id="2_uunyl"]
 
 [node name="Target" type="Sprite2D" unique_id=1876901742]
 texture_filter = 1

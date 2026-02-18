@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://ch580mkbsdw2n"]
+
+[ext_resource type="Script" uid="uid://jxkc4waxk4lx" path="res://scripts/Buildings/wall_segment.gd" id="1_042i8"]
+[ext_resource type="Texture2D" uid="uid://cj3sahktkmqep" path="res://assets/wallSegment.png" id="2_eh454"]
+
+[node name="wallSegment" type="Node2D" unique_id=2129524693]
+script = ExtResource("1_042i8")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=365241787]
+freeze = true
+
+[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D" unique_id=1807959290]
+z_index = -1
+scale = Vector2(1, 0.34259257)
+texture = ExtResource("2_eh454")

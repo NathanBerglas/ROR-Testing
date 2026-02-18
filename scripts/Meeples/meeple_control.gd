@@ -96,7 +96,7 @@ func _process(delta): #Runs every tick
 	
 	#Opens up the right click menu
 	elif Input.is_action_just_pressed("right_click_menu"):
-		if grid.probe(get_global_mouse_position()).classification != 2:
+		if grid.probe(get_global_mouse_position()).objectsInside.size() < 1 or grid.probe(get_global_mouse_position()).objectsInside[0].type != "ResourceHub":
 			RCLICKMENU.set_global_position(get_global_mouse_position())
 			RCLICKMENU.visible = true
 		else:

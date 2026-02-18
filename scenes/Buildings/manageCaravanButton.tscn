@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cjbl8iopdsxjb"]
 
-[ext_resource type="Script" uid="uid://co0bf0xx2myoy" path="res://scenes/Buildings/manage_caravan_button.gd" id="1_jmbjs"]
+[ext_resource type="Script" uid="uid://co0bf0xx2myoy" path="res://scripts/Buildings/manage_caravan_button.gd" id="1_jmbjs"]
 
 [node name="ManageCaravanButton" type="Button" unique_id=923080638]
-text = "<Hi Nate, if you are seeing this, some code fked up>"
+text = "<Hi Nate, if you are seeing this, some code messed up>"
 script = ExtResource("1_jmbjs")

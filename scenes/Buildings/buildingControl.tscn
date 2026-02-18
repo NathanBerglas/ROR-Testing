@@ -7,12 +7,16 @@
 [ext_resource type="PackedScene" uid="uid://vr7ll0w6bfdx" path="res://scenes/prefabs/BuildingPrefab/barracks.tscn" id="3_fbp8a"]
 [ext_resource type="PackedScene" uid="uid://dxr3aaa3ro1mf" path="res://scenes/prefabs/BuildingPrefab/StoneMine.tscn" id="4_cq801"]
 [ext_resource type="Texture2D" uid="uid://chvsahw5yjflm" path="res://assets/farm.png" id="5_fbp8a"]
+[ext_resource type="PackedScene" uid="uid://bvicor1lw62ay" path="res://scenes/prefabs/BuildingPrefab/resourceHub.tscn" id="5_u7xp7"]
 [ext_resource type="Texture2D" uid="uid://dmme2pmdcs6we" path="res://assets/barracks.png" id="5_vw06n"]
 [ext_resource type="Texture2D" uid="uid://bmdh3cno6m74l" path="res://assets/stoneMine.png" id="7_gftes"]
+[ext_resource type="PackedScene" uid="uid://btb83rswug0t1" path="res://scenes/prefabs/BuildingPrefab/wallCorner.tscn" id="7_t6ejh"]
 [ext_resource type="Texture2D" uid="uid://cnamqjcjw6sa1" path="res://assets/resourceBuildingMenuButton.png" id="8_3co7m"]
+[ext_resource type="PackedScene" uid="uid://ch580mkbsdw2n" path="res://scenes/prefabs/BuildingPrefab/wallSegment.tscn" id="8_hlxnr"]
 [ext_resource type="Texture2D" uid="uid://b2jmavmsncpfu" path="res://assets/combatBuildingMenuButton.png" id="8_rj1gy"]
 [ext_resource type="Texture2D" uid="uid://bmjqv3d2068k3" path="res://assets/lumberJacks.png" id="8_w1qyp"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/centralHub.png" id="11_cq801"]
+[ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/WallCorner.png" id="16_t6ejh"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
 
@@ -23,9 +27,12 @@
 [node name="BuildingControl" type="Node2D" unique_id=390504468]
 script = ExtResource("1_kvhp6")
 farm_prefab = ExtResource("2_fbp8a")
-lumberJack_prefab = ExtResource("3_bfbke")
 stoneMine_prefab = ExtResource("4_cq801")
+lumberJack_prefab = ExtResource("3_bfbke")
+resourceHub_prefab = ExtResource("5_u7xp7")
 barracks_prefab = ExtResource("3_fbp8a")
+wallCorner_prefab = ExtResource("7_t6ejh")
+wallSegment_prefab = ExtResource("8_hlxnr")
 
 [node name="buildingHud" type="CanvasLayer" parent="." unique_id=815674145]
 script = ExtResource("2_oj14w")
@@ -102,6 +109,7 @@ metadata/_edit_use_anchors_ = true
 [node name="resourceBuildingHud" type="CanvasLayer" parent="." unique_id=1220890351]
 
 [node name="ScrollContainer" type="ScrollContainer" parent="resourceBuildingHud" unique_id=246695275]
+visible = false
 offset_left = 17.0
 offset_top = 177.0
 offset_right = 322.0
@@ -161,6 +169,7 @@ layout_mode = 2
 text = "Close"
 
 [node name="FarmButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1757334247]
+visible = false
 z_index = 1
 z_as_relative = false
 offset_left = 167.0
@@ -174,6 +183,7 @@ text = "Farm - 500F
 metadata/_edit_use_anchors_ = true
 
 [node name="StoneMineButtonLabel2" type="Label" parent="resourceBuildingHud" unique_id=185697737]
+visible = false
 offset_left = 159.0
 offset_top = 455.0
 offset_right = 423.0
@@ -197,6 +207,7 @@ text = "LumberJack - 500F
 metadata/_edit_use_anchors_ = true
 
 [node name="ResourceHubButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1235039629]
+visible = false
 offset_left = 160.0
 offset_top = 319.0
 offset_right = 481.0
@@ -229,11 +240,22 @@ flat = true
 expand_icon = true
 metadata/_edit_use_anchors_ = true
 
+[node name="wallCornerButton" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=1404969341]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("16_t6ejh")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
 [node name="closeCombatMenu" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=98211182]
 layout_mode = 2
 text = "Close"
 
 [node name="BarracksButtonLabel" type="Label" parent="combatBuildingHud" unique_id=1610006482]
+visible = false
 offset_left = 160.0
 offset_top = 182.0
 offset_right = 409.0
@@ -242,6 +264,18 @@ theme_override_font_sizes/font_size = 30
 text = "Barracks - 1000F
                    1000W
                    1000S"
+metadata/_edit_use_anchors_ = true
+
+[node name="wallCornerButtonLabel" type="Label" parent="combatBuildingHud" unique_id=1721244334]
+visible = false
+offset_left = 170.0
+offset_top = 317.0
+offset_right = 419.0
+offset_bottom = 449.0
+theme_override_font_sizes/font_size = 30
+text = "Wall - 	50F
+           50W
+           50S"
 metadata/_edit_use_anchors_ = true
 
 [node name="RclickMenuResourceHub" type="VBoxContainer" parent="." unique_id=890369603]
