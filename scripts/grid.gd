@@ -6,10 +6,12 @@ extends Node2D
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
+@export var meeple_control: Node2D
 const SQRT_3 = 1.73205080757
 
 var created = false
 var grid: Array = []
+
 
 @export var hex_prefab: PackedScene
 const border_colours: PackedColorArray = [Color.DARK_GRAY, Color.DARK_RED, Color.SEA_GREEN, Color.STEEL_BLUE, Color.SKY_BLUE]
@@ -38,11 +40,12 @@ class tile:
 	var traversal_difficulty: float = 1.0 # Must be nonzero for AStar (i think?)
 	var biome: int = 0 # 0 is undefined biome
 	var objectsInside: Array = []
+	var queue: Array = []
 	var type: String = "NULL"
-	func _init(hex, _classification = 0):
-		self.hex = hex
+	func _init(init_hex, _classification = 0):
+		self.hex = init_hex
 		self.classification = _classification
-		self.traversable = (classification == 0) # Only traversable if empty
+		self.traversable = (classification == 0 || classification == 4) # Only traversable if empty or moving meeple
 	
 		var random = randi_range(0,TILE_TYPE_CHANCES)
 		if random == ARABLE_CHANCE:
@@ -57,7 +60,7 @@ class tile:
 
 #Added by Jacob -> External script that doesn't care about rules, set tile to that classification
 #Chat if needed
-func update_grid(hex: Vector2i, classification: int, objects):
+func update_grid(hex: Vector2i, classification: int, objects: Array):
 	var tile_to_update = grid[hex.x][hex.y]
 	tile_to_update.classification = classification ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE 
 	tile_to_update.traversable = (classification==0 || classification==4)
@@ -103,8 +106,8 @@ func _hex_in_bounds(hex: Vector2i) -> bool:
 
 # Takes the coordinates, ie. pixel position on map and coverts it to a hex position, ie. (q, r)
 func coord_to_axial_hex(coordinate: Vector2i):
-	var q: float = (SQRT_3 / 3.0 * coordinate.x - 1.0 / 3.0 * coordinate.y) / HEX_SIZE
-	var r: float = (2.0 / 3.0 * coordinate.y) / HEX_SIZE
+	var q: int = int((SQRT_3 / 3.0 * coordinate.x - 1.0 / 3.0 * coordinate.y) / HEX_SIZE)
+	var r: int = int((2.0 / 3.0 * coordinate.y) / HEX_SIZE)
 	if _hex_in_bounds(Vector2i(q, r)):
 		return _hex_round(Vector2(q, r))
 	else:
@@ -152,7 +155,7 @@ func update_astar():
 				var next_hex = t.hex + direction
 				if !_hex_in_bounds(next_hex):
 					continue
-				var next_tile = grid[next_hex.x][next_hex.y]
+				#var next_tile = grid[next_hex.x][next_hex.y]
 				#if next_tile.traversable:
 				astar.connect_points(id, _hex_to_id(next_hex), false)
 					#print(id, " --> ", _hex_to_id(next_hex))
@@ -179,11 +182,11 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attac
 	var path_hexes: Array[Vector2i] = []
 	for id in path_ids: # Unflatten path_ids
 		var q: int = id % GRID_COUNT.x
-		var r: int = id / GRID_COUNT.x
+		var r: int = int(1.0 * id / GRID_COUNT.x) #1.0 for floating division
 		path_hexes.append(Vector2i(q, r))
 		
 	return path_hexes
-	
+
 
 func _ready():
 	for q in range(GRID_COUNT.x):
@@ -217,3 +220,32 @@ func _ready():
 			row.append(tileToCreate)
 		grid.append(row)
 	update_astar()
+
+
+func hex_ingress(ingressing_hex, meeple_requesting):
+	var ingressing_tile = grid[ingressing_hex.x][ingressing_hex.y]
+	if len(ingressing_tile.queue) > 0:
+		ingressing_tile.queue.push_back(meeple_requesting)
+		return "PENDING"
+	if ingressing_tile.classification != 0:
+		update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
+	elif ingressing_tile.classification != 3 || ingressing_tile.classification != 4:
+		return "REDIRECTED"
+	# Check if the meeple is on the same team -> if not, attack!
+	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
+	var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
+	if (meeple_in_ingressing_hex.path[-1] == meeple_requesting.path[-1]):
+		meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
+		return "APPROVED"
+	if (len(meeple_in_ingressing_hex.path) > 1):
+		ingressing_tile.queue.push_back(meeple_requesting)
+		return "PENDING"
+	return "REDIRECTED"
+	
+func hex_egress(egressing_hex):
+	var egressing_meeple = egressing_hex.egressing_hex.objectsInside[0]
+	if len(egressing_hex.queue) == 0:
+		update_grid(egressing_hex, 0, egressing_hex.objectsInside)
+	else:
+		update_grid(egressing_hex, 4, [egressing_hex.queue.pop_front])
+	meeple_control.egress_granted(egressing_meeple) # Feels a little icky

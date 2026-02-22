@@ -53,11 +53,11 @@ func _process(delta): #Runs every tick
 	time_since_last_meeple_tick += delta
 	#if playerID == multiplayer.get_unique_id():
 	
-	if time_since_last_meeple_tick > 1 / MEEPLE_TICKS_PER_SECOND:
+	if time_since_last_meeple_tick > 1.0 / MEEPLE_TICKS_PER_SECOND:
 		meeple_process()
 	
 	#Goes through every meeple and sets them to their colour and resets their 
-	cleanMeeples()
+	#cleanMeeples()
 	for g in range(0,unorderedMeeples.size()):
 		if unorderedMeeples[g].selected:
 			unorderedMeeples[g].highlight(Color(3,3,3))
@@ -204,14 +204,14 @@ func update_selection_box():
 	selection_box.global_position = top_left
 	selection_box.size = size
 
-func spawn_meeple(position):
+func spawn_meeple(pos):
 	var instance = infantry_prefab.instantiate()
 	instance.UNIQUEID = MEEPLE_ID_COUNTER
 	MEEPLE_ID_COUNTER += 1
 	
 	add_child(instance)
 	set_id(instance)
-	instance.set_global_position(grid.axial_hex_to_coord(position))
+	instance.set_global_position(grid.axial_hex_to_coord(pos))
 	unorderedMeeples.push_back(instance)
 	
 	
@@ -259,7 +259,7 @@ func _on_attack_button_pressed():
 	
 	for m in unorderedMeeples:
 		if m.selected:
-			var tile = grid.axial_probe(attackLoc)
+			#var tile = grid.axial_probe(attackLoc)
 			if grid.axial_probe(attackLoc).objectsInside.size() > 0:
 				m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
 				var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
@@ -318,12 +318,15 @@ func equalize(otherController):
 func get_group():
 	return group
 """
+
+
 func get_group_targets():
 	return group_targets
 func get_groupColours():
 	return groupColours
 
 
+'''
 func cleanNodes(meepleList):
 	
 	var x = 1
@@ -361,7 +364,7 @@ func cleanNodes(meepleList):
 		x += 1
 	while x < unorderedMeeples.size():
 		unorderedMeeples.pop_at(x)
-
+'''
 
 """ Multiplayer shit
 func updatePos(meepleList):
@@ -376,7 +379,7 @@ func updatePos(meepleList):
 					n.set_global_position(n1[MEEPLE_POS_INDEX])
 					
 """
-
+'''
 func cleanMeeples(): #Updates the Grid and merges meeples
 	var vectorsSeen = []
 	var vectorsSaved = []
@@ -451,14 +454,15 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 			i += 1
 		if base != null:
 			base.HP += n
+'''
 
-
-func atDest(meeple):
-	if meeple.path == null:
+'''
+func atDest(m):
+	if m.path == null:
 		return true
 	else:
 		return false
-
+'''
 
 func freeMeeple(id):
 	for i in range(unorderedMeeples.size()):
@@ -467,8 +471,17 @@ func freeMeeple(id):
 			return
 
 
-func meeple_end_merge():
-	return
+func meeple_start_merge(target_meeple):
+	target_meeple.waiting = true
+	
+
+func meeple_end_merge(incoming_meeple, target_meeple):
+	target_meeple.HP += incoming_meeple.HP
+
+
+func egress_granted(waiting_meeple):
+	waiting_meeple.waiting = false
+	waiting_meeple.shouldBeMoving = true
 
 
 func meeple_process():
@@ -476,7 +489,7 @@ func meeple_process():
 		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
 			return
 		if (len(m.path) > 0):
-			var ingress_result = grid.hex_ingress(m.path[0])
+			var ingress_result = grid.hex_ingress(grid.coord_to_axial_hex(m.path[0]), m)
 			if (ingress_result == "Approved"):
 				grid.hex_egress()
 				m.shouldBeMoving = true
@@ -507,13 +520,13 @@ Meeple Move Algorithm: MMA
 	Path Found: Set meeple's path to newly found path -> Continue
 	Path Not Found: Break
 
-~~~ On meeple_start_merge: ~~~
+~~~ On meeple_start_merge: ~~~ DONE
 1. Set target meeple waiting flag to true -> Continue
 
-~~~ On meeple_end_merge: ~~~
+~~~ On meeple_end_merge: ~~~ DONE
 1. Increase target meeple's health by the incoming meeple's health -> Continue
 
-~~~ On egress_granted: ~~~
+~~~ On egress_granted: ~~~ DONE
 1. Set meeple's waiting flag to false -> Set meeple's flag moving to true -> Continue
 
 ~~~ On attack_target_move: ~~~
@@ -529,12 +542,12 @@ Meeple Move Algorithm: MMA
 				GRID:
 --------------------------------------------------
 
-~~~ On hex_ingress: ~~~
+~~~ On hex_ingress: ~~~ DONE
 1. Is there an existing queue to enter this hex?
-	Yes:	Add meeple to queue to enter that hex -> Return Approved
+	Yes:	Add meeple to queue to enter that hex -> Return Pending
 	No:		Continue
 2. Is hex occupied?
-	Yes: Is the hex's classificatReturnion that of a meeple?
+	Yes: Is the hex's classification that of a meeple?
 		Yes: 	Continue
 		No:		Return Redirected
 	No: 	Update grid to occupy new hex -> Return Approved
@@ -548,7 +561,7 @@ Meeple Move Algorithm: MMA
 	Yes:	Add meeple to queue to enter that hex -> Return Pending
 	No:		Return Redirected
 
-~~~ On hex_egress: ~~~
+~~~ On hex_egress: ~~~ DONE
 1. Pop meeple from hex -> Does the hex have a queue?
 	Yes:	Pop a meeple out from the front of the queue -> Update grid to occupy new hex with that meeple if it
 	No:		Continue
