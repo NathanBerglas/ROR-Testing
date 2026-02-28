@@ -66,16 +66,13 @@ func _process(delta): #Runs every tick
 				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
 		var instance = infantry_prefab.instantiate()
-		
-	
-		
 		# Set instance's data
 		instance.set_id(MEEPLE_ID_COUNTER)
 		MEEPLE_ID_COUNTER += 1
-		
-		instance.global_position = grid.hex_center(get_global_mouse_position())
+		var meeple_hex = grid.hex_center(get_global_mouse_position())
+		instance.global_position = meeple_hex
+		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 4, [instance])
 		#instance.target = group_targets[0]
-		
 		# Create instance
 		add_child(instance)
 		set_id(instance)
@@ -176,17 +173,17 @@ func _physics_process(delta: float) -> void:
 	for m in unorderedMeeples:
 		if !m.shouldBeMoving:
 			return
-		var next_hex: Vector2 = m.path[0]
+		var next_hex: Vector2 = m.path[1]
 		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
 		if (next_hex - m.global_position).length() >= m.speed * delta: # Not yet arrived
 			m.global_position += dir_to_next_hex * m.speed * delta
 			return
-		var next_hex_tile = grid.probe(m.path[0])
+		var next_hex_tile = grid.probe(m.path[1])
 		if (next_hex_tile.classification == 3):
 			grid.meeple_end_merge()
 			freeMeeple(m.UNIQUEID)
 		else:
-			m.path.pop(0)
+			m.path.pop_front()
 			m.shouldBeMoving = false
 
 
@@ -286,7 +283,7 @@ func removeEmptyGroups(): #Gets rid of all groups with no meeples
 			groupColours.pop_at(i)
 			i -= 1
 			cap -= 1
-		i += 1
+		i += 1tempPath
 
 """
 func colourNotIn(): #Returns a colour for a group
@@ -449,8 +446,6 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 					freeMeeple(id)
 					i -= 1
 					
-					
-					
 			i += 1
 		if base != null:
 			base.HP += n
@@ -488,16 +483,16 @@ func meeple_process():
 	for m in unorderedMeeples:
 		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
 			return
-		if (len(m.path) > 0):
-			var ingress_result = grid.hex_ingress(grid.coord_to_axial_hex(m.path[0]), m)
-			if (ingress_result == "Approved"):
-				grid.hex_egress()
+		if (len(m.path) > 1):
+			var ingress_result = grid.hex_ingress(grid.coord_to_axial_hex(m.path[1]), m)
+			if (ingress_result == "APPROVED"):
+				grid.hex_egress(grid.coord_to_axial_hex(m.path[0]))
 				m.shouldBeMoving = true
 				return
-			elif (ingress_result == "Pending"):
+			elif (ingress_result == "PENDING"):
 				m.waiting = true
 				return
-			elif (ingress_result == "Attacking"):
+			elif (ingress_result == "ATTACKING"):
 				m.attackTarget = true
 				return
 			else: # Redirected

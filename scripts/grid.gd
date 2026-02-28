@@ -106,8 +106,8 @@ func _hex_in_bounds(hex: Vector2i) -> bool:
 
 # Takes the coordinates, ie. pixel position on map and coverts it to a hex position, ie. (q, r)
 func coord_to_axial_hex(coordinate: Vector2i):
-	var q: int = int((SQRT_3 / 3.0 * coordinate.x - 1.0 / 3.0 * coordinate.y) / HEX_SIZE)
-	var r: int = int((2.0 / 3.0 * coordinate.y) / HEX_SIZE)
+	var q: int = int(round((SQRT_3 / 3.0 * coordinate.x - 1.0 / 3.0 * coordinate.y) / HEX_SIZE))
+	var r: int = int(round((2.0 / 3.0 * coordinate.y) / HEX_SIZE))
 	if _hex_in_bounds(Vector2i(q, r)):
 		return _hex_round(Vector2(q, r))
 	else:
@@ -227,15 +227,17 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 	if len(ingressing_tile.queue) > 0:
 		ingressing_tile.queue.push_back(meeple_requesting)
 		return "PENDING"
-	if ingressing_tile.classification != 0:
+	if ingressing_tile.classification == 0:
 		update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
-	elif ingressing_tile.classification != 3 || ingressing_tile.classification != 4:
+		return "APPROVED"
+	if ingressing_tile.classification != 3 || ingressing_tile.classification != 4:
 		return "REDIRECTED"
 	# Check if the meeple is on the same team -> if not, attack!
 	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
 	var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
 	if (meeple_in_ingressing_hex.path[-1] == meeple_requesting.path[-1]):
 		meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
+		update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
 		return "APPROVED"
 	if (len(meeple_in_ingressing_hex.path) > 1):
 		ingressing_tile.queue.push_back(meeple_requesting)
@@ -243,9 +245,11 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 	return "REDIRECTED"
 	
 func hex_egress(egressing_hex):
-	var egressing_meeple = egressing_hex.egressing_hex.objectsInside[0]
-	if len(egressing_hex.queue) == 0:
-		update_grid(egressing_hex, 0, egressing_hex.objectsInside)
+	var egressing_hex_tile = grid[egressing_hex.x][egressing_hex.y]
+	var egressing_meeple = egressing_hex_tile.objectsInside[0]
+	if len(egressing_hex_tile.queue) == 0:
+		update_grid(egressing_hex, 0, egressing_hex_tile.objectsInside)
 	else:
-		update_grid(egressing_hex, 4, [egressing_hex.queue.pop_front])
-	meeple_control.egress_granted(egressing_meeple) # Feels a little icky
+		update_grid(egressing_hex, 4, [egressing_hex_tile.queue.pop_front])
+	if (len(egressing_hex_tile.queue) > 0):
+		meeple_control.egress_granted(egressing_hex_tile.queue[0]) # Feels a little icky
