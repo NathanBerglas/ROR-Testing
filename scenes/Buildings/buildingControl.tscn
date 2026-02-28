@@ -1,22 +1,24 @@
 [gd_scene format=3 uid="uid://bujhjvi3667ko"]
 
 [ext_resource type="Script" uid="uid://bgv44hfc0ifr3" path="res://scripts/Buildings/buildingControl.gd" id="1_kvhp6"]
-[ext_resource type="PackedScene" uid="uid://crdqwkqqtjfod" path="res://scenes/prefabs/BuildingPrefab/Farm.tscn" id="2_fbp8a"]
+[ext_resource type="PackedScene" uid="uid://crdqwkqqtjfod" path="res://scenes/prefabs/BuildingPrefab/ResourceBuildings/Farm.tscn" id="2_fbp8a"]
 [ext_resource type="Script" uid="uid://c4jvo5hivmdi5" path="res://scripts/Buildings/hud.gd" id="2_oj14w"]
-[ext_resource type="PackedScene" uid="uid://b6t8bbcr80x3s" path="res://scenes/prefabs/BuildingPrefab/LumberJacks.tscn" id="3_bfbke"]
-[ext_resource type="PackedScene" uid="uid://vr7ll0w6bfdx" path="res://scenes/prefabs/BuildingPrefab/barracks.tscn" id="3_fbp8a"]
-[ext_resource type="PackedScene" uid="uid://dxr3aaa3ro1mf" path="res://scenes/prefabs/BuildingPrefab/StoneMine.tscn" id="4_cq801"]
+[ext_resource type="PackedScene" uid="uid://b6t8bbcr80x3s" path="res://scenes/prefabs/BuildingPrefab/ResourceBuildings/LumberJacks.tscn" id="3_bfbke"]
+[ext_resource type="PackedScene" uid="uid://vr7ll0w6bfdx" path="res://scenes/prefabs/BuildingPrefab/CombatBuildings/barracks.tscn" id="3_fbp8a"]
+[ext_resource type="PackedScene" uid="uid://dxr3aaa3ro1mf" path="res://scenes/prefabs/BuildingPrefab/ResourceBuildings/StoneMine.tscn" id="4_cq801"]
 [ext_resource type="Texture2D" uid="uid://chvsahw5yjflm" path="res://assets/farm.png" id="5_fbp8a"]
-[ext_resource type="PackedScene" uid="uid://bvicor1lw62ay" path="res://scenes/prefabs/BuildingPrefab/resourceHub.tscn" id="5_u7xp7"]
+[ext_resource type="PackedScene" uid="uid://bvicor1lw62ay" path="res://scenes/prefabs/BuildingPrefab/ResourceBuildings/resourceHub.tscn" id="5_u7xp7"]
 [ext_resource type="Texture2D" uid="uid://dmme2pmdcs6we" path="res://assets/barracks.png" id="5_vw06n"]
 [ext_resource type="Texture2D" uid="uid://bmdh3cno6m74l" path="res://assets/stoneMine.png" id="7_gftes"]
-[ext_resource type="PackedScene" uid="uid://btb83rswug0t1" path="res://scenes/prefabs/BuildingPrefab/wallCorner.tscn" id="7_t6ejh"]
+[ext_resource type="PackedScene" uid="uid://btb83rswug0t1" path="res://scenes/prefabs/BuildingPrefab/CombatBuildings/wallCorner.tscn" id="7_t6ejh"]
 [ext_resource type="Texture2D" uid="uid://cnamqjcjw6sa1" path="res://assets/resourceBuildingMenuButton.png" id="8_3co7m"]
-[ext_resource type="PackedScene" uid="uid://ch580mkbsdw2n" path="res://scenes/prefabs/BuildingPrefab/wallSegment.tscn" id="8_hlxnr"]
+[ext_resource type="PackedScene" uid="uid://ch580mkbsdw2n" path="res://scenes/prefabs/BuildingPrefab/CombatBuildings/wallSegment.tscn" id="8_hlxnr"]
 [ext_resource type="Texture2D" uid="uid://b2jmavmsncpfu" path="res://assets/combatBuildingMenuButton.png" id="8_rj1gy"]
 [ext_resource type="Texture2D" uid="uid://bmjqv3d2068k3" path="res://assets/lumberJacks.png" id="8_w1qyp"]
+[ext_resource type="PackedScene" uid="uid://dh3llecy2aj26" path="res://scenes/prefabs/BuildingPrefab/CombatBuildings/turret.tscn" id="9_k0c8h"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/centralHub.png" id="11_cq801"]
 [ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/WallCorner.png" id="16_t6ejh"]
+[ext_resource type="Texture2D" uid="uid://duhlw8ydi84fg" path="res://assets/turrent.png" id="19_2hoj7"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
 
@@ -33,6 +35,7 @@ resourceHub_prefab = ExtResource("5_u7xp7")
 barracks_prefab = ExtResource("3_fbp8a")
 wallCorner_prefab = ExtResource("7_t6ejh")
 wallSegment_prefab = ExtResource("8_hlxnr")
+turret_prefab = ExtResource("9_k0c8h")
 
 [node name="buildingHud" type="CanvasLayer" parent="." unique_id=815674145]
 script = ExtResource("2_oj14w")
@@ -221,7 +224,6 @@ metadata/_edit_use_anchors_ = true
 [node name="combatBuildingHud" type="CanvasLayer" parent="." unique_id=485597457]
 
 [node name="ScrollContainer" type="ScrollContainer" parent="combatBuildingHud" unique_id=662035960]
-visible = false
 offset_left = 17.0
 offset_top = 177.0
 offset_right = 322.0
@@ -245,6 +247,16 @@ custom_minimum_size = Vector2(135, 135)
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
 icon = ExtResource("16_t6ejh")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="turretButton" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=652666463]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("19_2hoj7")
 flat = true
 icon_alignment = 1
 expand_icon = true
@@ -276,6 +288,18 @@ theme_override_font_sizes/font_size = 30
 text = "Wall - 	50F
            50W
            50S"
+metadata/_edit_use_anchors_ = true
+
+[node name="turretButtonLabel" type="Label" parent="combatBuildingHud" unique_id=986655145]
+visible = false
+offset_left = 166.0
+offset_top = 455.0
+offset_right = 415.0
+offset_bottom = 587.0
+theme_override_font_sizes/font_size = 30
+text = "Turret - 500F
+              500W
+              500S"
 metadata/_edit_use_anchors_ = true
 
 [node name="RclickMenuResourceHub" type="VBoxContainer" parent="." unique_id=890369603]

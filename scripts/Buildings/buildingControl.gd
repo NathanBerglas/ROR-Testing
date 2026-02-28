@@ -32,6 +32,10 @@ extends Node2D
 @export var wallCorner_prefab: PackedScene
 @export var wallSegment_prefab: PackedScene
 
+@onready var turretButton = $combatBuildingHud/ScrollContainer/VBoxContainer/turretButton
+@onready var turretLabel = $combatBuildingHud/turretButtonLabel
+@export var turret_prefab: PackedScene
+
 #Combat building menu
 @onready var combatBuildingMenu = $combatBuildingHud/ScrollContainer
 @onready var closeCombatBuilding = $combatBuildingHud/ScrollContainer/VBoxContainer/closeCombatMenu
@@ -118,12 +122,16 @@ func _ready(): #Runs on start, connects buttons
 	wallCornerButton.button_down.connect(_on_wallCorner_button_pressed)
 	wallCornerButton.button_up.connect(_on_wallCorner_button_released)
 
+	turretButton.button_down.connect(_on_turret_button_pressed)
+	turretButton.button_up.connect(_on_turret_button_released)
+	
 	farmLabel.visible = false
 	stoneMineLabel.visible = false
 	lumberJackLabel.visible = false
 	resourceHubLabel.visible = false
 	resourceBuildingMenu.visible = false
 	wallCornerLabel.visible = false
+	combatBuildingMenu.visible = false
 	
 	resourceButtons.append([stoneMineButton, stoneMineLabel])
 	resourceButtons.append([farmButton, farmLabel])
@@ -132,11 +140,28 @@ func _ready(): #Runs on start, connects buttons
 	
 	combatButtons.append([barracksButton, barracksLabel])
 	combatButtons.append([wallCornerButton, wallCornerLabel])
+	combatButtons.append([turretButton, turretLabel])
 	RCLICK_ResourceHub.visible = false
 
 	#print(playerID)
 	
 
+func _on_turret_button_pressed():
+	if food < 500 or stone < 500 or wood < 500:
+		print("Ya Broke")
+		return
+	beginDragging("Turret")
+	
+func _on_turret_button_released():
+	if buildingDraggin != "Turret" or wood < 500 or stone < 500 or food < 500:
+		buildingDraggin = null
+		return
+	if finishDragging("Turret") == false:
+		return
+	food -= 500
+	wood -= 500
+	stone -= 500
+	
 func _on_wallCorner_button_pressed():
 	if food < 50 or stone < 50 or wood < 50:
 		print("Ya Broke")
@@ -356,6 +381,11 @@ func _process(delta): #runs every tick
 			m.generateWood(self, delta)
 		elif m.type == "StoneMine" and !m.fake:
 			m.generateStone(self, delta)
+		elif m.type == "Turret" and !m.fake:
+			if m.target == null:
+				m.getTarget(grid)
+			else:
+				m.attack()
 	sendCaravans()
 	
 	hud.updateFood(food) 
@@ -473,6 +503,8 @@ func beginDragging(buildingName):
 		instance = barracks_prefab.instantiate()
 	elif buildingName == "WallCorner":
 		instance = wallCorner_prefab.instantiate()
+	elif buildingName == "Turret":
+		instance = turret_prefab.instantiate()
 	 #New FAKE money farm
 	
 	instance.fake = true
