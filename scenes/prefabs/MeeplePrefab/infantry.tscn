@@ -1,10 +1,13 @@
 [gd_scene format=3 uid="uid://cc7tksw7agcxo"]
 
-[ext_resource type="Script" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
+[ext_resource type="Script" uid="uid://b32p4q6vmg88j" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
 [ext_resource type="Texture2D" uid="uid://div2aq3pn7qg3" path="res://assets/RedFootSoldier.png" id="2_5wvjh"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
 friction = 0.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_u6sr4"]
+radius = 16.0
 
 [node name="infantry" type="Node2D" unique_id=2020084538]
 z_index = 1
@@ -29,3 +32,6 @@ offset_right = 9.0
 offset_bottom = 11.0
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D" unique_id=1322105932]
+shape = SubResource("CircleShape2D_u6sr4")

@@ -47,7 +47,8 @@ func _ready() -> void:
 	RCLICKORDER.button_up.connect(_on_order_button_released)
 	RCLICKATTACK.button_down.connect(_on_attack_button_pressed)
 	RCLICKATTACK.button_up.connect(_on_attack_button_released)
-	
+
+
 func _process(delta): #Runs every tick
 	time += delta
 	time_since_last_meeple_tick += delta
@@ -71,13 +72,11 @@ func _process(delta): #Runs every tick
 		MEEPLE_ID_COUNTER += 1
 		var meeple_hex = grid.hex_center(get_global_mouse_position())
 		instance.global_position = meeple_hex
-		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 4, [instance])
+		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 3, [instance])
 		#instance.target = group_targets[0]
 		# Create instance
 		add_child(instance)
 		set_id(instance)
-		
-
 		unorderedMeeples.push_back(instance)
 		
 		#print("Spawned meeple")
@@ -92,7 +91,7 @@ func _process(delta): #Runs every tick
 		for m in unorderedMeeples:
 			if m.groupNum == 0:
 				m.path = grid.find_path(m.rb.get_global_position(), dest, true, false)
-			
+	
 	
 	#Opens up the right click menu
 	elif Input.is_action_just_pressed("right_click_menu"):
@@ -168,21 +167,23 @@ func _process(delta): #Runs every tick
 					equalize(GameManager.Players[p].meepleInfo)
 	"""
 
+
 # Moves Meeples and checks if they've arrived at their destination
 func _physics_process(delta: float) -> void:
 	for m in unorderedMeeples:
 		if !m.shouldBeMoving:
-			return
+			continue
 		var next_hex: Vector2 = m.path[1]
 		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
 		if (next_hex - m.global_position).length() >= m.speed * delta: # Not yet arrived
 			m.global_position += dir_to_next_hex * m.speed * delta
-			return
+			continue
 		var next_hex_tile = grid.probe(m.path[1])
 		if (next_hex_tile.classification == 3):
-			grid.meeple_end_merge()
+			meeple_end_merge(m, next_hex_tile.objectsInside[0])
 			freeMeeple(m.UNIQUEID)
 		else:
+			grid.update_grid(grid.coord_to_axial_hex(m.global_position), 3, [m])
 			m.path.pop_front()
 			m.shouldBeMoving = false
 
@@ -201,6 +202,7 @@ func update_selection_box():
 	selection_box.global_position = top_left
 	selection_box.size = size
 
+
 func spawn_meeple(pos):
 	var instance = infantry_prefab.instantiate()
 	instance.UNIQUEID = MEEPLE_ID_COUNTER
@@ -210,8 +212,8 @@ func spawn_meeple(pos):
 	set_id(instance)
 	instance.set_global_position(grid.axial_hex_to_coord(pos))
 	unorderedMeeples.push_back(instance)
-	
-	
+
+
 #Order all the selected meeples to that place
 func _on_order_button_pressed():
 	
@@ -226,7 +228,7 @@ func _on_order_button_pressed():
 				m.path.append(grid.axial_hex_to_coord(h))
 			m.selected = false
 
-				
+
 func _on_order_button_released(): #Menu gone :(
 	RCLICKMENU.visible = false
 
@@ -245,11 +247,12 @@ func _on_group_button_pressed():
 	
 	for m in unorderedMeeples:
 		print("Meeple ID: " + str(m.UNIQUEID) + ", Group Number: " + str(m.groupNum))
-		
-		
+
+
 func _on_group_button_released():
 	RCLICKMENU.visible = false
-	
+
+
 #Sends the meeple to attack the hex if there is something there
 func _on_attack_button_pressed():
 	var attackLoc = grid.coord_to_axial_hex(RCLICKMENU.get_global_position())
@@ -266,11 +269,11 @@ func _on_attack_button_pressed():
 				
 				#m.dest = grid.hex_center(attackLoc)
 			m.selected = false
-	
-	
-				
+
+
 func _on_attack_button_released(): #Menu gone :(
 	RCLICKMENU.visible = false
+
 
 """
 func removeEmptyGroups(): #Gets rid of all groups with no meeples
@@ -284,8 +287,9 @@ func removeEmptyGroups(): #Gets rid of all groups with no meeples
 			i -= 1
 			cap -= 1
 		i += 1tempPath
-
 """
+
+
 func colourNotIn(): #Returns a colour for a group
 	#print("looking for one")
 	var found = false
@@ -300,9 +304,11 @@ func colourNotIn(): #Returns a colour for a group
 			return c
 	return null
 
+
 func set_id(node):
 	node.UNIQUEID = MEEPLE_ID_COUNTER
 	MEEPLE_ID_COUNTER += 1
+
 
 """ Multiplayer Shit
 func equalize(otherController):
@@ -362,6 +368,7 @@ func cleanNodes(meepleList):
 	while x < unorderedMeeples.size():
 		unorderedMeeples.pop_at(x)
 '''
+
 
 """ Multiplayer shit
 func updatePos(meepleList):
@@ -451,6 +458,7 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 			base.HP += n
 '''
 
+
 '''
 func atDest(m):
 	if m.path == null:
@@ -458,6 +466,7 @@ func atDest(m):
 	else:
 		return false
 '''
+
 
 func freeMeeple(id):
 	for i in range(unorderedMeeples.size()):
