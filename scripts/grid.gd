@@ -223,26 +223,33 @@ func _ready():
 
 
 func hex_ingress(ingressing_hex, meeple_requesting):
+	var decision = "REDIRECTED"
+	var decision_made = false
 	var ingressing_tile = grid[ingressing_hex.x][ingressing_hex.y]
 	if len(ingressing_tile.queue) > 0:
 		ingressing_tile.queue.push_back(meeple_requesting)
-		return "PENDING"
-	if ingressing_tile.classification == 0:
+		decision = "PENDING"
+		decision_made = true
+	elif ingressing_tile.classification == 0:
 		update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
-		return "APPROVED"
-	if ingressing_tile.classification != 3 || ingressing_tile.classification != 4:
-		return "REDIRECTED"
+		decision = "APPROVED"
+		decision_made = true
+	elif ingressing_tile.classification != 3 || ingressing_tile.classification != 4:
+		decision = "REDIRECTED"
+		decision_made = true
 	# Check if the meeple is on the same team -> if not, attack!
 	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
-	var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
-	if (meeple_in_ingressing_hex.path[-1] == meeple_requesting.path[-1]):
-		meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
-		update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
-		return "APPROVED"
-	if (len(meeple_in_ingressing_hex.path) > 1):
-		ingressing_tile.queue.push_back(meeple_requesting)
-		return "PENDING"
-	return "REDIRECTED"
+	if !decision_made:
+		var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
+		if (meeple_in_ingressing_hex.path[-1] == meeple_requesting.path[-1]):
+			meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
+			update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
+			decision = "APPROVED"
+		elif (len(meeple_in_ingressing_hex.path) > 1):
+			ingressing_tile.queue.push_back(meeple_requesting)
+			decision = "PENDING"
+	#print("Meeple ", meeple_requesting, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
+	return decision
 	
 func hex_egress(egressing_hex):
 	var egressing_hex_tile = grid[egressing_hex.x][egressing_hex.y]

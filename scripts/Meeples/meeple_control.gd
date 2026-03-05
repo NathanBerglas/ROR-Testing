@@ -173,12 +173,12 @@ func _physics_process(delta: float) -> void:
 	for m in unorderedMeeples:
 		if !m.shouldBeMoving:
 			continue
-		var next_hex: Vector2 = m.path[1]
+		var next_hex: Vector2 = grid.axial_hex_to_coord(m.path[1])
 		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
 		if (next_hex - m.global_position).length() >= m.speed * delta: # Not yet arrived
 			m.global_position += dir_to_next_hex * m.speed * delta
 			continue
-		var next_hex_tile = grid.probe(m.path[1])
+		var next_hex_tile = grid.axial_probe(m.path[1])
 		if (next_hex_tile.classification == 3):
 			meeple_end_merge(m, next_hex_tile.objectsInside[0])
 			freeMeeple(m.UNIQUEID)
@@ -222,10 +222,10 @@ func _on_order_button_pressed():
 	
 	for m in unorderedMeeples:
 		if m.selected:
-			var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
-			m.path = []
-			for h in tempPath:
-				m.path.append(grid.axial_hex_to_coord(h))
+			m.path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
+			#m.path = []
+			#for h in tempPath:
+			#	m.path.append(grid.axial_hex_to_coord(h))
 			m.selected = false
 
 
@@ -262,10 +262,10 @@ func _on_attack_button_pressed():
 			#var tile = grid.axial_probe(attackLoc)
 			if grid.axial_probe(attackLoc).objectsInside.size() > 0:
 				m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
-				var tempPath = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
-				m.path = []
-				for h in tempPath:
-					m.path.append(grid.axial_hex_to_coord(h))
+				m.path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
+				#m.path = []
+				#for h in tempPath:
+				#	m.path.append(h)
 				
 				#m.dest = grid.hex_center(attackLoc)
 			m.selected = false
@@ -491,22 +491,21 @@ func egress_granted(waiting_meeple):
 func meeple_process():
 	for m in unorderedMeeples:
 		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
-			return
+			continue
 		if (len(m.path) > 1):
-			var ingress_result = grid.hex_ingress(grid.coord_to_axial_hex(m.path[1]), m)
+			var ingress_result = grid.hex_ingress(m.path[1], m)
 			if (ingress_result == "APPROVED"):
-				grid.hex_egress(grid.coord_to_axial_hex(m.path[0]))
+				grid.hex_egress(m.path[0])
 				m.shouldBeMoving = true
-				return
+				continue
 			elif (ingress_result == "PENDING"):
 				m.waiting = true
-				return
+				continue
 			elif (ingress_result == "ATTACKING"):
 				m.attackTarget = true
-				return
+				continue
 			else: # Redirected
-				m.path = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false, false)
-
+				m.path = grid.find_path(m.path[0], m.path[m.path.size() - 1], false, false)
 '''
 Meeple Move Algorithm: MMA
 
