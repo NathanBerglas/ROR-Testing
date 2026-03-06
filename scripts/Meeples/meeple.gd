@@ -14,12 +14,13 @@ const HEX_DIRS := [
 	Vector2i(0, 1),
 ]
 
-var brokenPath = []
+var redirected_from: Array = []
 var label = null
 var rb = null
 var sprite = null
 var selected = false #Determines if a meeple is selected
-var path = [] #destination of a meeple
+var path: Array = [] #destination of a meeple
+var queued_path: Array = [] #destination of a meeple
 var shouldBeMoving = false
 var waiting = false
 var attackTarget = null

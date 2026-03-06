@@ -91,7 +91,7 @@ func _process(delta): #Runs every tick
 		
 		for m in unorderedMeeples:
 			if m.groupNum == 0:
-				m.path = grid.find_path(m.path[0], dest, true, false)
+				m.queued_path = grid.find_path(m.path[0], dest, true, false)
 	
 	
 	#Opens up the right click menu
@@ -223,7 +223,7 @@ func _on_order_button_pressed():
 	
 	for m in unorderedMeeples:
 		if m.selected:
-			m.path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
+			m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
 			#m.path = []
 			#for h in tempPath:
 			#	m.path.append(grid.axial_hex_to_coord(h))
@@ -263,7 +263,7 @@ func _on_attack_button_pressed():
 			#var tile = grid.axial_probe(attackLoc)
 			if grid.axial_probe(attackLoc).objectsInside.size() > 0:
 				m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
-				m.path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
+				m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
 				#m.path = []
 				#for h in tempPath:
 				#	m.path.append(h)
@@ -341,24 +341,29 @@ func meeple_process():
 	for m in unorderedMeeples:
 		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
 			continue
+		if not m.queued_path.is_empty():
+			m.path = grid.find_path(m.path[0], m.queued_path[m.queued_path.size() - 1], false, false)
+			#m.path = m.queued_path#.slice(1) # Remove first hex in queued path
+			m.queued_path = []
 		if (m.path.size() > 1):
 			var ingress_result = grid.hex_ingress(m.path[1], m)
-			if (ingress_result == "APPROVED"):
-				m.brokenPath = []
-				grid.hex_egress(m.path[0])
-				m.shouldBeMoving = true
-				continue
-			elif (ingress_result == "PENDING"):
-				m.brokenPath = []
-				m.waiting = true
-				continue
-			elif (ingress_result == "ATTACKING"):
-				m.brokenPath = []
-				m.attackTarget = true
-				continue
-			else: # Redirected
-				m.brokenPath.append(m.path[1])
-				m.path = grid.redirected_find_path(m.path, false, false, m.brokenPath)
+			if (ingress_result == "REDIRECTED"): # Redirected
+				m.redirected_from.append(m.path[1])
+				m.queued_path = grid.redirected_find_path(m.path, false, false, m.redirected_from)
+			else:
+				m.redirected_from = []
+				if (ingress_result == "APPROVED"):
+					grid.hex_egress(m.path[0])
+					m.shouldBeMoving = true
+					continue
+				elif (ingress_result == "PENDING"):
+					m.redirected_from = []
+					m.waiting = true
+					continue
+				elif (ingress_result == "ATTACKING"):
+					m.redirected_from = []
+					m.attackTarget = true
+					continue
 
 
 """ Multiplayer Shit
