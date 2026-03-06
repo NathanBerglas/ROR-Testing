@@ -73,6 +73,7 @@ func _process(delta): #Runs every tick
 		var meeple_hex = grid.hex_center(get_global_mouse_position())
 		instance.global_position = meeple_hex
 		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 3, [instance])
+		instance.path = [grid.coord_to_axial_hex(instance.global_position)]
 		#instance.target = group_targets[0]
 		# Create instance
 		add_child(instance)
@@ -85,12 +86,12 @@ func _process(delta): #Runs every tick
 		
 	#Orders all meeples to a location
 	elif Input.is_action_just_pressed("super_order"):
-		var dest = grid.hex_center(get_global_mouse_position())
-		targetMarker.global_position = dest
+		var dest = grid.coord_to_axial_hex(get_global_mouse_position())
+		targetMarker.global_position = grid.hex_center(get_global_mouse_position())
 		
 		for m in unorderedMeeples:
 			if m.groupNum == 0:
-				m.path = grid.find_path(m.rb.get_global_position(), dest, true, false)
+				m.path = grid.find_path(m.path[0], dest, true, false)
 	
 	
 	#Opens up the right click menu
@@ -310,6 +311,56 @@ func set_id(node):
 	MEEPLE_ID_COUNTER += 1
 
 
+func get_group_targets():
+	return group_targets
+func get_groupColours():
+	return groupColours
+
+
+func freeMeeple(id):
+	for i in range(unorderedMeeples.size()):
+		if unorderedMeeples[i].UNIQUEID == id:
+			unorderedMeeples.pop_at(i).queue_free()
+			return
+
+
+func meeple_start_merge(target_meeple):
+	target_meeple.waiting = true
+	
+
+func meeple_end_merge(incoming_meeple, target_meeple):
+	target_meeple.HP += incoming_meeple.HP
+	target_meeple.waiting = false
+
+
+func egress_granted(waiting_meeple):
+	waiting_meeple.waiting = false
+	waiting_meeple.shouldBeMoving = true
+
+func meeple_process():
+	for m in unorderedMeeples:
+		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
+			continue
+		if (m.path.size() > 1):
+			var ingress_result = grid.hex_ingress(m.path[1], m)
+			if (ingress_result == "APPROVED"):
+				m.brokenPath = []
+				grid.hex_egress(m.path[0])
+				m.shouldBeMoving = true
+				continue
+			elif (ingress_result == "PENDING"):
+				m.brokenPath = []
+				m.waiting = true
+				continue
+			elif (ingress_result == "ATTACKING"):
+				m.brokenPath = []
+				m.attackTarget = true
+				continue
+			else: # Redirected
+				m.brokenPath.append(m.path[1])
+				m.path = grid.redirected_find_path(m.path, false, false, m.brokenPath)
+
+
 """ Multiplayer Shit
 func equalize(otherController):
 	
@@ -321,12 +372,6 @@ func equalize(otherController):
 func get_group():
 	return group
 """
-
-
-func get_group_targets():
-	return group_targets
-func get_groupColours():
-	return groupColours
 
 
 '''
@@ -467,45 +512,6 @@ func atDest(m):
 		return false
 '''
 
-
-func freeMeeple(id):
-	for i in range(unorderedMeeples.size()):
-		if unorderedMeeples[i].UNIQUEID == id:
-			unorderedMeeples.pop_at(i).queue_free()
-			return
-
-
-func meeple_start_merge(target_meeple):
-	target_meeple.waiting = true
-	
-
-func meeple_end_merge(incoming_meeple, target_meeple):
-	target_meeple.HP += incoming_meeple.HP
-
-
-func egress_granted(waiting_meeple):
-	waiting_meeple.waiting = false
-	waiting_meeple.shouldBeMoving = true
-
-
-func meeple_process():
-	for m in unorderedMeeples:
-		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
-			continue
-		if (len(m.path) > 1):
-			var ingress_result = grid.hex_ingress(m.path[1], m)
-			if (ingress_result == "APPROVED"):
-				grid.hex_egress(m.path[0])
-				m.shouldBeMoving = true
-				continue
-			elif (ingress_result == "PENDING"):
-				m.waiting = true
-				continue
-			elif (ingress_result == "ATTACKING"):
-				m.attackTarget = true
-				continue
-			else: # Redirected
-				m.path = grid.find_path(m.path[0], m.path[m.path.size() - 1], false, false)
 '''
 Meeple Move Algorithm: MMA
 

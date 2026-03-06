@@ -14,6 +14,7 @@ const HEX_DIRS := [
 	Vector2i(0, 1),
 ]
 
+var brokenPath = []
 var label = null
 var rb = null
 var sprite = null

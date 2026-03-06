@@ -45,7 +45,7 @@ class tile:
 	func _init(init_hex, _classification = 0):
 		self.hex = init_hex
 		self.classification = _classification
-		self.traversable = (classification == 0 || classification == 4) # Only traversable if empty or moving meeple
+		self.traversable = (classification == 0 || classification == 4 || classification==3) # Only traversable if empty or moving meeple
 	
 		var random = randi_range(0,TILE_TYPE_CHANCES)
 		if random == ARABLE_CHANCE:
@@ -63,7 +63,7 @@ class tile:
 func update_grid(hex: Vector2i, classification: int, objects: Array):
 	var tile_to_update = grid[hex.x][hex.y]
 	tile_to_update.classification = classification ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE 
-	tile_to_update.traversable = (classification==0 || classification==4)
+	tile_to_update.traversable = (classification==0 || classification==4 || classification==3)
 	tile_to_update.objectsInside = objects
 	astar.set_point_disabled(_hex_to_id(hex), !tile_to_update.traversable)
 	tile_to_update.hex_pf.get_node("Border").modulate = border_colours[tile_to_update.classification]
@@ -188,6 +188,20 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attac
 	return path_hexes
 
 
+func redirected_find_path(path, partialPathBoolean, attackingBoolean, pathToDisable):
+	
+	var pathsCheck = []
+	for h in pathToDisable:
+		astar.set_point_disabled(_hex_to_id(h), 1)
+		pathsCheck.append(astar.is_point_disabled(_hex_to_id(h)))
+	var new_path = find_path(path[0], path[path.size() - 1], partialPathBoolean, attackingBoolean)
+	
+	for h in range(pathToDisable.size()):
+		astar.set_point_disabled(_hex_to_id(pathToDisable[h]), pathsCheck[h])
+	
+	
+	return new_path
+
 func _ready():
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
@@ -234,28 +248,29 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 		update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
 		decision = "APPROVED"
 		decision_made = true
-	elif ingressing_tile.classification != 3 || ingressing_tile.classification != 4:
+	elif ingressing_tile.classification != 3 && ingressing_tile.classification != 4:
 		decision = "REDIRECTED"
 		decision_made = true
 	# Check if the meeple is on the same team -> if not, attack!
 	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
-	if !decision_made:
+	if !decision_made:	#print("Meeple ", meeple_requesting, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
+
 		var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
-		if (meeple_in_ingressing_hex.path[-1] == meeple_requesting.path[-1]):
+		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]):
 			meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
-			update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
+			#update_grid(ingressing_hex, 3, [meeple_requesting] + ingressing_tile.objectsInside)
 			decision = "APPROVED"
 		elif (len(meeple_in_ingressing_hex.path) > 1):
 			ingressing_tile.queue.push_back(meeple_requesting)
 			decision = "PENDING"
-	#print("Meeple ", meeple_requesting, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
+	print("Meeple ", meeple_requesting, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
 	return decision
 	
 func hex_egress(egressing_hex):
 	var egressing_hex_tile = grid[egressing_hex.x][egressing_hex.y]
 	var egressing_meeple = egressing_hex_tile.objectsInside[0]
 	if len(egressing_hex_tile.queue) == 0:
-		update_grid(egressing_hex, 0, egressing_hex_tile.objectsInside)
+		update_grid(egressing_hex, 0, egressing_hex_tile.objectsInside.slice(1)) # Removes meeple from grid
 	else:
 		update_grid(egressing_hex, 4, [egressing_hex_tile.queue.pop_front])
 	if (len(egressing_hex_tile.queue) > 0):

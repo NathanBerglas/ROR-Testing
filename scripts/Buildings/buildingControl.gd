@@ -200,7 +200,8 @@ func _process(delta): #runs every tick
 	cleanBuildings()
 	#Opens up the right click menu
 	if Input.is_action_just_pressed("right_click_menu"):
-		if grid.probe(get_global_mouse_position()).objectsInside.size() > 0 and grid.probe(get_global_mouse_position()).objectsInside[0].type == "ResourceHub":
+		var probing_hex = grid.probe(get_global_mouse_position())
+		if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub":
 			RCLICKMENU.set_global_position(get_global_mouse_position())
 			RCLICKMENU.visible = true
 		else:
