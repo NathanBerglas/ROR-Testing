@@ -6,8 +6,10 @@ extends Node2D
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
+@export var biomeGenScene: PackedScene
 const SQRT_3 = 1.73205080757
 
+var biomeGen = null
 var created = false
 var grid: Array = []
 
@@ -208,6 +210,8 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attac
 	return path_hexes
 
 func _ready():
+	biomeGen = biomeGenScene.instantiate()
+	add_child(biomeGen)
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
 		for r in range(GRID_COUNT.y):

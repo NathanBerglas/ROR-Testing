@@ -4,6 +4,7 @@ var playerID = 0
 @onready var c = [$MeepleControl, $BuildingControl]  #What nodes the player uses
 var setShit = false
 var time = 0
+
 func _ready() -> void:
 
 	$MeepleControl.teammates.push_back($BuildingControl)

@@ -199,6 +199,8 @@ func _on_wallCorner_button_released():
 	
 func _on_combatBuildingMenu_button_pressed():
 	var what = "HUH"
+	
+	
 func _on_combatBuildingMenu_button_released():
 	combatBuildingMenu.visible = true
 	resourceBuildingMenu.visible = false
