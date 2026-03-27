@@ -32,6 +32,8 @@ const ARABLE_CHANCE = 1
 const FOREST_CHANCE = 2
 const STONE_CHANCE = 3
 
+const FLAG_VERBOSE = true
+
 class tile:
 	var hex: Vector2i # (q, r)
 	var hex_pf: Node
@@ -263,7 +265,7 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 		elif (len(meeple_in_ingressing_hex.path) > 1):
 			ingressing_tile.queue.push_back(meeple_requesting)
 			decision = "PENDING"
-	print("Meeple ", meeple_requesting, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
+	if FLAG_VERBOSE: print("Meeple ", meeple_requesting.UNIQUEID, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
 	return decision
 	
 func hex_egress(egressing_hex):

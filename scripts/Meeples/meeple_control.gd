@@ -34,6 +34,9 @@ var selecting = Vector2(0,0)
 var selectingTime = 0
 
 var MEEPLE_ID_COUNTER = 1
+
+const FLAG_VERBOSE = true
+
 func _ready() -> void:
 	
 	#Setting base states for the selection box and the right click menu
@@ -80,7 +83,7 @@ func _process(delta): #Runs every tick
 		set_id(instance)
 		unorderedMeeples.push_back(instance)
 		
-		#print("Spawned meeple")
+		if FLAG_VERBOSE: print("Spawned meeple")
 		
 		
 		
@@ -178,15 +181,18 @@ func _physics_process(delta: float) -> void:
 		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
 		if (next_hex - m.global_position).length() >= m.speed * delta: # Not yet arrived
 			m.global_position += dir_to_next_hex * m.speed * delta
-			continue
-		var next_hex_tile = grid.axial_probe(m.path[1])
-		if (next_hex_tile.classification == 3):
-			meeple_end_merge(m, next_hex_tile.objectsInside[0])
-			freeMeeple(m.UNIQUEID)
-		else:
-			grid.update_grid(grid.coord_to_axial_hex(m.global_position), 3, [m])
-			m.path.pop_front()
-			m.shouldBeMoving = false
+		else: # Just entered the hex
+			m.global_position = next_hex
+			var next_hex_tile = grid.axial_probe(m.path[1])
+			if (next_hex_tile.classification == 3):
+				meeple_end_merge(m, next_hex_tile.objectsInside[0])
+				if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has reached merge position at hex: ", m.path[1])
+				freeMeeple(m.UNIQUEID)
+			else:
+				grid.update_grid(grid.coord_to_axial_hex(m.global_position), 3, [m])
+				m.path.pop_front()
+				if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has stopped moving at position ", m.global_position, " in hex: ", next_hex)
+				m.shouldBeMoving = false
 
 
 #Updates the selction box to where the mouse is
@@ -247,7 +253,7 @@ func _on_group_button_pressed():
 		nextGroupID += 1
 	
 	for m in unorderedMeeples:
-		print("Meeple ID: " + str(m.UNIQUEID) + ", Group Number: " + str(m.groupNum))
+		if FLAG_VERBOSE: print("Meeple ID: " + str(m.UNIQUEID) + ", Group Number: " + str(m.groupNum))
 
 
 func _on_group_button_released():
@@ -318,6 +324,7 @@ func get_groupColours():
 
 
 func freeMeeple(id):
+	if FLAG_VERBOSE: print("Deleting meeple ", id)
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
 			unorderedMeeples.pop_at(i).queue_free()
