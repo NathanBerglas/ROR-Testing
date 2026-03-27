@@ -69,6 +69,12 @@ func _process(delta): #Runs every tick
 			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum])
 				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
+		if grid.probe(get_global_mouse_position()).classification == 3:
+			grid.probe(get_global_mouse_position()).objectsInside[0].HP += 1
+			return
+		elif grid.probe(get_global_mouse_position()).classification != 0:
+			if FLAG_VERBOSE: print("Failed to place meeple. Hex obstructed")
+			return
 		var instance = infantry_prefab.instantiate()
 		# Set instance's data
 		instance.set_id(MEEPLE_ID_COUNTER)
@@ -182,16 +188,17 @@ func _physics_process(delta: float) -> void:
 		if (next_hex - m.global_position).length() >= m.speed * delta: # Not yet arrived
 			m.global_position += dir_to_next_hex * m.speed * delta
 		else: # Just entered the hex
+			m.pause_a_tick = true
 			m.global_position = next_hex
 			var next_hex_tile = grid.axial_probe(m.path[1])
 			if (next_hex_tile.classification == 3):
+				if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has reached merge position at hex: ", m.path[1], " with meeple ", next_hex_tile.objectsInside[0].UNIQUEID)
 				meeple_end_merge(m, next_hex_tile.objectsInside[0])
-				if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has reached merge position at hex: ", m.path[1])
 				freeMeeple(m.UNIQUEID)
 			else:
-				grid.update_grid(grid.coord_to_axial_hex(m.global_position), 3, [m])
+				grid.update_grid(m.path[1], 3, [m])
 				m.path.pop_front()
-				if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has stopped moving at position ", m.global_position, " in hex: ", next_hex)
+				#if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has stopped moving at position ", m.global_position, " in hex: ", next_hex)
 				m.shouldBeMoving = false
 
 
@@ -333,19 +340,30 @@ func freeMeeple(id):
 
 func meeple_start_merge(target_meeple):
 	target_meeple.waiting = true
+	if FLAG_VERBOSE: print("Meeple ", target_meeple.UNIQUEID, " set to waiting in meeple_start_merge.")
 	
 
 func meeple_end_merge(incoming_meeple, target_meeple):
 	target_meeple.HP += incoming_meeple.HP
-	target_meeple.waiting = false
+	if !target_meeple.inqueue: 
+		target_meeple.waiting = false
+		# Error caused if the target meeple is currently in a queue
+		if FLAG_VERBOSE: print("Meeple ", target_meeple.UNIQUEID, " set to stop waiting in meeple_end_merge.")
+	else:
+		if FLAG_VERBOSE: print("Meeple ", target_meeple.UNIQUEID, " in a queue, won't stop waiting in meeple_end_merge.")
 
 
 func egress_granted(waiting_meeple):
+	if FLAG_VERBOSE and waiting_meeple.waiting: print("Meeple ", waiting_meeple.UNIQUEID, " set to stop waiting in egress_granted.")
 	waiting_meeple.waiting = false
 	waiting_meeple.shouldBeMoving = true
 
+
 func meeple_process():
 	for m in unorderedMeeples:
+		if m.pause_a_tick:
+			m.pause_a_tick = false
+			continue
 		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
 			continue
 		if not m.queued_path.is_empty():
@@ -366,6 +384,7 @@ func meeple_process():
 				elif (ingress_result == "PENDING"):
 					m.redirected_from = []
 					m.waiting = true
+					if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " set to waiting due to pending ingress.")
 					continue
 				elif (ingress_result == "ATTACKING"):
 					m.redirected_from = []

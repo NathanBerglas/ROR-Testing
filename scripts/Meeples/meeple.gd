@@ -23,6 +23,8 @@ var path: Array = [] #destination of a meeple
 var queued_path: Array = [] #destination of a meeple
 var shouldBeMoving = false
 var waiting = false
+var inqueue = false; # british behaviour, french sounding word
+var pause_a_tick = false; # When arriving to prevent merge skipping
 var attackTarget = null
 var UNIQUEID = null #Unique Id for every meeple on a team by unit type
 #When I say Unique, I mean UNIQUE

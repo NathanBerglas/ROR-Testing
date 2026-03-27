@@ -243,8 +243,12 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 	var decision_made = false
 	var ingressing_tile = grid[ingressing_hex.x][ingressing_hex.y]
 	if len(ingressing_tile.queue) > 0:
-		ingressing_tile.queue.push_back(meeple_requesting)
-		decision = "PENDING"
+		#ingressing_tile.queue.push_back(meeple_requesting)
+		#meeple_requesting.inqueue = true
+		#if FLAG_VERBOSE: print("Adding another meeple, ", meeple_requesting.UNIQUEID, " to the queue on hex ", ingressing_tile.hex)
+		#decision = "PENDING"
+		#decision_made = true
+		decision = "REDIRECTED"
 		decision_made = true
 	elif ingressing_tile.classification == 0:
 		update_grid(ingressing_hex, 4, [meeple_requesting] + ingressing_tile.objectsInside)
@@ -255,25 +259,30 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 		decision_made = true
 	# Check if the meeple is on the same team -> if not, attack!
 	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
-	if !decision_made:	#print("Meeple ", meeple_requesting, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
-
+	if !decision_made:
 		var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
 		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]):
 			meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
 			#update_grid(ingressing_hex, 3, [meeple_requesting] + ingressing_tile.objectsInside)
 			decision = "APPROVED"
-		elif (len(meeple_in_ingressing_hex.path) > 1):
-			ingressing_tile.queue.push_back(meeple_requesting)
-			decision = "PENDING"
+		if !meeple_in_ingressing_hex.waiting:
+			# 2 path, because the meeple in ingressing hex is moving, so it has initial hex, and target hex
+			if (ingressing_tile.classification == 4 and len(meeple_in_ingressing_hex.path) > 2) or (ingressing_tile.classification == 3 and len(meeple_in_ingressing_hex.path) > 2):
+				ingressing_tile.queue.push_back(meeple_requesting)
+				meeple_requesting.inqueue = true
+				if FLAG_VERBOSE: print("Queing a meeple, ", meeple_requesting.UNIQUEID, " to the queue on hex ", ingressing_tile.hex)
+				decision = "PENDING"
 	if FLAG_VERBOSE: print("Meeple ", meeple_requesting.UNIQUEID, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
 	return decision
 	
 func hex_egress(egressing_hex):
 	var egressing_hex_tile = grid[egressing_hex.x][egressing_hex.y]
-	var egressing_meeple = egressing_hex_tile.objectsInside[0]
+	#var egressing_meeple = egressing_hex_tile.objectsInside[0]
 	if len(egressing_hex_tile.queue) == 0:
 		update_grid(egressing_hex, 0, egressing_hex_tile.objectsInside.slice(1)) # Removes meeple from grid
 	else:
-		update_grid(egressing_hex, 4, [egressing_hex_tile.queue.pop_front])
-	if (len(egressing_hex_tile.queue) > 0):
-		meeple_control.egress_granted(egressing_hex_tile.queue[0]) # Feels a little icky
+		var collected_meeple = egressing_hex_tile.queue.pop_front()
+		collected_meeple.inqueue = false
+		if FLAG_VERBOSE: print("Collecting meeple, ", collected_meeple.UNIQUEID, " from queue on hex ", egressing_hex)
+		update_grid(egressing_hex, 4, [collected_meeple])
+		meeple_control.egress_granted(collected_meeple)
