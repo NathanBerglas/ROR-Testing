@@ -27,10 +27,10 @@ const HEX_DIRS := [
 
 var astar = AStar2D.new()
 
-const TILE_TYPE_CHANCES = 15
-const ARABLE_CHANCE = 1
-const FOREST_CHANCE = 2
-const STONE_CHANCE = 3
+const TILE_TYPE_CHANCES = 100000000
+const ARABLE_CHANCE = 0
+const FOREST_CHANCE = 0
+const STONE_CHANCE = 0
 
 class tile:
 	var hex: Vector2i # (q, r)

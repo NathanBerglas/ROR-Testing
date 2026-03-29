@@ -5,6 +5,8 @@ var playerID = 0
 var setShit = false
 var time = 0
 
+const MEEPLE_Z_INDEX = 2
+const BUILDING_Z_INDEX = 2
 func _ready() -> void:
 
 	$MeepleControl.teammates.push_back($BuildingControl)
@@ -12,6 +14,8 @@ func _ready() -> void:
 	$MeepleControl.grid = $Grid
 	$BuildingControl.grid = $Grid
 	
+	$MeepleControl.set_z_index(MEEPLE_Z_INDEX)
+	$BuildingControl.set_z_index(BUILDING_Z_INDEX)
 	$BuildingControl/buildingHud.visible = true
 	
 	

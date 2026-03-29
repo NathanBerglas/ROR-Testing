@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://yaght1yrplnl"]
 
-[ext_resource type="Script" uid="uid://cob5ttlt4b0jv" path="res://scenes/prefabs/MeeplePrefab/caravan.gd" id="1_0nrcj"]
+[ext_resource type="Script" uid="uid://cob5ttlt4b0jv" path="res://scripts/Meeples/caravan.gd" id="1_0nrcj"]
 [ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeple.png" id="2_0nrcj"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y4nmv"]
 friction = 0.0
 
 [node name="caravan" type="Node2D" unique_id=2020084538]
-z_index = 1
+z_index = 2
 script = ExtResource("1_0nrcj")
 
 [node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=1991257517]

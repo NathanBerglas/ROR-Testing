@@ -8,7 +8,8 @@ extends Node2D
 # Map Area
 @export var BORDER_RESOLUTION: int = 10
 @export var PIXELS_PER_TILE: int = 10
-var MAP_RESOLUTION: Vector2i = Vector2i(210, 110)
+var MAP_RESOLUTION: Vector2i = Vector2i(420, 220)
+
 
 # Gen Data
 @export var gen_data: JSON
@@ -26,6 +27,10 @@ const max_poisson_attempts_2d: int = 300
 const sphere_packing_constant: float = 0.9069
 var GLOBAL_CHUNK_COUNT = Vector2i()
 var GLOBAL_chunk_length = float()
+
+const RANDOM_BLOB_VARIATION = 3
+
+
 func point_chunk_print(point_chunk) -> void:
 	var chunk_array = point_chunk[1]
 	var chunk_dim = GLOBAL_CHUNK_COUNT
@@ -34,6 +39,7 @@ func point_chunk_print(point_chunk) -> void:
 			print("Chunk (",col, ", ", row, ")")
 			print(chunk_array[col-1][row-1])
 func _ready() -> void:
+
 	var previous_time = Time.get_ticks_msec()
 	var ellapsed = 0
 	# Main Area
@@ -44,8 +50,10 @@ func _ready() -> void:
 	#MAP_RESOLUTION.x = MAP_RESOLUTION.x / PIXELS_PER_TILE
 	#MAP_RESOLUTION.y = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
+	
+	#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points
 	var data = get_data()
-	#Data: min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes
+	#Data: min_distance, features, spawn_area, occurences, roughness, , num_points
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	GLOBAL_chunk_length = data[0] * 0.70711 # min_distance / sqrt(2)
@@ -59,12 +67,21 @@ func _ready() -> void:
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	#_generate_mesh(total_point_chunk[1])
-	var baseTerrain = []
 	
+	#Layer 1:
+	var baseTerrain = []
 	for i in range(data[4].size()):
 		if data[4][i] == 1:
-			baseTerrain.append([data[2][i], biome_colours[i]])
-	_generate_mesh(baseTerrain)
+			baseTerrain.append([data[2][i], biome_colours[i], data[1][i]])
+			
+	#Layer 2:
+	var coverTerrainExtents = []
+	for i in range(data[4].size()):
+		if data[4][i] == 2:
+			coverTerrainExtents.append([data[2][i], biome_colours[i], data[3][i], data[5][i], data[6][i], data[7][i], data[1][i]])
+	var coverTerrainPointsList = _generate_points(coverTerrainExtents)
+	
+	_generate_mesh(baseTerrain, coverTerrainPointsList)
 	print("working?")
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
@@ -155,6 +172,7 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 	print("PDD 2D Timed out!")
 	return Vector2i.ZERO
 
+#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points
 func get_data() -> Array:
 	#Resource data
 	var json_received = gen_data.data
@@ -162,9 +180,9 @@ func get_data() -> Array:
 	var spawn_area: Array # [0] is the top left, [1] is bottom right Vector2i
 	var occurences = PackedInt32Array()
 	var layers = PackedInt32Array()
-	var gen_depth = PackedInt32Array()
-	var sub_occurences: Array # sub_occurences[i] is an array of integers of length gen_depth[i], where i is the ith feature
-	var sizes: Array # sizes[i] is an array of integers of length gen_depth[i], where i is the ith feature
+	var roughness = PackedFloat32Array()
+	var radius: Array # radius[i] is an array of integers of length roughness[i], where i is the ith feature
+	var num_points: Array # num_points[i] is an array of integers of length roughness[i], where i is the ith feature
 	var gen_screen_resolution # The resolution that gen.json is balanced for
 	
 	# Initialize data from JSON
@@ -175,21 +193,53 @@ func get_data() -> Array:
 		spawn_area.append(feature["spawn_area"])
 		occurences.append(feature["occurences"])
 		layers.append(feature["layer"])
-		gen_depth.append(feature["gen_depth"])
-		sub_occurences.append(feature["sub_occurences"])  # already an Array
-		sizes.append(feature["sizes"])  # already an Array
+		roughness.append(feature["roughness"])
+		radius.append(feature["radius"])  # already an Array
+		num_points.append(feature["num_points"])  # already an Array
 	print(features)
+	print(roughness)
 
-	
+	print("")
 	# Scaled based on desired resolution
-	var scaling_factor: Vector2 = Vector2((MAP_RESOLUTION.x - BORDER_RESOLUTION) * PIXELS_PER_TILE / gen_screen_resolution.x, (MAP_RESOLUTION.y - BORDER_RESOLUTION) * PIXELS_PER_TILE / gen_screen_resolution.y)
-	for f in sizes.size():
-		for s in sizes[f].size():
-			sizes[f][s] = int(sizes[f][s] * scaling_factor.length())
+	var scaling_factor: Vector2 = Vector2((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.x, (MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.y)
+	var minScalingFactor
+	if scaling_factor.x < scaling_factor.y:
+		minScalingFactor = scaling_factor.x
+	else:
+		minScalingFactor = scaling_factor.y
+	print(radius)
+	for r in radius:
+		print(r)
+		r[0] = r[0] * minScalingFactor
+		r[1] = r[1] * minScalingFactor
+	print("BORDER: ")
+	print("(0, 0)")
+	print(MAP_RESOLUTION * PIXELS_PER_TILE)
+	print("")
+	print("MAP AT: ")
+	var mapRes = MAP_RESOLUTION
+	mapRes.x -= BORDER_RESOLUTION
+	mapRes.y -= BORDER_RESOLUTION
+	var postBorderTopLeft = Vector2i(BORDER_RESOLUTION, BORDER_RESOLUTION)
+	print(postBorderTopLeft * PIXELS_PER_TILE)
+	print(mapRes * PIXELS_PER_TILE)
+	print("")
+	print("SCALE FACTOR: " + str(scaling_factor))
+	print("")
+	#for f in num_points.size():
+		#for s in num_points[f].size():
+		#	num_points[f][s] = int(num_points[f][s] * scaling_factor.length())
 			
 
-	for a in spawn_area.size():
+	for a in features.size():
+		print("BEEP BOOP: SCALING: " + features[a])
 		for area in spawn_area[a]:
+			
+			print("PRE-SCALED SPAWN AREA FOR: " + features[a] + ": ")
+			print(area[0][0])
+			print(area[0][1])
+			print(area[1][0])
+			print(area[1][1])
 			
 			area[0][0] = int(area[0][0] * scaling_factor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			area[0][1] = int(area[0][1] * scaling_factor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
@@ -197,23 +247,51 @@ func get_data() -> Array:
 			area[1][0] = int(area[1][0] * scaling_factor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			area[1][1] = int(area[1][1] * scaling_factor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			
-			
+			print("SCALED SPAWN AREA FOR " + features[a] + ": ")
+			print(area[0][0])
+			print(area[0][1])
+			print(area[1][0])
+			print(area[1][1])
+			print("")
 	
-	
+	print("DONE SCALING")
 	#Calculate number of features
 	var number_of_features = 0
 	for f in features.size():
 		number_of_features += occurences[f]
 	#print(number_of_features)
-	var arrayToReturn = [sqrt((((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE) * ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE)) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, layers, gen_depth, sub_occurences, sizes]
-	# Return min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes
+	var arrayToReturn = [sqrt((((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE) * ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE)) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, layers, roughness, radius, num_points]
+	# Return min_distance, features, spawn_area, occurences, roughness, radius, num_points
 	#print(arrayToReturn)
 	return arrayToReturn
-	#return [sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, gen_depth, sub_occurences, sizes]
+	#return [sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, roughness, radius, num_points]
 	
 #Returns [PackedVector3Array, Array[Array], Vector2i]
-func _generate_points(min_distance, features, spawn_area, occurences, gen_depth, sub_occurences, sizes) -> Array:
-	return []
+func _generate_points(coverTerrain) -> Array:
+	var pointsList = []
+	print("GENERATE POINTS BEGIN: ")
+	print("")
+	print(coverTerrain)
+	print("")
+	print("GENREATE POINTS END")
+	print("")
+	
+	for type in coverTerrain:
+		for bounding_area in type[0]:
+			for i in type[2]: #the number of occurences of the type
+				var forestSize = randi_range(1, 3)
+				var center = Vector2(
+					randi_range(bounding_area[0][0], bounding_area[1][0]),
+					randi_range(bounding_area[0][1], bounding_area[1][1])
+				)
+				
+				var radius = randf_range(type[4][0], type[4][1])
+				for j in forestSize:
+					var offset = Vector2(randi_range(-1 * radius, radius),  randi_range(-1 * radius, radius))
+					var blob = generate_blob(center + offset, radius, type[5], type[3])
+					pointsList.append([type[6], type[1], blob])
+				
+	return pointsList
 	"""
 	var points = PackedVector3Array() # (x, y, feature index)
 		
@@ -250,11 +328,11 @@ func _generate_points(min_distance, features, spawn_area, occurences, gen_depth,
 				var center = item[0]
 				var depth = item[1]
 				# Stop if we've reached max depth
-				if depth >= gen_depth[f]:
+				if depth >= roughness[f]:
 					continue
-				var num_children = sub_occurences[f][depth]
+				var num_children = radius[f][depth]
 				
-				var radius = sizes[f][depth]
+				var radius = num_points[f][depth]
 				var angles = _poisson_dd_1d(0, floor(TAU*1000),num_children,1) # Multiplied by 1000 to be like an integer
 				
 				for a in angles:
@@ -280,7 +358,7 @@ func _generate_points(min_distance, features, spawn_area, occurences, gen_depth,
 	"""
 
 # Generates the mesh
-func _generate_mesh(baseTerrain: Array): # 
+func _generate_mesh(baseTerrain: Array, coverTerrain: Array): # 
 	# Mesh variables
 	var mesh = ArrayMesh.new()
 	var arrays = []
@@ -289,8 +367,17 @@ func _generate_mesh(baseTerrain: Array): #
 	var colors = PackedColorArray()
 	var indices = PackedInt32Array()
 	
-	print(baseTerrain)
+	#print(baseTerrain)
 	# Generates mesh
+	print("BASE TERRAINS: ")
+	for type in baseTerrain:
+		print(type)
+	print("")
+	print("COVER TERRAINS: ")
+	for blob in coverTerrain:
+		print(blob)
+		
+	#Base Terrain coverage
 	for row: int in MAP_RESOLUTION.y:
 		for col: int in MAP_RESOLUTION.x:
 			var x: int = col * quad_size
@@ -298,12 +385,13 @@ func _generate_mesh(baseTerrain: Array): #
 			
 			var i = vertices.size()  # index of first vertex in this quad
 			
+
 			# Define the 4 vertices of the quad (clockwise or CCW)
 			vertices.push_back(Vector2(x, y))
 			vertices.push_back(Vector2(x + quad_size, y))
 			vertices.push_back(Vector2(x + quad_size, y + quad_size))
 			vertices.push_back(Vector2(x, y + quad_size))
-		
+
 			#Hard sets quads to ocean
 			if col < (BORDER_RESOLUTION - 1) or row < BORDER_RESOLUTION - 1 or col > (MAP_RESOLUTION.x - (BORDER_RESOLUTION) + 1) or row > (MAP_RESOLUTION.y - BORDER_RESOLUTION + 1):
 				
@@ -339,45 +427,46 @@ func _generate_mesh(baseTerrain: Array): #
 				var color = biome_colours[0]
 				colors.append_array([color, color, color, color])
 				indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
-			"""
-			# Calculate the closest feature to this point
-			var closest_feature = Vector2(-1, -1) # distance squared, feature id
-			var current_chunk = Vector2i(
-				floor((col * PIXELS_PER_TILE) / GLOBAL_chunk_length),
-				floor((row * PIXELS_PER_TILE)/ GLOBAL_chunk_length))
-			var d_d = 2 # The range of chunks to check (-d_d < chunk < d_dd)
-			
-			while closest_feature.x == -1 and d_d < GLOBAL_CHUNK_COUNT.x:
-				
+	#Cover Terrain coverage
+	for blob in coverTerrain:
+		print("Its blobbin' time")
+		var min_x = INF; var max_x = -INF
+		var min_y = INF; var max_y = -INF
+		for p in blob[2]:
+			min_x = min(min_x, p.x); max_x = max(max_x, p.x)
+			min_y = min(min_y, p.y); max_y = max(max_y, p.y)
+		
+		var col_start = int(min_x / PIXELS_PER_TILE)
+		var col_end   = int(max_x / PIXELS_PER_TILE)
+		var row_start = int(min_y / PIXELS_PER_TILE)
+		var row_end   = int(max_y / PIXELS_PER_TILE)
+		
+		if col_start < BORDER_RESOLUTION: col_start = BORDER_RESOLUTION + 1
+		if col_end > MAP_RESOLUTION.x - BORDER_RESOLUTION: col_end = MAP_RESOLUTION.x - BORDER_RESOLUTION
+		if row_start < BORDER_RESOLUTION: row_start = BORDER_RESOLUTION + 1
+		if row_end > MAP_RESOLUTION.y - BORDER_RESOLUTION: row_end = MAP_RESOLUTION.y - BORDER_RESOLUTION
+		
+		
+		for row in range(row_start, row_end):
+			for col in range(col_start, col_end):
+				var cell_center = Vector2(
+					col * PIXELS_PER_TILE + PIXELS_PER_TILE * 0.5,
+					row * PIXELS_PER_TILE + PIXELS_PER_TILE * 0.5
+				)
+				if point_in_polygon(cell_center, blob[2]):
+					var base_idx = (row * MAP_RESOLUTION.x + col) * 4
+					# Set all 4 corners of the quad to forest color
+					colors[base_idx + 0] = blob[1] # top-left
+					colors[base_idx + 1] = blob[1]  # top-right
+					colors[base_idx + 2] = blob[1]  # bottom-left
+					colors[base_idx + 3] = blob[1]  # bottom-right
 
-				for dy in range(-d_d,d_d+1):
-					for dx in range(-d_d, d_d+1):
-						var target_chunk = current_chunk + Vector2i(dx,dy)
-						if ((0 <= target_chunk.x and target_chunk.x < GLOBAL_CHUNK_COUNT.x) and (0 <= target_chunk.y and target_chunk.y < GLOBAL_CHUNK_COUNT.y)):
-							for p in chunks[target_chunk.x][target_chunk.y]:
-								var distance = pow((x - p.x),2) + pow((y - p.y),2) # Calculate distance squared
-								if (p.z == 0 and distance < origin_radius): # If it's within origin radius from origin, force it to be origin
-									closest_feature = Vector2(distance, p.z)
-									break
-								if ((closest_feature.x == -1) or (distance < closest_feature.x)): # New closest feature
-									closest_feature = Vector2(distance,p.z)
-				if (closest_feature.x == -1):
-					d_d += 1
-					#print("D_D must be upped for Col:", col, " and row: ", row)
-				
-			# Generate the color for the whole quad
-			var color = biome_colours[closest_feature.y]
-			#var color = biome_colours[y]
-			#if (sqrt(closest_feature.x) > (col * PIXELS_PER_TILE) or sqrt(closest_feature.x) > (2 * MAP_RESOLUTION.x - col * PIXELS_PER_TILE)
-			#or sqrt(closest_feature.x) > (row * PIXELS_PER_TILE) or sqrt(closest_feature.x) > MAP_RESOLUTION.y - (row * PIXELS_PER_TILE)):
-			#	color = Color.DARK_BLUE
-			
-			colors.append_array([color, color, color, color])
-			# Define two triangles (quad = 2 triangles)
-			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
-			"""
+
+	print("")
+	print("There should be about: " + str(MAP_RESOLUTION.x * MAP_RESOLUTION.y) + " quads")
+	print("There are: " + str(colors.size()) + " quads")
 	
-	print(colors.size())
+	# Index of a quad should be: ((row - 1) * map_resolution.x) + col
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_COLOR] = colors
@@ -385,3 +474,29 @@ func _generate_mesh(baseTerrain: Array): #
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	$"Ground Mesh".mesh = mesh
+
+func point_in_polygon(point: Vector2, polygon: PackedVector2Array) -> bool:
+	var inside = false
+	var n = polygon.size()
+	var j = n - 1
+	for i in n:
+		var xi = polygon[i].x; var yi = polygon[i].y
+		var xj = polygon[j].x; var yj = polygon[j].y
+		if ((yi > point.y) != (yj > point.y)) and \
+		(point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi):
+			inside = !inside
+		j = i
+	return inside
+	
+	
+func generate_blob(center: Vector2, base_radius: float, num_points: int, roughness: float) -> PackedVector2Array:
+	var pts = PackedVector2Array()
+	var n = num_points + randi_range(-1 * RANDOM_BLOB_VARIATION, RANDOM_BLOB_VARIATION)  # slight variation in point count
+	for i in n:
+		var angle = (float(i) / n) * TAU
+		var new_base_radius = base_radius
+		if i != 0:
+			new_base_radius = (base_radius + (pts[i - 1]-center).length()) / 2
+		var r = new_base_radius * (1.0 + randf_range(-roughness, roughness))
+		pts.append(center + Vector2(cos(angle), sin(angle)) * r)
+	return pts
