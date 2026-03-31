@@ -8,7 +8,6 @@ extends Node2D
 @onready var RCLICKATTACK= $VBoxContainer/Attack
 @onready var RCLICKMENU = $VBoxContainer
 
-var time = 0
 const MEEPLE_TICKS_PER_SECOND = 20
 var time_since_last_meeple_tick = 0
 #The list of meeple groups, their targets, and their colours
@@ -22,6 +21,8 @@ var group_targets: Array[Vector2] = [Vector2(1000,500)]
 var groupColours = [Color(1,0,0)]
 var permGroupColour = [Color(1,0,0), Color(0,0,3), Color(0,3,0), Color(3,3,0), Color(3,0,3),Color(0,3,3)]
 
+var selected_colour = Color(1.3, 1.3, 0.6) 
+
 #Team mates for this player and what team they are on
 var teammates = []
 
@@ -31,7 +32,7 @@ var grid
 #var playerID = 0
 #logic used for the cool selcting box
 var selecting = Vector2(0,0)
-var selectingTime = 0
+#var selectingTime = 0
 
 var MEEPLE_ID_COUNTER = 1
 
@@ -54,24 +55,15 @@ func _ready() -> void:
 
 
 func _process(delta): #Runs every tick
-	time += delta
 	time_since_last_meeple_tick += delta
 	#if playerID == multiplayer.get_unique_id():
 	
 	if time_since_last_meeple_tick > 1.0 / MEEPLE_TICKS_PER_SECOND:
 		meeple_process()
 	
-	#Goes through every meeple and sets them to their colour and resets their 
-	#cleanMeeples()
-	for g in range(0,unorderedMeeples.size()):
-		if unorderedMeeples[g].selected:
-			unorderedMeeples[g].highlight(Color(3,3,3))
-		else:
-			unorderedMeeples[g].remove_highlight(permGroupColour[unorderedMeeples[g].groupNum])
-				
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
 		if grid.probe(get_global_mouse_position()).classification == 3:
-			grid.probe(get_global_mouse_position()).objectsInside[0].HP += 1
+			grid.probe(get_global_mouse_position()).objectsInside[0].update_hp(1)
 			return
 		elif grid.probe(get_global_mouse_position()).classification != 0:
 			if FLAG_VERBOSE: print("Failed to place meeple. Hex obstructed")
@@ -91,9 +83,7 @@ func _process(delta): #Runs every tick
 		unorderedMeeples.push_back(instance)
 		
 		if FLAG_VERBOSE: print("Spawned meeple ", instance.UNIQUEID)
-		
-		
-		
+
 	#Orders all meeples to a location
 	elif Input.is_action_just_pressed("super_order"):
 		var dest = grid.coord_to_axial_hex(get_global_mouse_position())
@@ -103,68 +93,74 @@ func _process(delta): #Runs every tick
 			if m.groupNum == 0:
 				m.queued_path = grid.find_path(m.path[0], dest, true, false)
 	
-	
 	#Opens up the right click menu
 	elif Input.is_action_just_pressed("right_click_menu"):
-		if grid.probe(get_global_mouse_position()).classification != 2:
+		if grid.probe(get_global_mouse_position()).classification == 3:
 			RCLICKMENU.set_global_position(get_global_mouse_position())
 			RCLICKMENU.visible = true
-		else:
-			RCLICKMENU.visible = false
-		
+		elif Input.is_action_just_pressed("order"):
+			RCLICKMENU.visible = false	
+			order_meeple(get_global_mouse_position())
+
+	elif Input.is_action_just_pressed("order"):
+		order_meeple(get_global_mouse_position())
 	
 	#Starts the selction process
 	elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
 		RCLICKMENU.visible = false
 		selecting = get_global_mouse_position()
-		selectingTime = 0
-	
+		if !Input.is_action_pressed("preserve_selection"):
+			var clicked_meeple_hex = grid.probe(get_global_mouse_position()).hex
+			for m in unorderedMeeples:
+				if m.path[0] != clicked_meeple_hex:
+						m.is_unselected()
+			
 	#Used to build the selection box if
 	elif Input.is_action_pressed("select") and teammates[0].buildingDraggin == null:
-		selectingTime += delta
-		if selectingTime > 0.25:
+		#selectingTime += delta
+		#if selectingTime > 0.25:
+		if InputEventMouseMotion:
 			selection_box.visible = true
 			update_selection_box()
-	
+			
 	#Logic for when the select button is released
 	elif Input.is_action_just_released("select"):
-		selectingTime += delta
-		if selectingTime < 0.25: #No selecting box
-			var hit = false
-			var groupHit = null
-			#iterates through all meeples to find the clicked meeples group
-			#it selects all meeples in the group
-			for m in unorderedMeeples: 
-				if m.hasMouse():
-					hit = true
-					m.selected = true
-					if m.groupNum > 0:
-						groupHit = m.groupNum
-					break
-			for m in unorderedMeeples:
-				if m.groupNum == groupHit:
-					m.selected = true
-			if hit == false:		
-				for m in unorderedMeeples:
-					m.selected = false
-		else:
-			#Same thing but for all meeples in the rectangle
-			var rect = Rect2(selection_box.global_position, selection_box.size)
-			var groupsHit = []
-			for m in unorderedMeeples:
-				if rect.has_point(m.rb.get_global_position()):
-					m.selected = true
-					groupsHit.push_back(m.groupNum)
+		#selectingTime += delta
+		#if selectingTime < 0.25: #No selecting box
+		#	var hit = false
+		#	var groupHit = null
+		#	#iterates through all meeples to find the clicked meeples group
+		#	#it selects all meeples in the group
+		#	for m in unorderedMeeples: 
+		#		if m.hasMouse():
+		#			hit = true
+		#			m.is_selected()
+		#			if m.groupNum > 0:
+		#				groupHit = m.groupNum
+		#			break
+		#	for m in unorderedMeeples:
+		#		if m.groupNum == groupHit:
+		#			m.is_selected()
+		#	if hit == false:		
+		#		for m in unorderedMeeples:
+		#			m.is_unselected()
+		#else:
+		#Same thing but for all meeples in the rectangle
+		var rect = Rect2(selection_box.global_position, selection_box.size)
+		#var groupsHit = []
+		for m in unorderedMeeples:
+			if rect.has_point(m.get_global_position()):
+				m.is_selected()
+				#groupsHit.push_back(m.groupNum)
 			
-			for g in groupsHit: #Needs a redo -> at worst its O(n^2)
-				if g == 0:
-					continue
-				for m in unorderedMeeples:
-					if m.groupNum == g:
-						m.selected = true
-					
-					
-		selecting = false #No more selecting :(
+			#for g in groupsHit: #Needs a redo -> at worst its O(n^2)
+			#	if g == 0:
+			#		continue
+			#	for m in unorderedMeeples:
+			#		if m.groupNum == g:
+			#			m.is_selected()
+							
+		selecting = Vector2(0, 0) #No more selecting :(
 		selection_box.visible = false
 		
 	"""
@@ -236,26 +232,16 @@ func spawn_meeple(pos):
 
 #Order all the selected meeples to that place
 func _on_order_button_pressed():
-	
-	var dest = grid.hex_center(RCLICKMENU.get_global_position())
-	targetMarker.global_position = dest
-	
-	for m in unorderedMeeples:
-		if m.selected:
-			m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
-			#m.path = []
-			#for h in tempPath:
-			#	m.path.append(grid.axial_hex_to_coord(h))
-			m.selected = false
+	order_meeple(get_global_mouse_position())
 
 
 func _on_order_button_released(): #Menu gone :(
 	RCLICKMENU.visible = false
 
+
 #Absolutly BROKEN logic for creating groups
 #For real tho, it kinda fire
-func _on_group_button_pressed():
-	
+func _on_group_button_pressed():	
 	var hit = false
 	for m in unorderedMeeples:
 		if m.selected:
@@ -288,7 +274,7 @@ func _on_attack_button_pressed():
 				#	m.path.append(h)
 				
 				#m.dest = grid.hex_center(attackLoc)
-			m.selected = false
+			m.is_unselected()
 
 
 func _on_attack_button_released(): #Menu gone :(
@@ -310,19 +296,19 @@ func removeEmptyGroups(): #Gets rid of all groups with no meeples
 """
 
 
-func colourNotIn(): #Returns a colour for a group
-	#print("looking for one")
-	var found = false
-	for c in permGroupColour:
-		for nc in groupColours:
-			found = false
-			if c == nc:
-				found = true
-				break
-		if found == false:
-			#print("Found One")
-			return c
-	return null
+#unc colourNotIn(): #Returns a colour for a group
+#	#print("looking for one")
+#	var found = false
+#	for c in permGroupColour:
+#		for nc in groupColours:
+#			found = false
+#			if c == nc:
+#				found = true
+#				break
+#		if found == false:
+#			#print("Found One")
+#			return c
+#	return null
 
 
 func set_id(node):
@@ -330,10 +316,10 @@ func set_id(node):
 	MEEPLE_ID_COUNTER += 1
 
 
-func get_group_targets():
-	return group_targets
-func get_groupColours():
-	return groupColours
+#func get_group_targets():
+#	return group_targets
+#func get_groupColours():
+#	return groupColours
 
 
 func freeMeeple(id):
@@ -343,6 +329,17 @@ func freeMeeple(id):
 			unorderedMeeples.pop_at(i).queue_free()
 			return
 
+func order_meeple(coordinate):
+	var dest = grid.hex_center(coordinate)
+	#targetMarker.global_position = dest
+	for m in unorderedMeeples:
+		if m.selected:
+			m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
+			#m.path = []
+			#for h in tempPath:
+			#	m.path.append(grid.axial_hex_to_coord(h))
+			m.is_unselected()
+
 
 func meeple_start_merge(target_meeple):
 	target_meeple.waiting = true
@@ -350,7 +347,7 @@ func meeple_start_merge(target_meeple):
 	
 
 func meeple_end_merge(incoming_meeple, target_meeple):
-	target_meeple.HP += incoming_meeple.HP
+	target_meeple.update_hp(incoming_meeple.HP)
 	if !target_meeple.inqueue: 
 		target_meeple.waiting = false
 		# Error caused if the target meeple is currently in a queue

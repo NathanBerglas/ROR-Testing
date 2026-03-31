@@ -1,7 +1,6 @@
 extends Node2D
 class_name meeple
 
-@export var area_2d: Area2D
 @export var speed: float = 200
 @export var acceleration: float = 300
 
@@ -14,10 +13,11 @@ const HEX_DIRS := [
 	Vector2i(0, 1),
 ]
 
+@export var lbl: Label
+@export var rb: CharacterBody2D
+@export var sprite: Sprite2D
+
 var redirected_from: Array = []
-var label = null
-var rb = null
-var sprite = null
 var selected = false #Determines if a meeple is selected
 var path: Array = [] #destination of a meeple
 var queued_path: Array = [] #destination of a meeple
@@ -36,8 +36,12 @@ var HP = 1
 var type = "Meeple"
 
 
-func _process(delta): #runs on each meeple every tick
-	label.text = str(HP)
+func _ready():
+	lbl.text = str(HP)
+	
+
+#func _process(delta): #runs on each meeple every tick
+	#label.text = str(HP)
 	
 	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
 	#	_go_to_target(delta)
@@ -46,22 +50,30 @@ func _process(delta): #runs on each meeple every tick
 		#dest = null
 
 
-func hasMouse(): #Checks if the mouse is within the meeple
-	var radius = 220 #should be set to meeple radius squared
-	var mousePos = get_global_mouse_position()
-	
-	var dif = rb.global_position - mousePos
-	
-	if dif.length_squared() < radius:
-		return true
-	return false
+func update_hp(hp: int):
+	HP += hp
+	lbl.text = str(HP)
 
 
-func highlight(colour):
-	sprite.modulate = colour  # White Highlight
+#func hasMouse(): #Checks if the mouse is within the meeple
+	#var radius = 220 #should be set to meeple radius squared
+	#var mousePos = get_global_mouse_position()
+	#
+	#var dif = rb.global_position - mousePos
+	#
+	#if dif.length_squared() < radius:
+		#return true
+	#return false
 
-func remove_highlight(colour):
-	sprite.modulate = colour  # Red highlight
+
+func is_selected():
+	selected = true
+	sprite.modulate = Color(2.5, 3, 3)
+
+
+func is_unselected():
+	selected = false
+	sprite.modulate = Color(1, 1, 1)
 
 
 #func _go_to_target(delta):
@@ -94,3 +106,11 @@ func remove_highlight(colour):
 	#if ((dist.x * dist.x) < 3 and (dist.y * dist.y) < 3):
 		#return true
 	#return false
+
+
+func _on_rigid_body_2d_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
+	if Input.is_action_just_pressed("select"):
+		if selected:
+			is_unselected()
+		else:
+			is_selected()

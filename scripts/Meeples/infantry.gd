@@ -5,16 +5,13 @@ var attackTimer = 0
 var attackRange = 1
 
 func _ready():
-	self.rb = $RigidBody2D
-	self.sprite = $RigidBody2D/Sprite2D
-	self.label = $RigidBody2D/Label
+	super._ready()
+	self.sprite = $Sprite2D
 	self.type = "Infantry"
-
+	
 
 func _process(delta): #runs on each meeple every tick
-	label.text = str(HP)
-	
-	
+	#label.text = str(self.HP)
 	if attackTarget:
 		if inAttackRange(attackTarget.pos):
 			attack(attackTarget, delta)
@@ -36,9 +33,9 @@ func attack(target, delta):
 		attackTimer = 0
 		if target.type == "Meeple":
 			if path == null:
-				target.HP -= HP * 2
+				target.HP -= self.HP * 2
 			else:
-				target.HP -= int(HP)
+				target.HP -= int(self.HP)
 			
 			if target.HP <= 0:
 				attackTarget = null
@@ -52,10 +49,8 @@ func attack(target, delta):
 			
 			if target.hp <= 0:
 				attackTarget = null
-				
-		
-		
-		
+
+
 func inAttackRange(target):
 	if target == null:
 		return false
