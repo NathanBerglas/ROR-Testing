@@ -8,7 +8,7 @@ extends Node2D
 # Map Area
 @export var BORDER_RESOLUTION: int = 10
 @export var PIXELS_PER_TILE: int = 10
-var MAP_RESOLUTION: Vector2i = Vector2i(420, 220)
+var MAP_RESOLUTION: Vector2i = Vector2i(820, 420)
 
 
 # Gen Data
@@ -51,9 +51,9 @@ func _ready() -> void:
 	#MAP_RESOLUTION.y = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
 	
-	#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points
+	#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points, neighbour counts
 	var data = get_data()
-	#Data: min_distance, features, spawn_area, occurences, roughness, , num_points
+	
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	GLOBAL_chunk_length = data[0] * 0.70711 # min_distance / sqrt(2)
@@ -78,7 +78,7 @@ func _ready() -> void:
 	var coverTerrainExtents = []
 	for i in range(data[4].size()):
 		if data[4][i] == 2:
-			coverTerrainExtents.append([data[2][i], biome_colours[i], data[3][i], data[5][i], data[6][i], data[7][i], data[1][i]])
+			coverTerrainExtents.append([data[2][i], biome_colours[i], data[3][i], data[5][i], data[6][i], data[7][i], data[8][i], data[9][i], data[1][i]])
 	var coverTerrainPointsList = _generate_points(coverTerrainExtents)
 	
 	_generate_mesh(baseTerrain, coverTerrainPointsList)
@@ -147,27 +147,27 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 # density: float - How dense the points can be packed. Higher is denser, lower is less dense. < 1 may result in not fitting total points
 # chunks: Array - A 2d array of chunks, each chunk is an array of points previously generated with tile coordinates
 # Note: The diagonal of each chunk is equal to minimum_distance
-func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: float, chunks: Array[Array]) -> Vector2i:
+func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: float, chunks: Array[Array], chunkLength: int) -> Vector2i:
 	var range_x: int = bottom_right.x - top_left.x
 	var range_y: int = bottom_right.y - top_left.y
-	print(top_left)
-	print(bottom_right)
+	#print(top_left)
+	#print(bottom_right)
 
 	for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
 		var sucess: bool = true
 		var pointLocation: Vector2i = Vector2i(randi_range(top_left.x, bottom_right.x),randi_range(top_left.y, bottom_right.y))
 		#var global_x = x + Vector2i(1, 1) * int(BORDER_RESOLUTION * PIXELS_PER_TILE)
-		var chunk_index: Vector2i = Vector2i(int(pointLocation.x / GLOBAL_chunk_length),int(pointLocation.y / GLOBAL_chunk_length))
+		var chunk_index: Vector2i = Vector2i(int(pointLocation.x / chunkLength),int(pointLocation.y / chunkLength))
 		for dx: int in range(-2,3):
 			for dy: int in range(-2,3):
 				var adj_chunk_index: Vector2i = chunk_index + Vector2i(dx,dy)
 				if (adj_chunk_index.x >= 0 and adj_chunk_index.y >= 0) and (adj_chunk_index.x < chunks.size() and adj_chunk_index.y < chunks[0].size()): # CHECK FOR MAX BOUNDS!
-					for point: Vector3 in chunks[adj_chunk_index.x][adj_chunk_index.y]:
+					for point: Vector2 in chunks[adj_chunk_index.x][adj_chunk_index.y]:
 						if Vector2i(point.x,point.y).distance_squared_to(pointLocation) < min_distance * min_distance:
 							sucess = false
 							break # Too close to a point
 		if sucess:
-			print(pointLocation)
+			#print(pointLocation)
 			return pointLocation
 	print("PDD 2D Timed out!")
 	return Vector2i.ZERO
@@ -178,11 +178,13 @@ func get_data() -> Array:
 	var json_received = gen_data.data
 	var features = PackedStringArray()
 	var spawn_area: Array # [0] is the top left, [1] is bottom right Vector2i
-	var occurences = PackedInt32Array()
-	var layers = PackedInt32Array()
-	var roughness = PackedFloat32Array()
+	var occurences: Array
+	var layers: Array
+	var roughness: Array
 	var radius: Array # radius[i] is an array of integers of length roughness[i], where i is the ith feature
 	var num_points: Array # num_points[i] is an array of integers of length roughness[i], where i is the ith feature
+	var neighbourCounts: Array # an array of ints for the second layer terrain types random gen
+	var minDistances: Array
 	var gen_screen_resolution # The resolution that gen.json is balanced for
 	
 	# Initialize data from JSON
@@ -195,7 +197,11 @@ func get_data() -> Array:
 		layers.append(feature["layer"])
 		roughness.append(feature["roughness"])
 		radius.append(feature["radius"])  # already an Array
-		num_points.append(feature["num_points"])  # already an Array
+		num_points.append(feature["num_points"])
+		neighbourCounts.append(feature["neighbour_count"])  
+		minDistances.append(feature["min_distance"])
+		
+		
 	print(features)
 	print(roughness)
 
@@ -210,8 +216,13 @@ func get_data() -> Array:
 	print(radius)
 	for r in radius:
 		print(r)
-		r[0] = r[0] * minScalingFactor
-		r[1] = r[1] * minScalingFactor
+		if r != null:
+			r[0] = r[0] * minScalingFactor
+			r[1] = r[1] * minScalingFactor
+			
+	for m in minDistances:
+		if m != null:
+			m = m * minScalingFactor
 	print("BORDER: ")
 	print("(0, 0)")
 	print(MAP_RESOLUTION * PIXELS_PER_TILE)
@@ -260,7 +271,7 @@ func get_data() -> Array:
 	for f in features.size():
 		number_of_features += occurences[f]
 	#print(number_of_features)
-	var arrayToReturn = [sqrt((((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE) * ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE)) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, layers, roughness, radius, num_points]
+	var arrayToReturn = [sqrt((((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE) * ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE)) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, layers, roughness, radius, num_points, neighbourCounts, minDistances]
 	# Return min_distance, features, spawn_area, occurences, roughness, radius, num_points
 	#print(arrayToReturn)
 	return arrayToReturn
@@ -276,18 +287,38 @@ func _generate_points(coverTerrain) -> Array:
 	print("GENREATE POINTS END")
 	print("")
 	
+	
 	for type in coverTerrain:
 		for bounding_area in type[0]:
+			var chunkLen = type[7]
+			var chunks: Array[Array]
+			var chunk_count: Vector2i = Vector2i(int(ceil((bounding_area[1][0] - bounding_area[0][0]) / chunkLen)), int(ceil((bounding_area[1][1] - bounding_area[0][1]) / chunkLen)))
+
+			for cx: int in chunk_count.x:
+				chunks.push_back([])
+				for cy: int in chunk_count.y:		
+					chunks[cx].push_back([])
+			
 			for i in type[2]: #the number of occurences of the type
-				var forestSize = randi_range(1, 3)
-				var center = Vector2(
-					randi_range(bounding_area[0][0], bounding_area[1][0]),
-					randi_range(bounding_area[0][1], bounding_area[1][1])
-				)
 				
+				
+				var neighbourCount = randi_range(1, type[6])
+				
+				var topLeft = Vector2(bounding_area[0][0], bounding_area[0][1])
+				var bottomRight = Vector2(bounding_area[1][0], bounding_area[1][1])
+				
+				var center = _poisson_dd_2d(topLeft, bottomRight, chunkLen, chunks, chunkLen)
+				print("")
+				print("GENERATING " + type[type.size() - 1] + " HERE: ")
+				print(center)
+				print("")
+				
+				var chunk_index = Vector2i(int(floor((center.x - topLeft.x) / chunkLen)),int(floor((center.y - topLeft.y) / chunkLen)))
+				
+				chunks[chunk_index.x][chunk_index.y].append(Vector2(center.x - topLeft.x, center.y - topLeft.y))
 				var radius = randf_range(type[4][0], type[4][1])
-				for j in forestSize:
-					var offset = Vector2(randi_range(-1 * radius, radius),  randi_range(-1 * radius, radius))
+				for j in neighbourCount:
+					var offset = Vector2i(randi_range(-1 * radius, radius),  randi_range(-1 * radius, radius))
 					var blob = generate_blob(center + offset, radius, type[5], type[3])
 					pointsList.append([type[6], type[1], blob])
 				
