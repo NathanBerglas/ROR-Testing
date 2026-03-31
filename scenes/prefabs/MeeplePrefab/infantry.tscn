@@ -3,6 +3,12 @@
 [ext_resource type="Script" uid="uid://b32p4q6vmg88j" path="res://scripts/Meeples/infantry.gd" id="1_5wvjh"]
 [ext_resource type="Texture2D" uid="uid://div2aq3pn7qg3" path="res://assets/RedFootSoldier.png" id="2_5wvjh"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_u6sr4"]
+font_size = 13
+shadow_size = 2
+shadow_color = Color(0, 0, 0, 0.3019608)
+shadow_offset = Vector2(0, 0)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_u6sr4"]
 radius = 16.0
 
@@ -20,10 +26,12 @@ scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_5wvjh")
 
 [node name="Label" type="Label" parent="RigidBody2D" unique_id=723761028]
-offset_left = -9.0
+offset_left = -16.0
 offset_top = -12.0
-offset_right = 9.0
+offset_right = 16.0
 offset_bottom = 11.0
+text = "15"
+label_settings = SubResource("LabelSettings_u6sr4")
 horizontal_alignment = 1
 vertical_alignment = 1
 

@@ -272,7 +272,7 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 				meeple_requesting.inqueue = true
 				if FLAG_VERBOSE: print("Queing a meeple, ", meeple_requesting.UNIQUEID, " to the queue on hex ", ingressing_tile.hex)
 				decision = "PENDING"
-	if FLAG_VERBOSE: print("Meeple ", meeple_requesting.UNIQUEID, " ingressing request to ", ingressing_hex, " - Granted: ", decision)
+	if FLAG_VERBOSE: print("Meeple ", meeple_requesting.UNIQUEID, " ingress request to ", ingressing_hex, " - Granted: ", decision)
 	return decision
 	
 func hex_egress(egressing_hex):
@@ -286,3 +286,4 @@ func hex_egress(egressing_hex):
 		if FLAG_VERBOSE: print("Collecting meeple, ", collected_meeple.UNIQUEID, " from queue on hex ", egressing_hex)
 		update_grid(egressing_hex, 4, [collected_meeple])
 		meeple_control.egress_granted(collected_meeple)
+		hex_egress(collected_meeple.path[0])

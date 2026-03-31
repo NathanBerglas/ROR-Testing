@@ -36,6 +36,7 @@ var selectingTime = 0
 var MEEPLE_ID_COUNTER = 1
 
 const FLAG_VERBOSE = true
+const FLAG_DEBUG = true
 
 func _ready() -> void:
 	
@@ -89,7 +90,7 @@ func _process(delta): #Runs every tick
 		set_id(instance)
 		unorderedMeeples.push_back(instance)
 		
-		if FLAG_VERBOSE: print("Spawned meeple")
+		if FLAG_VERBOSE: print("Spawned meeple ", instance.UNIQUEID)
 		
 		
 		
@@ -192,9 +193,14 @@ func _physics_process(delta: float) -> void:
 			m.global_position = next_hex
 			var next_hex_tile = grid.axial_probe(m.path[1])
 			if (next_hex_tile.classification == 3):
-				if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has reached merge position at hex: ", m.path[1], " with meeple ", next_hex_tile.objectsInside[0].UNIQUEID)
-				meeple_end_merge(m, next_hex_tile.objectsInside[0])
-				freeMeeple(m.UNIQUEID)
+				if m.UNIQUEID == next_hex_tile.objectsInside[0].UNIQUEID:
+					print("Meeple ", m.UNIQUEID, " merging with itself!")
+					if FLAG_DEBUG: breakpoint
+					meeple_end_merge(m, next_hex_tile.objectsInside[0])
+				else:
+					if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has reached merge position at hex: ", m.path[1], " with meeple ", next_hex_tile.objectsInside[0].UNIQUEID)
+					meeple_end_merge(m, next_hex_tile.objectsInside[0])
+					freeMeeple(m.UNIQUEID)
 			else:
 				grid.update_grid(m.path[1], 3, [m])
 				m.path.pop_front()
