@@ -8,15 +8,15 @@ extends Node2D
 # Map Area
 @export var BORDER_RESOLUTION: int = 10
 @export var PIXELS_PER_TILE: int = 10
-var MAP_RESOLUTION: Vector2i = Vector2i(820, 420)
+var MAP_RESOLUTION: Vector2i = Vector2i(620, 320)
 
 
 # Gen Data
 @export var gen_data: JSON
-
+#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
 #Hardcode
 @export var origin_radius = 10*10 # Squared
-@export var biome_colours: Array[Color] = [Color.BLACK, Color.FOREST_GREEN, Color.GREEN_YELLOW, Color.SKY_BLUE, Color.SANDY_BROWN, Color.WHEAT, Color.FOREST_GREEN, Color.LIGHT_GREEN, Color.ROYAL_BLUE]
+@export var biome_index: Array = [99, 0, 4, 1, 3, 6, 0, 5, 2]
 
 # Debugging
 @export var target: PackedScene
@@ -25,12 +25,19 @@ var MAP_RESOLUTION: Vector2i = Vector2i(820, 420)
 const max_poisson_attempts_1d: int = 100
 const max_poisson_attempts_2d: int = 300
 const sphere_packing_constant: float = 0.9069
+
+const warp_strength: float = 8.0   # How far borders get pushed (in cells)
+const warp_frequency: float = 0.04 # Scale of the noise (smaller = smoother)
+const noise_offset: float = 75.0  # Offset to decorrelate X and Y axes
+
+#Data types sent over:
+#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
 var GLOBAL_CHUNK_COUNT = Vector2i()
 var GLOBAL_chunk_length = float()
 
 const RANDOM_BLOB_VARIATION = 3
 
-
+var map = null
 func point_chunk_print(point_chunk) -> void:
 	var chunk_array = point_chunk[1]
 	var chunk_dim = GLOBAL_CHUNK_COUNT
@@ -72,16 +79,21 @@ func _ready() -> void:
 	var baseTerrain = []
 	for i in range(data[4].size()):
 		if data[4][i] == 1:
-			baseTerrain.append([data[2][i], biome_colours[i], data[1][i]])
+			baseTerrain.append([data[2][i], biome_index[i], data[1][i]])
 			
 	#Layer 2:
 	var coverTerrainExtents = []
 	for i in range(data[4].size()):
 		if data[4][i] == 2:
-			coverTerrainExtents.append([data[2][i], biome_colours[i], data[3][i], data[5][i], data[6][i], data[7][i], data[8][i], data[9][i], data[1][i]])
+			print("NUMBER HERE??")
+			print(biome_index)
+			
+			coverTerrainExtents.append([data[2][i], biome_index[i], data[3][i], data[5][i], data[6][i], data[7][i], data[8][i], data[9][i], data[1][i]])
+			print("NUMBER DONE??")
+	
 	var coverTerrainPointsList = _generate_points(coverTerrainExtents)
 	
-	_generate_mesh(baseTerrain, coverTerrainPointsList)
+	map = _generate_mesh(baseTerrain, coverTerrainPointsList)
 	print("working?")
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
@@ -94,7 +106,7 @@ func _show_points(points: PackedVector3Array):
 	for p in points:
 		var instance = target.instantiate()
 		instance.global_position = Vector2(p.x, p.y)
-		instance.modulate = biome_colours[p.z] * 0.9
+		instance.modulate = biome_index[p.z] * 0.9
 		add_child(instance)
 
 # 1 dimensional poisson disk distribution
@@ -397,7 +409,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	var vertices = PackedVector2Array()
 	var colors = PackedColorArray()
 	var indices = PackedInt32Array()
-	
+	var generatingMap = []
 	#print(baseTerrain)
 	# Generates mesh
 	print("BASE TERRAINS: ")
@@ -410,6 +422,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 		
 	#Base Terrain coverage
 	for row: int in MAP_RESOLUTION.y:
+		var rowToAppend = []
 		for col: int in MAP_RESOLUTION.x:
 			var x: int = col * quad_size
 			var y: int = row * quad_size
@@ -417,28 +430,26 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 			var i = vertices.size()  # index of first vertex in this quad
 			
 
-			# Define the 4 vertices of the quad (clockwise or CCW)
-			vertices.push_back(Vector2(x, y))
-			vertices.push_back(Vector2(x + quad_size, y))
-			vertices.push_back(Vector2(x + quad_size, y + quad_size))
-			vertices.push_back(Vector2(x, y + quad_size))
+			
 
 			#Hard sets quads to ocean
 			if col < (BORDER_RESOLUTION - 1) or row < BORDER_RESOLUTION - 1 or col > (MAP_RESOLUTION.x - (BORDER_RESOLUTION) + 1) or row > (MAP_RESOLUTION.y - BORDER_RESOLUTION + 1):
 				
-				var color = biome_colours[8] #WATER
-				colors.append_array([color, color, color, color])
+				var color = 2 #WATER
+				#colors.append_array([color, color, color, color])
+				rowToAppend.append(color)
 				# Define two triangles (quad = 2 triangles)
-				indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+				#indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
 				continue
 				
 			#Hard sets quads to beach
 			if col <= (BORDER_RESOLUTION) or row <= BORDER_RESOLUTION or col >= (MAP_RESOLUTION.x - (BORDER_RESOLUTION)) or row >= (MAP_RESOLUTION.y - BORDER_RESOLUTION):
 				
-				var color = biome_colours[4] #DESERT/Sand -> Needs change3z
-				colors.append_array([color, color, color, color])
+				var color = 3 #DESERT/Sand -> Needs change3z
+				#colors.append_array([color, color, color, color])
 				# Define two triangles (quad = 2 triangles)
-				indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+				#indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+				rowToAppend.append(color)
 				continue
 			var found = false
 			for type in baseTerrain:
@@ -449,16 +460,22 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 						if row * PIXELS_PER_TILE >= area[0][1] and row * PIXELS_PER_TILE <= area[1][1]:
 							IN = true
 				if IN:
-					colors.append_array([type[1],type[1],type[1],type[1]])
-					indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+					rowToAppend.append(type[1])
+					
+					#colors.append_array([type[1],type[1],type[1],type[1]])
+					#indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
 					found = true
 					break
 	
 			if found == false:
-				var color = biome_colours[0]
-				colors.append_array([color, color, color, color])
-				indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+				var color = biome_index[0]
+				
+				#colors.append_array([color, color, color, color])
+				#indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+				rowToAppend.append(color)
+		generatingMap.append(rowToAppend)
 	#Cover Terrain coverage
+	
 	for blob in coverTerrain:
 		print("Its blobbin' time")
 		var min_x = INF; var max_x = -INF
@@ -485,17 +502,58 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 					row * PIXELS_PER_TILE + PIXELS_PER_TILE * 0.5
 				)
 				if point_in_polygon(cell_center, blob[2]):
+					
+					generatingMap[row][col] = blob[1]
+					
+					"""
 					var base_idx = (row * MAP_RESOLUTION.x + col) * 4
 					# Set all 4 corners of the quad to forest color
 					colors[base_idx + 0] = blob[1] # top-left
 					colors[base_idx + 1] = blob[1]  # top-right
 					colors[base_idx + 2] = blob[1]  # bottom-left
 					colors[base_idx + 3] = blob[1]  # bottom-right
-
-
+					"""
+	
+	generatingMap = roughenMap(generatingMap)
+	
+	for row: int in MAP_RESOLUTION.y:
+		for col: int in MAP_RESOLUTION.x:
+			var i = vertices.size()  # index of first vertex in this quad
+			var x: int = col * PIXELS_PER_TILE
+			var y: int = row * PIXELS_PER_TILE
+			
+			# Define the 4 vertices of the quad (clockwise or CCW)
+			vertices.push_back(Vector2(x, y))
+			vertices.push_back(Vector2(x + quad_size, y))
+			vertices.push_back(Vector2(x + quad_size, y + quad_size))
+			vertices.push_back(Vector2(x, y + quad_size))
+			
+			
+			var biome = generatingMap[row][col]
+			var color = null
+			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
+			if biome == 0:
+				color = Color.FOREST_GREEN
+			if biome == 1:
+				color = Color.SKY_BLUE
+			if biome == 2:
+				color = Color.ROYAL_BLUE
+			if biome == 3:
+				color = Color.SANDY_BROWN
+			if biome == 4:
+				color = Color.GREEN_YELLOW
+			if biome == 5:
+				color = Color.LIGHT_GREEN
+			if biome == 6:
+				color = Color.WHEAT
+			colors.append_array([color, color, color, color])
+			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
+	
+			
 	print("")
 	print("There should be about: " + str(MAP_RESOLUTION.x * MAP_RESOLUTION.y) + " quads")
 	print("There are: " + str(colors.size()) + " quads")
+	
 	
 	# Index of a quad should be: ((row - 1) * map_resolution.x) + col
 	arrays.resize(Mesh.ARRAY_MAX)
@@ -505,6 +563,8 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	$"Ground Mesh".mesh = mesh
+	
+	return generatingMap
 
 func point_in_polygon(point: Vector2, polygon: PackedVector2Array) -> bool:
 	var inside = false
@@ -531,3 +591,42 @@ func generate_blob(center: Vector2, base_radius: float, num_points: int, roughne
 		var r = new_base_radius * (1.0 + randf_range(-roughness, roughness))
 		pts.append(center + Vector2(cos(angle), sin(angle)) * r)
 	return pts
+
+
+func roughenMap(base_map: Array) -> Array:
+	print("base_map border sample: ", base_map[0][0], " ", base_map[0][1], " ", base_map[1][0])
+	var noise = FastNoiseLite.new()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.frequency = warp_frequency
+	noise.fractal_octaves = 3
+
+	var result = []
+	var actual_width = base_map[0].size()
+	var actual_height = base_map.size()
+	var warp_padding = warp_strength + 1
+	var inner_x_min = BORDER_RESOLUTION + warp_padding
+	var inner_x_max = actual_width - BORDER_RESOLUTION - warp_padding - 1
+	var inner_y_min = BORDER_RESOLUTION + warp_padding
+	var inner_y_max = actual_height - BORDER_RESOLUTION - warp_padding - 1
+	print("actual_width: ", actual_width)
+	print("actual_height: ", actual_height)
+	print("BORDER_RESOLUTION: ", BORDER_RESOLUTION)
+	print("inner_x_min: ", inner_x_min, " inner_x_max: ", inner_x_max)
+	print("inner_y_min: ", inner_y_min, " inner_y_max: ", inner_y_max)
+	for y in actual_height:
+		result.append([])
+		for x in actual_width:
+			
+			if x < BORDER_RESOLUTION or x >= actual_width - BORDER_RESOLUTION or y < BORDER_RESOLUTION or y >= actual_height - BORDER_RESOLUTION:
+				result[y].append(base_map[y][x])
+				continue
+
+			var warp_x = noise.get_noise_2d(x, y) * warp_strength
+			var warp_y = noise.get_noise_2d(x + noise_offset, y + noise_offset) * warp_strength
+
+			var sample_x = clamp(floori(x + warp_x), inner_x_min, inner_x_max)
+			var sample_y = clamp(floori(y + warp_y), inner_y_min, inner_y_max)
+
+			result[y].append(base_map[sample_y][sample_x])
+	print("result border sample: ", result[0][0], " ", result[0][1], " ", result[1][0])
+	return result

@@ -1,8 +1,8 @@
 extends Node2D
 
 # Grid constants
-@export var HEX_SIZE: float = 100
-@export var GRID_COUNT: Vector2i = Vector2i(25,20)
+@export var HEX_SIZE: float = 10
+@export var GRID_COUNT: Vector2i = Vector2i(400,280)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
@@ -14,7 +14,13 @@ var created = false
 var grid: Array = []
 
 @export var hex_prefab: PackedScene
-
+@export var forestHex_prefab: PackedScene
+@export var waterHex_prefab: PackedScene
+@export var tundraHex_prefab: PackedScene
+@export var sandHex_prefab: PackedScene
+@export var rainforestHex_prefab: PackedScene
+@export var grasslandHex_prefab: PackedScene
+@export var plainsHex_prefab: PackedScene
 
 const HEX_DIRS := [
 	Vector2i(1, 0),
@@ -58,7 +64,7 @@ class tile:
 			self.type = "BASIC_BITCH"
 
 
-#Added by Jacob -> External script that doesn't care about rules, set tile to that classification
+#Added by Anna -> External script that doesn't care about rules, set tile to that classification
 #Chat if needed
 func update_grid(hex: Vector2i, classification: int, objects):
 	var tile_to_update = grid[hex.x][hex.y]
@@ -81,7 +87,7 @@ func update_grid(hex: Vector2i, classification: int, objects):
 		tile_to_update.hex_pf.get_node("Border").modulate = Color.PALE_VIOLET_RED
 
 
-#Added by Jacob -> Probe by takes axial Hex
+#Added by Anna -> Probe by takes axial Hex
 func axial_probe(coordinate: Vector2i):
 	var tile_pos: Vector2i = coordinate
 	return grid[tile_pos.x][tile_pos.y]
@@ -237,11 +243,37 @@ func _ready():
 		grid.append(row)
 	update_astar()
 	# Draw Grid
+	
 	for row in grid:
 		for h in row:
 			var q = h.hex.x
 			var r = h.hex.y
-			var new_hex = hex_prefab.instantiate()
+			var center = Vector2(q,r)
+			center = axial_hex_to_coord(center)
+			var index = Vector2i(int(floor((center.x) / biomeGen.PIXELS_PER_TILE)),int(floor((center.y) / biomeGen.PIXELS_PER_TILE)))
+			
+			var new_hex = null
+			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
+			if index.x >= biomeGen.MAP_RESOLUTION.x or index.y >= biomeGen.MAP_RESOLUTION.y:
+				new_hex = hex_prefab.instantiate()
+			else:
+				if biomeGen.map[index.y][index.x] == 0:
+					new_hex = forestHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 1:
+					new_hex = tundraHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 2:
+					new_hex = waterHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 3:
+					new_hex = sandHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 4:
+					new_hex = rainforestHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 5:
+					new_hex = plainsHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 6:
+					new_hex = grasslandHex_prefab.instantiate()
+			if new_hex == null:
+				new_hex = hex_prefab.instantiate()
+			
 			new_hex.position = axial_hex_to_coord(Vector2i(q, r))
 			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2
 			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
