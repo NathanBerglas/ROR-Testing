@@ -2,7 +2,7 @@ extends Node2D
 
 # Grid constants
 @export var HEX_SIZE: float = 10
-@export var GRID_COUNT: Vector2i = Vector2i(400,280)
+@export var GRID_COUNT: Vector2i = Vector2i(465,214)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
@@ -33,10 +33,13 @@ const HEX_DIRS := [
 
 var astar = AStar2D.new()
 
+
 const TILE_TYPE_CHANCES = 100000000
 const ARABLE_CHANCE = 0
 const FOREST_CHANCE = 0
 const STONE_CHANCE = 0
+
+var terrainOffset = null
 
 class tile:
 	var hex: Vector2i # (q, r)
@@ -216,7 +219,9 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attac
 	return path_hexes
 
 func _ready():
+	terrainOffset = int(HEX_SIZE * SQRT_3 * (GRID_COUNT.y * 0.5))
 	biomeGen = biomeGenScene.instantiate()
+	biomeGen.terrainOffset = terrainOffset
 	add_child(biomeGen)
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
@@ -250,7 +255,7 @@ func _ready():
 			var r = h.hex.y
 			var center = Vector2(q,r)
 			center = axial_hex_to_coord(center)
-			var index = Vector2i(int(floor((center.x) / biomeGen.PIXELS_PER_TILE)),int(floor((center.y) / biomeGen.PIXELS_PER_TILE)))
+			var index = Vector2i(int(floor((center.x - terrainOffset) / biomeGen.getPixelsPerTile())),int(floor((center.y) / biomeGen.getPixelsPerTile())))
 			
 			var new_hex = null
 			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]

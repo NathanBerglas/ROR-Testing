@@ -38,6 +38,13 @@ var GLOBAL_chunk_length = float()
 const RANDOM_BLOB_VARIATION = 3
 
 var map = null
+
+var scalingFactor = null
+var terrainOffset = null
+
+
+	
+
 func point_chunk_print(point_chunk) -> void:
 	var chunk_array = point_chunk[1]
 	var chunk_dim = GLOBAL_CHUNK_COUNT
@@ -219,12 +226,12 @@ func get_data() -> Array:
 
 	print("")
 	# Scaled based on desired resolution
-	var scaling_factor: Vector2 = Vector2((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.x, (MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.y)
+	scalingFactor = Vector2((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.x, (MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.y)
 	var minScalingFactor
-	if scaling_factor.x < scaling_factor.y:
-		minScalingFactor = scaling_factor.x
+	if scalingFactor.x < scalingFactor.y:
+		minScalingFactor = scalingFactor.x
 	else:
-		minScalingFactor = scaling_factor.y
+		minScalingFactor = scalingFactor.y
 	print(radius)
 	for r in radius:
 		print(r)
@@ -247,11 +254,11 @@ func get_data() -> Array:
 	print(postBorderTopLeft * PIXELS_PER_TILE)
 	print(mapRes * PIXELS_PER_TILE)
 	print("")
-	print("SCALE FACTOR: " + str(scaling_factor))
+	print("SCALE FACTOR: " + str(scalingFactor))
 	print("")
 	#for f in num_points.size():
 		#for s in num_points[f].size():
-		#	num_points[f][s] = int(num_points[f][s] * scaling_factor.length())
+		#	num_points[f][s] = int(num_points[f][s] * scalingFactor.length())
 			
 
 	for a in features.size():
@@ -264,11 +271,11 @@ func get_data() -> Array:
 			print(area[1][0])
 			print(area[1][1])
 			
-			area[0][0] = int(area[0][0] * scaling_factor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
-			area[0][1] = int(area[0][1] * scaling_factor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
+			area[0][0] = int(area[0][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
+			area[0][1] = int(area[0][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			
-			area[1][0] = int(area[1][0] * scaling_factor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
-			area[1][1] = int(area[1][1] * scaling_factor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
+			area[1][0] = int(area[1][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
+			area[1][1] = int(area[1][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			
 			print("SCALED SPAWN AREA FOR " + features[a] + ": ")
 			print(area[0][0])
@@ -402,6 +409,7 @@ func _generate_points(coverTerrain) -> Array:
 
 # Generates the mesh
 func _generate_mesh(baseTerrain: Array, coverTerrain: Array): # 
+
 	# Mesh variables
 	var mesh = ArrayMesh.new()
 	var arrays = []
@@ -424,7 +432,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	for row: int in MAP_RESOLUTION.y:
 		var rowToAppend = []
 		for col: int in MAP_RESOLUTION.x:
-			var x: int = col * quad_size
+			var x: int = col * quad_size + terrainOffset
 			var y: int = row * quad_size
 			
 			var i = vertices.size()  # index of first vertex in this quad
@@ -519,7 +527,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	for row: int in MAP_RESOLUTION.y:
 		for col: int in MAP_RESOLUTION.x:
 			var i = vertices.size()  # index of first vertex in this quad
-			var x: int = col * PIXELS_PER_TILE
+			var x: int = col * PIXELS_PER_TILE + terrainOffset
 			var y: int = row * PIXELS_PER_TILE
 			
 			# Define the 4 vertices of the quad (clockwise or CCW)
@@ -630,3 +638,6 @@ func roughenMap(base_map: Array) -> Array:
 			result[y].append(base_map[sample_y][sample_x])
 	print("result border sample: ", result[0][0], " ", result[0][1], " ", result[1][0])
 	return result
+
+func getPixelsPerTile() -> int:
+	return PIXELS_PER_TILE
