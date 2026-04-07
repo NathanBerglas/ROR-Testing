@@ -2,7 +2,7 @@ extends Node2D
 
 # Grid constants
 @export var HEX_SIZE: float = 10
-@export var GRID_COUNT: Vector2i = Vector2i(465,214)
+@export var GRID_COUNT: Vector2i = Vector2i(466,214)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
@@ -226,6 +226,7 @@ func _ready():
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
 		for r in range(GRID_COUNT.y):
+			
 			var tileToCreate = tile.new(Vector2i(q, r))
 			row.append(tileToCreate)
 			
@@ -253,8 +254,11 @@ func _ready():
 		for h in row:
 			var q = h.hex.x
 			var r = h.hex.y
+			
 			var center = Vector2(q,r)
 			center = axial_hex_to_coord(center)
+			if center.x < terrainOffset or center.x > (biomeGen.MAP_RESOLUTION.x * biomeGen.PIXELS_PER_TILE) + terrainOffset:
+				continue
 			var index = Vector2i(int(floor((center.x - terrainOffset) / biomeGen.getPixelsPerTile())),int(floor((center.y) / biomeGen.getPixelsPerTile())))
 			
 			var new_hex = null

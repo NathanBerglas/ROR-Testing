@@ -570,7 +570,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	arrays[Mesh.ARRAY_INDEX] = indices
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	$"Ground Mesh".mesh = mesh
+	#$"Ground Mesh".mesh = mesh
 	
 	return generatingMap
 
