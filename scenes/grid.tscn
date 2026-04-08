@@ -5,14 +5,18 @@
 [ext_resource type="PackedScene" uid="uid://dg77d0mctts7" path="res://scenes/prefabs/landscapePrefab/forest.tscn" id="3_gnlqp"]
 [ext_resource type="PackedScene" uid="uid://bey5vvkq0u1fp" path="res://scenes/prefabs/landscapePrefab/stoneDeposit.tscn" id="4_jaoqn"]
 [ext_resource type="PackedScene" uid="uid://c55deqr6361v3" path="res://scenes/BiomeGen/BiomeGen.tscn" id="5_726jt"]
-[ext_resource type="PackedScene" uid="uid://w5sjmbbv6a8b" path="res://scenes/prefabs/hex_prefab.tscn" id="5_jaoqn"]
-[ext_resource type="PackedScene" uid="uid://sb6uk17uy178" path="res://scenes/prefabs/forestHex.tscn" id="7_8kere"]
+[ext_resource type="PackedScene" uid="uid://w5sjmbbv6a8b" path="res://scenes/prefabs/hexs/hex_prefab.tscn" id="5_jaoqn"]
+[ext_resource type="PackedScene" uid="uid://sb6uk17uy178" path="res://scenes/prefabs/hexs/forestHex.tscn" id="7_8kere"]
 [ext_resource type="PackedScene" uid="uid://b0wt475ct167j" path="res://scenes/prefabs/waterHex.tscn" id="8_awic7"]
-[ext_resource type="PackedScene" uid="uid://bp5yb3vufyjyu" path="res://scenes/prefabs/tundraHex.tscn" id="9_37306"]
-[ext_resource type="PackedScene" uid="uid://cb277dnckgs4w" path="res://scenes/prefabs/sandHex.tscn" id="10_f7i2a"]
-[ext_resource type="PackedScene" uid="uid://bhlvtw4s8cmd5" path="res://scenes/prefabs/rainforestHex.tscn" id="11_8ulmy"]
-[ext_resource type="PackedScene" uid="uid://bcbvc55ld6n5c" path="res://scenes/prefabs/grasslandHex.tscn" id="12_wqld8"]
-[ext_resource type="PackedScene" uid="uid://bt878poxkdcfw" path="res://scenes/prefabs/plainsHex.tscn" id="13_idg7c"]
+[ext_resource type="PackedScene" uid="uid://bp5yb3vufyjyu" path="res://scenes/prefabs/hexs/tundraHex.tscn" id="9_37306"]
+[ext_resource type="PackedScene" uid="uid://cb277dnckgs4w" path="res://scenes/prefabs/hexs/sandHex.tscn" id="10_f7i2a"]
+[ext_resource type="PackedScene" uid="uid://bhlvtw4s8cmd5" path="res://scenes/prefabs/hexs/rainforestHex.tscn" id="11_8ulmy"]
+[ext_resource type="PackedScene" uid="uid://bcbvc55ld6n5c" path="res://scenes/prefabs/hexs/grasslandHex.tscn" id="12_wqld8"]
+[ext_resource type="PackedScene" uid="uid://bt878poxkdcfw" path="res://scenes/prefabs/hexs/plainsHex.tscn" id="13_idg7c"]
+[ext_resource type="PackedScene" uid="uid://bkcddsyke5dko" path="res://scenes/prefabs/hexs/diamondHex.tscn" id="14_37306"]
+[ext_resource type="PackedScene" uid="uid://bsfbxr4p83kd2" path="res://scenes/prefabs/hexs/ironHex.tscn" id="15_8ulmy"]
+[ext_resource type="PackedScene" uid="uid://dqw3pwnw258w8" path="res://scenes/prefabs/hexs/stoneHex.tscn" id="16_wqld8"]
+[ext_resource type="PackedScene" uid="uid://clc1r1k5rss53" path="res://scenes/prefabs/hexs/rubyHex.tscn" id="17_idg7c"]
 
 [node name="Grid" type="Node2D" unique_id=1852769152]
 script = ExtResource("1_t5fjg")
@@ -28,3 +32,7 @@ sandHex_prefab = ExtResource("10_f7i2a")
 rainforestHex_prefab = ExtResource("11_8ulmy")
 grasslandHex_prefab = ExtResource("12_wqld8")
 plainsHex_prefab = ExtResource("13_idg7c")
+diamondHex_prefab = ExtResource("14_37306")
+ironHex_prefab = ExtResource("15_8ulmy")
+stoneHex_prefab = ExtResource("16_wqld8")
+rubyHex_prefab = ExtResource("17_idg7c")

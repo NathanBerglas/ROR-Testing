@@ -1,5 +1,7 @@
 extends Node2D
 
+const FLAG_VERBOSE = false
+
 # Main Area
 #@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
 #@export var COLS: int = 192
@@ -13,10 +15,10 @@ var MAP_RESOLUTION: Vector2i = Vector2i(620, 320)
 
 # Gen Data
 @export var gen_data: JSON
-#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
+#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland, Stone, Iron, Ruby, Diamonds]
 #Hardcode
 @export var origin_radius = 10*10 # Squared
-@export var biome_index: Array = [99, 0, 4, 1, 3, 6, 0, 5, 2]
+@export var biome_index: Array = [99, 0, 4, 1, 3, 6, 0, 5, 2, 7, 8, 9, 10]
 
 # Debugging
 @export var target: PackedScene
@@ -50,8 +52,8 @@ func point_chunk_print(point_chunk) -> void:
 	var chunk_dim = GLOBAL_CHUNK_COUNT
 	for col in chunk_dim[0]:
 		for row in chunk_dim[1]:
-			print("Chunk (",col, ", ", row, ")")
-			print(chunk_array[col-1][row-1])
+			if FLAG_VERBOSE: print("Chunk (",col, ", ", row, ")")
+			if FLAG_VERBOSE: print(chunk_array[col-1][row-1])
 func _ready() -> void:
 
 	var previous_time = Time.get_ticks_msec()
@@ -65,16 +67,18 @@ func _ready() -> void:
 	#MAP_RESOLUTION.y = MAP_RESOLUTION.y / PIXELS_PER_TILE
 	# Generate Mesh
 	
-	#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points, neighbour counts
+	
+		#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points, neighbour counts, point min Distance
+		
 	var data = get_data()
 	
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	GLOBAL_chunk_length = data[0] * 0.70711 # min_distance / sqrt(2)
-	print("Data gotten: ", ellapsed)
-	print(GLOBAL_chunk_length)
+	if FLAG_VERBOSE: print("Data gotten: ", ellapsed)
+	if FLAG_VERBOSE: print(GLOBAL_chunk_length)
 	GLOBAL_CHUNK_COUNT = Vector2i(int(ceil((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / GLOBAL_chunk_length)), int(ceil((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2)  * PIXELS_PER_TILE / GLOBAL_chunk_length)))
-	print(GLOBAL_CHUNK_COUNT)
+	if FLAG_VERBOSE: print(GLOBAL_CHUNK_COUNT)
 	#var total_point_chunk = _generate_points(data[0], data[1], data[2], data[3], data[4], data[5], data[6])
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
@@ -92,22 +96,29 @@ func _ready() -> void:
 	var coverTerrainExtents = []
 	for i in range(data[4].size()):
 		if data[4][i] == 2:
-			print("NUMBER HERE??")
-			print(biome_index)
-			
 			coverTerrainExtents.append([data[2][i], biome_index[i], data[3][i], data[5][i], data[6][i], data[7][i], data[8][i], data[9][i], data[1][i]])
-			print("NUMBER DONE??")
 	
-	var coverTerrainPointsList = _generate_points(coverTerrainExtents)
+	var resourceExtents = []
 	
-	map = _generate_mesh(baseTerrain, coverTerrainPointsList)
-	print("working?")
+
+	for i in range(data[4].size()):
+		if data[4][i] == 3:
+			resourceExtents.append([data[2][i], biome_index[i], data[3][i],  data[9][i], data[1][i]])
+		
+	
+	var pointsList = _generate_points(coverTerrainExtents, resourceExtents)
+	
+	var coverTerrainPointsList = pointsList[0]
+	var resourcePointsList = pointsList[1]
+	map = _generate_mesh(baseTerrain, coverTerrainPointsList, resourcePointsList)
+	
+	if FLAG_VERBOSE: print("working?")
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
-	print("Mesh generated: ", ellapsed)
+	if FLAG_VERBOSE: print("Mesh generated: ", ellapsed)
 	#_show_points(total_point_chunk[0])
 	#point_chunk_print(total_point_chunk)
-	print("DONE!")
+	if FLAG_VERBOSE: print("DONE!")
 
 func _show_points(points: PackedVector3Array):
 	for p in points:
@@ -154,7 +165,7 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 				p_points.push_back(x)
 				break
 			if (attempt == max_poisson_attempts_1d):
-				print("Biome Gen Timed out! 1d")
+				if FLAG_VERBOSE: print("Biome Gen Timed out! 1d")
 	return p_points
 
 
@@ -169,8 +180,8 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: float, chunks: Array[Array], chunkLength: int) -> Vector2i:
 	var range_x: int = bottom_right.x - top_left.x
 	var range_y: int = bottom_right.y - top_left.y
-	#print(top_left)
-	#print(bottom_right)
+	#if FLAG_VERBOSE: print(top_left)
+	#if FLAG_VERBOSE: print(bottom_right)
 
 	for attempt in max_poisson_attempts_2d: # Cap number of attempts in case to prevent infinite loop
 		var sucess: bool = true
@@ -186,9 +197,9 @@ func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: fl
 							sucess = false
 							break # Too close to a point
 		if sucess:
-			#print(pointLocation)
+			#if FLAG_VERBOSE: print(pointLocation)
 			return pointLocation
-	print("PDD 2D Timed out!")
+	if FLAG_VERBOSE: print("PDD 2D Timed out!")
 	return Vector2i.ZERO
 
 #Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points
@@ -221,10 +232,10 @@ func get_data() -> Array:
 		minDistances.append(feature["min_distance"])
 		
 		
-	print(features)
-	print(roughness)
+	if FLAG_VERBOSE: print(features)
+	if FLAG_VERBOSE: print(roughness)
 
-	print("")
+	if FLAG_VERBOSE: print("")
 	# Scaled based on desired resolution
 	scalingFactor = Vector2((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.x, (MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE / gen_screen_resolution.y)
 	var minScalingFactor
@@ -232,9 +243,9 @@ func get_data() -> Array:
 		minScalingFactor = scalingFactor.x
 	else:
 		minScalingFactor = scalingFactor.y
-	print(radius)
+	if FLAG_VERBOSE: print(radius)
 	for r in radius:
-		print(r)
+		if FLAG_VERBOSE: print(r)
 		if r != null:
 			r[0] = r[0] * minScalingFactor
 			r[1] = r[1] * minScalingFactor
@@ -242,34 +253,34 @@ func get_data() -> Array:
 	for m in minDistances:
 		if m != null:
 			m = m * minScalingFactor
-	print("BORDER: ")
-	print("(0, 0)")
-	print(MAP_RESOLUTION * PIXELS_PER_TILE)
-	print("")
-	print("MAP AT: ")
+	if FLAG_VERBOSE: print("BORDER: ")
+	if FLAG_VERBOSE: print("(0, 0)")
+	if FLAG_VERBOSE: print(MAP_RESOLUTION * PIXELS_PER_TILE)
+	if FLAG_VERBOSE: print("")
+	if FLAG_VERBOSE: print("MAP AT: ")
 	var mapRes = MAP_RESOLUTION
 	mapRes.x -= BORDER_RESOLUTION
 	mapRes.y -= BORDER_RESOLUTION
 	var postBorderTopLeft = Vector2i(BORDER_RESOLUTION, BORDER_RESOLUTION)
-	print(postBorderTopLeft * PIXELS_PER_TILE)
-	print(mapRes * PIXELS_PER_TILE)
-	print("")
-	print("SCALE FACTOR: " + str(scalingFactor))
-	print("")
+	if FLAG_VERBOSE: print(postBorderTopLeft * PIXELS_PER_TILE)
+	if FLAG_VERBOSE: print(mapRes * PIXELS_PER_TILE)
+	if FLAG_VERBOSE: print("")
+	if FLAG_VERBOSE: print("SCALE FACTOR: " + str(scalingFactor))
+	if FLAG_VERBOSE: print("")
 	#for f in num_points.size():
 		#for s in num_points[f].size():
 		#	num_points[f][s] = int(num_points[f][s] * scalingFactor.length())
 			
 
 	for a in features.size():
-		print("BEEP BOOP: SCALING: " + features[a])
+		if FLAG_VERBOSE: print("BEEP BOOP: SCALING: " + features[a])
 		for area in spawn_area[a]:
 			
-			print("PRE-SCALED SPAWN AREA FOR: " + features[a] + ": ")
-			print(area[0][0])
-			print(area[0][1])
-			print(area[1][0])
-			print(area[1][1])
+			if FLAG_VERBOSE: print("PRE-SCALED SPAWN AREA FOR: " + features[a] + ": ")
+			if FLAG_VERBOSE: print(area[0][0])
+			if FLAG_VERBOSE: print(area[0][1])
+			if FLAG_VERBOSE: print(area[1][0])
+			if FLAG_VERBOSE: print(area[1][1])
 			
 			area[0][0] = int(area[0][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			area[0][1] = int(area[0][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
@@ -277,34 +288,35 @@ func get_data() -> Array:
 			area[1][0] = int(area[1][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			area[1][1] = int(area[1][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
 			
-			print("SCALED SPAWN AREA FOR " + features[a] + ": ")
-			print(area[0][0])
-			print(area[0][1])
-			print(area[1][0])
-			print(area[1][1])
-			print("")
+			if FLAG_VERBOSE: print("SCALED SPAWN AREA FOR " + features[a] + ": ")
+			if FLAG_VERBOSE: print(area[0][0])
+			if FLAG_VERBOSE: print(area[0][1])
+			if FLAG_VERBOSE: print(area[1][0])
+			if FLAG_VERBOSE: print(area[1][1])
+			if FLAG_VERBOSE: print("")
 	
-	print("DONE SCALING")
+	if FLAG_VERBOSE: print("DONE SCALING")
 	#Calculate number of features
 	var number_of_features = 0
 	for f in features.size():
 		number_of_features += occurences[f]
-	#print(number_of_features)
+	#if FLAG_VERBOSE: print(number_of_features)
 	var arrayToReturn = [sqrt((((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE) * ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE)) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, layers, roughness, radius, num_points, neighbourCounts, minDistances]
 	# Return min_distance, features, spawn_area, occurences, roughness, radius, num_points
-	#print(arrayToReturn)
+	#if FLAG_VERBOSE: print(arrayToReturn)
 	return arrayToReturn
 	#return [sqrt((SCREEN_RESOLUTION.x * SCREEN_RESOLUTION.y) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, roughness, radius, num_points]
 	
 #Returns [PackedVector3Array, Array[Array], Vector2i]
-func _generate_points(coverTerrain) -> Array:
-	var pointsList = []
-	print("GENERATE POINTS BEGIN: ")
-	print("")
-	print(coverTerrain)
-	print("")
-	print("GENREATE POINTS END")
-	print("")
+func _generate_points(coverTerrain, resources) -> Array:
+	var coverTerrainPointsList = []
+	var resourcePointsList = []
+	if FLAG_VERBOSE: print("GENERATE POINTS BEGIN: ")
+	if FLAG_VERBOSE: print("")
+	if FLAG_VERBOSE: print(coverTerrain)
+	if FLAG_VERBOSE: print("")
+	if FLAG_VERBOSE: print("GENREATE POINTS END")
+	if FLAG_VERBOSE: print("")
 	
 	
 	for type in coverTerrain:
@@ -327,10 +339,10 @@ func _generate_points(coverTerrain) -> Array:
 				var bottomRight = Vector2(bounding_area[1][0], bounding_area[1][1])
 				
 				var center = _poisson_dd_2d(topLeft, bottomRight, chunkLen, chunks, chunkLen)
-				print("")
-				print("GENERATING " + type[type.size() - 1] + " HERE: ")
-				print(center)
-				print("")
+				if FLAG_VERBOSE: print("")
+				if FLAG_VERBOSE: print("GENERATING " + type[type.size() - 1] + " HERE: ")
+				if FLAG_VERBOSE: print(center)
+				if FLAG_VERBOSE: print("")
 				
 				var chunk_index = Vector2i(int(floor((center.x - topLeft.x) / chunkLen)),int(floor((center.y - topLeft.y) / chunkLen)))
 				
@@ -339,9 +351,48 @@ func _generate_points(coverTerrain) -> Array:
 				for j in neighbourCount:
 					var offset = Vector2i(randi_range(-1 * radius, radius),  randi_range(-1 * radius, radius))
 					var blob = generate_blob(center + offset, radius, type[5], type[3])
-					pointsList.append([type[6], type[1], blob])
+					coverTerrainPointsList.append([type[6], type[1], blob])
+	
+	for r in resources:
+		if FLAG_VERBOSE: print("")
+		if FLAG_VERBOSE: print("GENERATING POINT FOR: ",r[4])
+		if FLAG_VERBOSE: print("IN RANGE: ")
+		if FLAG_VERBOSE: print(r[0])
+		if FLAG_VERBOSE: print("")
+		for bounding_area in r[0]:
+			if r[3] != null:
+				var chunkLen = r[3]
+				var chunks: Array[Array]
+				var chunk_count: Vector2i = Vector2i(int(ceil((bounding_area[1][0] - bounding_area[0][0]) / chunkLen)), int(ceil((bounding_area[1][1] - bounding_area[0][1]) / chunkLen)))
+
+				for cx: int in chunk_count.x:
+					chunks.push_back([])
+					for cy: int in chunk_count.y:		
+						chunks[cx].push_back([])
 				
-	return pointsList
+				for i in r[2]: #the number of occurences of the type
+					
+					var topLeft = Vector2(bounding_area[0][0], bounding_area[0][1])
+					var bottomRight = Vector2(bounding_area[1][0], bounding_area[1][1])
+					
+					var center = _poisson_dd_2d(topLeft, bottomRight, chunkLen, chunks, chunkLen)
+					if FLAG_VERBOSE: print("")
+					if FLAG_VERBOSE: print("GENERATING " + r[r.size() - 1] + " HERE: ")
+					if FLAG_VERBOSE: print(center)
+					if FLAG_VERBOSE: print("")
+					
+					var chunk_index = Vector2i(int(floor((center.x - topLeft.x) / chunkLen)),int(floor((center.y - topLeft.y) / chunkLen)))
+					chunks[chunk_index.x][chunk_index.y].append(Vector2(center.x - topLeft.x, center.y - topLeft.y))
+
+					resourcePointsList.append([r[1], center])
+			else:
+				var center: Vector2
+			
+				center.x = randi_range(bounding_area[0][0],bounding_area[1][0])
+				center.y = randi_range(bounding_area[0][1],bounding_area[1][1])
+				
+				resourcePointsList.append([r[1], center])
+	return [coverTerrainPointsList, resourcePointsList]
 	"""
 	var points = PackedVector3Array() # (x, y, feature index)
 		
@@ -403,12 +454,12 @@ func _generate_points(coverTerrain) -> Array:
 						stack.append([new_point, depth])
 				
 				
-	print(points.size())
+	if FLAG_VERBOSE: print(points.size())
 	return [points, chunks]
 	"""
 
 # Generates the mesh
-func _generate_mesh(baseTerrain: Array, coverTerrain: Array): # 
+func _generate_mesh(baseTerrain: Array, coverTerrain: Array, resources: Array): # 
 
 	# Mesh variables
 	var mesh = ArrayMesh.new()
@@ -418,15 +469,15 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	var colors = PackedColorArray()
 	var indices = PackedInt32Array()
 	var generatingMap = []
-	#print(baseTerrain)
+	#if FLAG_VERBOSE: print(baseTerrain)
 	# Generates mesh
-	print("BASE TERRAINS: ")
+	if FLAG_VERBOSE: print("BASE TERRAINS: ")
 	for type in baseTerrain:
-		print(type)
-	print("")
-	print("COVER TERRAINS: ")
+		if FLAG_VERBOSE: print(type)
+	if FLAG_VERBOSE: print("")
+	if FLAG_VERBOSE: print("COVER TERRAINS: ")
 	for blob in coverTerrain:
-		print(blob)
+		if FLAG_VERBOSE: print(blob)
 		
 	#Base Terrain coverage
 	for row: int in MAP_RESOLUTION.y:
@@ -485,7 +536,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	#Cover Terrain coverage
 	
 	for blob in coverTerrain:
-		print("Its blobbin' time")
+		if FLAG_VERBOSE: print("Its blobbin' time")
 		var min_x = INF; var max_x = -INF
 		var min_y = INF; var max_y = -INF
 		for p in blob[2]:
@@ -524,6 +575,12 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 	
 	generatingMap = roughenMap(generatingMap)
 	
+	for r in resources:
+		var rX = floor((r[1][0]) / PIXELS_PER_TILE)
+		var rY = floor((r[1][1]) / PIXELS_PER_TILE)
+		
+		
+		generatingMap[rY][rX] = r[0] #Setting to the resource ID
 	for row: int in MAP_RESOLUTION.y:
 		for col: int in MAP_RESOLUTION.x:
 			var i = vertices.size()  # index of first vertex in this quad
@@ -558,9 +615,9 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array): #
 			indices.append_array([i, i + 1, i + 2, i, i + 2, i + 3])
 	
 			
-	print("")
-	print("There should be about: " + str(MAP_RESOLUTION.x * MAP_RESOLUTION.y) + " quads")
-	print("There are: " + str(colors.size()) + " quads")
+	if FLAG_VERBOSE: print("")
+	if FLAG_VERBOSE: print("There should be about: " + str(MAP_RESOLUTION.x * MAP_RESOLUTION.y) + " quads")
+	if FLAG_VERBOSE: print("There are: " + str(colors.size()) + " quads")
 	
 	
 	# Index of a quad should be: ((row - 1) * map_resolution.x) + col
@@ -602,7 +659,7 @@ func generate_blob(center: Vector2, base_radius: float, num_points: int, roughne
 
 
 func roughenMap(base_map: Array) -> Array:
-	print("base_map border sample: ", base_map[0][0], " ", base_map[0][1], " ", base_map[1][0])
+	if FLAG_VERBOSE: print("base_map border sample: ", base_map[0][0], " ", base_map[0][1], " ", base_map[1][0])
 	var noise = FastNoiseLite.new()
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
 	noise.frequency = warp_frequency
@@ -616,11 +673,11 @@ func roughenMap(base_map: Array) -> Array:
 	var inner_x_max = actual_width - BORDER_RESOLUTION - warp_padding - 1
 	var inner_y_min = BORDER_RESOLUTION + warp_padding
 	var inner_y_max = actual_height - BORDER_RESOLUTION - warp_padding - 1
-	print("actual_width: ", actual_width)
-	print("actual_height: ", actual_height)
-	print("BORDER_RESOLUTION: ", BORDER_RESOLUTION)
-	print("inner_x_min: ", inner_x_min, " inner_x_max: ", inner_x_max)
-	print("inner_y_min: ", inner_y_min, " inner_y_max: ", inner_y_max)
+	if FLAG_VERBOSE: print("actual_width: ", actual_width)
+	if FLAG_VERBOSE: print("actual_height: ", actual_height)
+	if FLAG_VERBOSE: print("BORDER_RESOLUTION: ", BORDER_RESOLUTION)
+	if FLAG_VERBOSE: print("inner_x_min: ", inner_x_min, " inner_x_max: ", inner_x_max)
+	if FLAG_VERBOSE: print("inner_y_min: ", inner_y_min, " inner_y_max: ", inner_y_max)
 	for y in actual_height:
 		result.append([])
 		for x in actual_width:
@@ -636,7 +693,7 @@ func roughenMap(base_map: Array) -> Array:
 			var sample_y = clamp(floori(y + warp_y), inner_y_min, inner_y_max)
 
 			result[y].append(base_map[sample_y][sample_x])
-	print("result border sample: ", result[0][0], " ", result[0][1], " ", result[1][0])
+	if FLAG_VERBOSE: print("result border sample: ", result[0][0], " ", result[0][1], " ", result[1][0])
 	return result
 
 func getPixelsPerTile() -> int:

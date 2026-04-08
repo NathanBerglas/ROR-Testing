@@ -7,7 +7,7 @@
 			"occurences": 2,
 			"spawn_area": [[[350,450],[450,550]], [[1550,450],[1650,550]]],
 			"roughness": null,
-			"layer": 3,
+			"layer": 4,
 			"radius": null,
 			"num_points": null,
 			"neighbour_count": null,
@@ -90,6 +90,8 @@
 			"neighbour_count": null,
 			"min_distance": null,
 		},
+		
+		
 		{
 			"name": "lake",
 			"occurences": 3,
@@ -100,6 +102,51 @@
 			"num_points": 15,
 			"neighbour_count": 3,
 			"min_distance": 800,
-		}
+		},
+		{
+			"name": "stone",
+			"occurences": 15,
+			"spawn_area": [[[0,0],[800,1000]], [[1200,0],[2000,1000]]],
+			"roughness": null,
+			"layer": 3,
+			"radius": null,
+			"num_points": null,
+			"neighbour_count": null,
+			"min_distance": 100,
+		},
+		{
+			"name": "iron",
+			"occurences": 10,
+			"spawn_area": [[[0,0],[800,1000]], [[1200,0],[2000,1000]]],
+			"roughness": null,
+			"layer": 3,
+			"radius": null,
+			"num_points": null,
+			"neighbour_count": null,
+			"min_distance": 150,
+		},
+		{
+			"name": "rubies",
+			"occurences": 1,
+			"spawn_area": [[[800,400],[933,600]], [[934, 400],[1066,466]], [[934,534],[1066,600]], [[1067, 400],[1200,600]]],
+			"roughness": null,
+			"layer": 3,
+			"radius": null,
+			"num_points": null,
+			"neighbour_count": null,
+			"min_distance": null,
+		},
+		
+		{
+			"name": "diamonds",
+			"occurences": 1,
+			"spawn_area": [[[800,0],[933,200]], [[934,100],[1066,200]], [[1067,0],[1200,200]]],
+			"roughness": null,
+			"layer": 3,
+			"radius": null,
+			"num_points": null,
+			"neighbour_count": null,
+			"min_distance": null,
+		},
 	]
 }

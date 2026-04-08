@@ -21,6 +21,12 @@ var grid: Array = []
 @export var rainforestHex_prefab: PackedScene
 @export var grasslandHex_prefab: PackedScene
 @export var plainsHex_prefab: PackedScene
+@export var diamondHex_prefab: PackedScene
+@export var ironHex_prefab: PackedScene
+@export var stoneHex_prefab: PackedScene
+@export var rubyHex_prefab: PackedScene
+
+
 
 const HEX_DIRS := [
 	Vector2i(1, 0),
@@ -280,6 +286,14 @@ func _ready():
 					new_hex = plainsHex_prefab.instantiate()
 				if biomeGen.map[index.y][index.x] == 6:
 					new_hex = grasslandHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 7:
+					new_hex = stoneHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 8:
+					new_hex = ironHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 9:
+					new_hex = rubyHex_prefab.instantiate()
+				if biomeGen.map[index.y][index.x] == 10:
+					new_hex = diamondHex_prefab.instantiate()
 			if new_hex == null:
 				new_hex = hex_prefab.instantiate()
 			
