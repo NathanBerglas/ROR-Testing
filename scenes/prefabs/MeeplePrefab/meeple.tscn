@@ -11,11 +11,12 @@ shadow_size = 2
 shadow_color = Color(0, 0, 0, 0.3019608)
 shadow_offset = Vector2(0, 0)
 
-[node name="Meeple" type="Node2D" unique_id=934984987 node_paths=PackedStringArray("lbl", "rb")]
+[node name="Meeple" type="Node2D" unique_id=934984987 node_paths=PackedStringArray("label", "rb", "sprite")]
 scale = Vector2(2, 2)
 script = ExtResource("1_y4nmv")
-lbl = NodePath("Label")
+label = NodePath("Label")
 rb = NodePath("CharecterBody2D")
+sprite = NodePath("Sprite2D")
 
 [node name="CharecterBody2D" type="CharacterBody2D" parent="." unique_id=1703296516]
 input_pickable = true
@@ -25,6 +26,8 @@ motion_mode = 1
 shape = SubResource("CircleShape2D_yij1d")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=803099803]
+texture_filter = 1
+texture_repeat = 1
 
 [node name="Label" type="Label" parent="." unique_id=1866522079]
 offset_left = -16.0

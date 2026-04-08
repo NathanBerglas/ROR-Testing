@@ -17,7 +17,7 @@ func spawn(p, delta, position, grid): #Generates meeple every 5 seconds
 		var tempVector = position
 		tempVector.x += 1
 		
-		p.spawn_meeple(tempVector)
+		p.spawn_meeple(grid.axial_hex_to_coord(tempVector))
 		
 		#p.group[0].push_back(instance)
 		

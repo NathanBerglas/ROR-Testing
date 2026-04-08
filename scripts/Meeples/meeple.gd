@@ -13,7 +13,7 @@ const HEX_DIRS := [
 	Vector2i(0, 1),
 ]
 
-@export var lbl: Label
+@export var label: Label
 @export var rb: CharacterBody2D
 @export var sprite: Sprite2D
 
@@ -28,16 +28,14 @@ var pause_a_tick = false; # When arriving to prevent merge skipping
 var attackTarget = null
 var UNIQUEID = null #Unique Id for every meeple on a team by unit type
 #When I say Unique, I mean UNIQUE
-var size = 1 #Size of the ARMY hashtag troops slay
 var groupNum = 0
 var min_distance = 9 # Squared
-var pos = Vector2i(0, 0)
 var HP = 1
 var type = "Meeple"
 
 
 func _ready():
-	lbl.text = str(HP)
+	label.text = str(HP)
 	
 
 #func _process(delta): #runs on each meeple every tick
@@ -52,7 +50,9 @@ func _ready():
 
 func update_hp(hp: int):
 	HP += hp
-	lbl.text = str(HP)
+	if HP <= 0:
+		get_parent().freeMeeple(UNIQUEID)
+	label.text = str(HP)
 
 
 #func hasMouse(): #Checks if the mouse is within the meeple

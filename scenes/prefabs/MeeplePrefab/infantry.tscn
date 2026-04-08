@@ -7,8 +7,6 @@
 [node name="Meeple" unique_id=934984987 instance=ExtResource("1_hvju5")]
 script = ExtResource("1_5wvjh")
 
-[node name="Sprite2D" type="Sprite2D" parent="." index="2" unique_id=666036494]
-texture_filter = 1
-texture_repeat = 1
+[node name="Sprite2D" parent="." index="1" unique_id=803099803]
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_5wvjh")

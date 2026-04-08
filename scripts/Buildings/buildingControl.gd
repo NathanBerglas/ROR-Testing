@@ -286,7 +286,6 @@ func cleanBuildings():
 			
 
 
-
 func freeBuilding(ID):
 	
 	for i in range(buildings.size()):

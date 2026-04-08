@@ -50,8 +50,8 @@ func _ready() -> void:
 	RCLICKGROUP.button_up.connect(_on_group_button_released)
 	RCLICKORDER.button_down.connect(_on_order_button_pressed)
 	RCLICKORDER.button_up.connect(_on_order_button_released)
-	RCLICKATTACK.button_down.connect(_on_attack_button_pressed)
-	RCLICKATTACK.button_up.connect(_on_attack_button_released)
+	#RCLICKATTACK.button_down.connect(_on_attack_button_pressed)
+	#RCLICKATTACK.button_up.connect(_on_attack_button_released)
 
 
 func _process(delta): #Runs every tick
@@ -68,21 +68,7 @@ func _process(delta): #Runs every tick
 		elif grid.probe(get_global_mouse_position()).classification != 0:
 			if FLAG_VERBOSE: print("Failed to place meeple. Hex obstructed")
 			return
-		var instance = infantry_prefab.instantiate()
-		# Set instance's data
-		instance.set_id(MEEPLE_ID_COUNTER)
-		MEEPLE_ID_COUNTER += 1
-		var meeple_hex = grid.hex_center(get_global_mouse_position())
-		instance.global_position = meeple_hex
-		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 3, [instance])
-		instance.path = [grid.coord_to_axial_hex(instance.global_position)]
-		#instance.target = group_targets[0]
-		# Create instance
-		add_child(instance)
-		set_id(instance)
-		unorderedMeeples.push_back(instance)
-		
-		if FLAG_VERBOSE: print("Spawned meeple ", instance.UNIQUEID)
+		spawn_meeple(get_global_mouse_position())
 
 	#Orders all meeples to a location
 	elif Input.is_action_just_pressed("super_order"):
@@ -162,7 +148,23 @@ func _process(delta): #Runs every tick
 							
 		selecting = Vector2(0, 0) #No more selecting :(
 		selection_box.visible = false
-		
+	
+	if Input.is_action_just_pressed("attack"):
+		var attackLoc = grid.coord_to_axial_hex(get_global_mouse_position())
+		for m in unorderedMeeples:
+			if m.selected:
+				#var tile = grid.axial_probe(attackLoc)
+				if grid.axial_probe(attackLoc).objectsInside.size() > 0:
+					m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
+					if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " attacking: ", m.attackTarget)
+					if !m.inAttackRange(attackLoc):
+						m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
+					#m.path = []
+					#for h in tempPath:
+					#	m.path.append(h)
+					
+					#m.dest = grid.hex_center(attackLoc)
+				m.is_unselected()
 	"""
 	else:
 		var MEEPLE_CONTROL_INDEX = 0
@@ -190,7 +192,7 @@ func _physics_process(delta: float) -> void:
 			var next_hex_tile = grid.axial_probe(m.path[1])
 			if (next_hex_tile.classification == 3):
 				if m.UNIQUEID == next_hex_tile.objectsInside[0].UNIQUEID:
-					print("Meeple ", m.UNIQUEID, " merging with itself!")
+					print("URGENT - Meeple ", m.UNIQUEID, " is not feeling good (self-merge)")
 					if FLAG_DEBUG: breakpoint
 					meeple_end_merge(m, next_hex_tile.objectsInside[0])
 				else:
@@ -220,14 +222,23 @@ func update_selection_box():
 
 
 func spawn_meeple(pos):
+	var meeple_hex = grid.coord_to_axial_hex(pos)
+	if grid.grid[meeple_hex.x][meeple_hex.y].classification == 3:
+		grid.grid[meeple_hex.x][meeple_hex.y].objectsInside[0].update_hp(1)
+		return
 	var instance = infantry_prefab.instantiate()
-	instance.UNIQUEID = MEEPLE_ID_COUNTER
+	# Set instance's data
+	instance.set_id(MEEPLE_ID_COUNTER)
 	MEEPLE_ID_COUNTER += 1
-	
+	instance.global_position = grid.hex_center(pos)
+	grid.update_grid(meeple_hex, 3, [instance])
+	instance.path = [meeple_hex]
+	#instance.target = group_targets[0]
+	# Create instance
 	add_child(instance)
 	set_id(instance)
-	instance.set_global_position(grid.axial_hex_to_coord(pos))
 	unorderedMeeples.push_back(instance)
+	if FLAG_VERBOSE: print("Spawned meeple ", instance.UNIQUEID)
 
 
 #Order all the selected meeples to that place
@@ -257,24 +268,6 @@ func _on_group_button_pressed():
 
 func _on_group_button_released():
 	RCLICKMENU.visible = false
-
-
-#Sends the meeple to attack the hex if there is something there
-func _on_attack_button_pressed():
-	var attackLoc = grid.coord_to_axial_hex(RCLICKMENU.get_global_position())
-	
-	for m in unorderedMeeples:
-		if m.selected:
-			#var tile = grid.axial_probe(attackLoc)
-			if grid.axial_probe(attackLoc).objectsInside.size() > 0:
-				m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
-				m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
-				#m.path = []
-				#for h in tempPath:
-				#	m.path.append(h)
-				
-				#m.dest = grid.hex_center(attackLoc)
-			m.is_unselected()
 
 
 func _on_attack_button_released(): #Menu gone :(
@@ -326,6 +319,7 @@ func freeMeeple(id):
 	if FLAG_VERBOSE: print("Deleting meeple ", id)
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
+			grid.update_grid(unorderedMeeples[i].path[0], 0, [])
 			unorderedMeeples.pop_at(i).queue_free()
 			return
 
@@ -334,11 +328,12 @@ func order_meeple(coordinate):
 	#targetMarker.global_position = dest
 	for m in unorderedMeeples:
 		if m.selected:
+			m.attackTarget = null
 			m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), grid.coord_to_axial_hex(dest), false, false)
 			#m.path = []
 			#for h in tempPath:
 			#	m.path.append(grid.axial_hex_to_coord(h))
-			m.is_unselected()
+			#m.is_unselected()
 
 
 func meeple_start_merge(target_meeple):
@@ -367,8 +362,15 @@ func meeple_process():
 		if m.pause_a_tick:
 			m.pause_a_tick = false
 			continue
-		if (m.shouldBeMoving || m.waiting || m.attackTarget != null):
+		if (m.shouldBeMoving || m.waiting):
 			continue
+		if (m.attackTarget != null):
+			var pos = null
+			if m.attackTarget.type == "Infantry": pos = m.attackTarget.path[0]
+			else: pos = m.attackTarget.pos
+			if m.inAttackRange(pos):
+				m.path = [m.path[0]]
+				continue
 		if not m.queued_path.is_empty():
 			m.path = grid.find_path(m.path[0], m.queued_path[m.queued_path.size() - 1], false, false)
 			#m.path = m.queued_path#.slice(1) # Remove first hex in queued path
