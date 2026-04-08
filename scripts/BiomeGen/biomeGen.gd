@@ -1,7 +1,7 @@
 extends Node2D
 
 const FLAG_VERBOSE = false
-
+const debuggingGrid = false
 # Main Area
 #@export var SCREEN_RESOLUTION: Vector2i = Vector2i(1920,1080)
 #@export var COLS: int = 192
@@ -44,8 +44,10 @@ var map = null
 var scalingFactor = null
 var terrainOffset = null
 
+var grid = null
 
-	
+var waterAreas = [] #locations of water to not spawn stuff on
+
 
 func point_chunk_print(point_chunk) -> void:
 	var chunk_array = point_chunk[1]
@@ -351,6 +353,8 @@ func _generate_points(coverTerrain, resources) -> Array:
 				for j in neighbourCount:
 					var offset = Vector2i(randi_range(-1 * radius, radius),  randi_range(-1 * radius, radius))
 					var blob = generate_blob(center + offset, radius, type[5], type[3])
+					if type[1] == 0:
+						waterAreas.append(blob)
 					coverTerrainPointsList.append([type[6], type[1], blob])
 	
 	for r in resources:
@@ -374,8 +378,11 @@ func _generate_points(coverTerrain, resources) -> Array:
 					
 					var topLeft = Vector2(bounding_area[0][0], bounding_area[0][1])
 					var bottomRight = Vector2(bounding_area[1][0], bounding_area[1][1])
+					var center = null
 					
-					var center = _poisson_dd_2d(topLeft, bottomRight, chunkLen, chunks, chunkLen)
+					center = _poisson_dd_2d(topLeft, bottomRight, chunkLen, chunks, chunkLen)
+					center = grid.hex_center(center)
+					
 					if FLAG_VERBOSE: print("")
 					if FLAG_VERBOSE: print("GENERATING " + r[r.size() - 1] + " HERE: ")
 					if FLAG_VERBOSE: print(center)
@@ -386,11 +393,11 @@ func _generate_points(coverTerrain, resources) -> Array:
 
 					resourcePointsList.append([r[1], center])
 			else:
-				var center: Vector2
-			
+				var center = Vector2(0,0)
+				
 				center.x = randi_range(bounding_area[0][0],bounding_area[1][0])
 				center.y = randi_range(bounding_area[0][1],bounding_area[1][1])
-				
+				center = grid.hex_center(center)
 				resourcePointsList.append([r[1], center])
 	return [coverTerrainPointsList, resourcePointsList]
 	"""
@@ -627,7 +634,8 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array, resources: Array): 
 	arrays[Mesh.ARRAY_INDEX] = indices
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	#$"Ground Mesh".mesh = mesh
+	if debuggingGrid:
+		$"Ground Mesh".mesh = mesh
 	
 	return generatingMap
 
@@ -698,3 +706,9 @@ func roughenMap(base_map: Array) -> Array:
 
 func getPixelsPerTile() -> int:
 	return PIXELS_PER_TILE
+	
+func point_in_water(point): 
+	for w in waterAreas:
+		if point_in_polygon(point, w):
+			return true
+	return true

@@ -275,6 +275,7 @@ func _ready():
 	terrainOffset = int(HEX_SIZE * SQRT_3 * (GRID_COUNT.y * 0.5))
 	biomeGen = biomeGenScene.instantiate()
 	biomeGen.terrainOffset = terrainOffset
+	biomeGen.grid = self
 	add_child(biomeGen)
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
@@ -319,28 +320,30 @@ func _ready():
 			if index.x >= biomeGen.MAP_RESOLUTION.x or index.y >= biomeGen.MAP_RESOLUTION.y:
 				new_hex = hex_prefab.instantiate()
 			else:
-				if biomeGen.map[index.y][index.x] == 0:
-					new_hex = forestHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 1:
-					new_hex = tundraHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 2:
-					new_hex = waterHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 3:
-					new_hex = sandHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 4:
-					new_hex = rainforestHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 5:
-					new_hex = plainsHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 6:
-					new_hex = grasslandHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 7:
-					new_hex = stoneHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 8:
-					new_hex = ironHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 9:
-					new_hex = rubyHex_prefab.instantiate()
-				if biomeGen.map[index.y][index.x] == 10:
-					new_hex = diamondHex_prefab.instantiate()
+				if biomeGen.debuggingGrid == false:
+					if biomeGen.map[index.y][index.x] == 0:
+						new_hex = forestHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 1:
+						new_hex = tundraHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 2:
+						new_hex = waterHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 3:
+						new_hex = sandHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 4:
+						new_hex = rainforestHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 5:
+						new_hex = plainsHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 6:
+						new_hex = grasslandHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 7:
+						new_hex = stoneHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 8:
+						new_hex = ironHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 9:
+						new_hex = rubyHex_prefab.instantiate()
+					if biomeGen.map[index.y][index.x] == 10:
+						new_hex = diamondHex_prefab.instantiate()
+				
 			if new_hex == null:
 				new_hex = hex_prefab.instantiate()
 			
