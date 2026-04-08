@@ -1,28 +1,26 @@
 extends meeple
 
 
-
 var attackTimer = 0
-var attackTarget = null
 var attackRange = 1
 
 func _ready():
-	self.rb = $RigidBody2D
-	self.sprite = $RigidBody2D/Sprite2D
-	self.label = $RigidBody2D/Label
-	self.type = "Infrantry"
-
+	super._ready()
+	self.sprite = $Sprite2D
+	self.type = "Infantry"
+	
 
 func _process(delta): #runs on each meeple every tick
-	label.text = str(HP)
-	
-	
+	#label.text = str(self.HP)
 	if attackTarget:
-		if inAttackRange(attackTarget.pos):
-			attack(attackTarget, delta)
-	
-	if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
-		_go_to_target(delta)
+		if attackTarget.type == "Infantry":
+			if inAttackRange(attackTarget.path[0]):
+				attack(attackTarget, delta)
+		else:
+			if inAttackRange(attackTarget.pos):
+				attack(attackTarget, delta)
+	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
+		#_go_to_target(delta)
 	
 	#if dest != null and closeEnough(): #meeple reaches destination
 		#dest = null
@@ -36,33 +34,27 @@ func attack(target, delta):
 	attackTimer += delta
 	if attackTimer >= 1:
 		attackTimer = 0
-		if target.type == "Meeple":
-			if path == null:
-				target.HP -= HP * 2
+		if target.type == "Infantry":
+			if shouldBeMoving:
+				target.update_hp(-HP * 2)
 			else:
-				target.HP -= int(HP)
-			
+				target.update_hp(-HP)
 			if target.HP <= 0:
-				attackTarget = null
-			
-			
+				attackTarget = null		
 		else:
-			if path == null:
-				target.hp -= size * 10
+			if shouldBeMoving:
+				target.hp -= HP * 10
+				print('attacked for ', -HP * 10, " damage")
 			else:
-				target.hp -= int(size * 5)
-			
+				target.hp -= int(HP * 5)
 			if target.hp <= 0:
 				attackTarget = null
-				
-		
-		
-		
+
+
 func inAttackRange(target):
 	if target == null:
 		return false
-	var distToTarget = pos - target
-	
+	var distToTarget = path[0] - target
 	for v in HEX_DIRS: #Need to change based on varying range
 		if distToTarget == v:
 			return true
