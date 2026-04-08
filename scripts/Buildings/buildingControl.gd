@@ -360,10 +360,9 @@ func _process(delta): #runs every tick
 	if Input.is_action_just_pressed("right_click_menu"):
 		var probing_hex = grid.probe(get_global_mouse_position())
 		if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub":
-			RCLICKMENU.set_global_position(get_global_mouse_position())
-			RCLICKMENU.visible = true
+			RCLICK_ResourceHub.set_global_position(get_global_mouse_position())
+			RCLICK_ResourceHub.visible = true
 		else:
-			print("We vibin?")
 			RCLICK_ResourceHub.visible = false
 		
 	for b in buildings:

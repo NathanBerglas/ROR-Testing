@@ -49,7 +49,7 @@ const STONE_CHANCE = 0
 
 var terrainOffset = null
 
-const FLAG_VERBOSE = true
+const FLAG_VERBOSE = false
 
 class tile:
 	var hex: Vector2i # (q, r)
@@ -281,13 +281,7 @@ func _ready():
 		for r in range(GRID_COUNT.y):
 			
 			var tileToCreate = tile.new(Vector2i(q, r))
-			
-			var new_hex = hex_prefab.instantiate()
-			new_hex.position = axial_hex_to_coord(Vector2i(q, r))
-			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2
-			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
-			self.add_child(new_hex)
-			tileToCreate.hex_pf = new_hex
+			row.append(tileToCreate)
 			
 			if tileToCreate.type == "ARABLE":
 				var instance = arable_land_prefab.instantiate()
@@ -305,7 +299,6 @@ func _ready():
 				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
 				add_child(instance)
 		
-			row.append(tileToCreate)
 		grid.append(row)
 	update_astar()
 	# Draw Grid
@@ -356,3 +349,4 @@ func _ready():
 			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
 			self.add_child(new_hex)
 			h.hex_pf = new_hex
+	

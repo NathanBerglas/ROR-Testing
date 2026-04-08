@@ -35,8 +35,8 @@ var selecting = Vector2(0,0)
 #var selectingTime = 0
 
 var MEEPLE_ID_COUNTER = 1
-
-const FLAG_VERBOSE = true
+ 
+const FLAG_VERBOSE = false
 const FLAG_DEBUG = true
 
 func _ready() -> void:
@@ -57,7 +57,6 @@ func _ready() -> void:
 func _process(delta): #Runs every tick
 	time_since_last_meeple_tick += delta
 	#if playerID == multiplayer.get_unique_id():
-	
 	if time_since_last_meeple_tick > 1.0 / MEEPLE_TICKS_PER_SECOND:
 		meeple_process()
 	
