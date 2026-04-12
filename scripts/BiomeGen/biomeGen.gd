@@ -18,19 +18,23 @@ var MAP_RESOLUTION: Vector2i = Vector2i(620, 320)
 #[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland, Stone, Iron, Ruby, Diamonds]
 #Hardcode
 @export var origin_radius = 10*10 # Squared
-@export var biome_index: Array = [99, 0, 4, 1, 3, 6, 0, 5, 2, 7, 8, 9, 10]
+@export var biome_index: Array = [99, 0, 4, 1, 3, 6, 0, 5, 2]
+
+var resource_index: Array = [7, 8, 9, 10]
+#2: Water
 
 # Debugging
 @export var target: PackedScene
 
 # Poisson distribution constants
 const max_poisson_attempts_1d: int = 100
-const max_poisson_attempts_2d: int = 300
+const max_poisson_attempts_2d: int = 500
 const sphere_packing_constant: float = 0.9069
 
 const warp_strength: float = 8.0   # How far borders get pushed (in cells)
 const warp_frequency: float = 0.04 # Scale of the noise (smaller = smoother)
 const noise_offset: float = 75.0  # Offset to decorrelate X and Y axes
+
 
 #Data types sent over:
 #[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
@@ -39,6 +43,7 @@ var GLOBAL_chunk_length = float()
 
 const RANDOM_BLOB_VARIATION = 3
 
+const RESOURCE_WATER_OFFSET = 2 # defines when placing resources, how many pixels to offset them by if they are in water
 var map = null
 
 var scalingFactor = null
@@ -105,7 +110,7 @@ func _ready() -> void:
 
 	for i in range(data[4].size()):
 		if data[4][i] == 3:
-			resourceExtents.append([data[2][i], biome_index[i], data[3][i],  data[9][i], data[1][i]])
+			resourceExtents.append([data[2][i], resource_index[i - biome_index.size()], data[3][i],  data[9][i], data[1][i]])
 		
 	
 	var pointsList = _generate_points(coverTerrainExtents, resourceExtents)
@@ -357,6 +362,10 @@ func _generate_points(coverTerrain, resources) -> Array:
 						waterAreas.append(blob)
 					coverTerrainPointsList.append([type[6], type[1], blob])
 	
+	if FLAG_VERBOSE: print("")
+	if FLAG_VERBOSE: print("WATER AREAS HERE:")
+	if FLAG_VERBOSE: print(waterAreas)
+	if FLAG_VERBOSE: print("")
 	for r in resources:
 		if FLAG_VERBOSE: print("")
 		if FLAG_VERBOSE: print("GENERATING POINT FOR: ",r[4])
@@ -379,9 +388,34 @@ func _generate_points(coverTerrain, resources) -> Array:
 					var topLeft = Vector2(bounding_area[0][0], bounding_area[0][1])
 					var bottomRight = Vector2(bounding_area[1][0], bounding_area[1][1])
 					var center = null
+					while center == null or point_in_water(center):
+						center = _poisson_dd_2d(topLeft, bottomRight, chunkLen, chunks, chunkLen)
+						center = grid.hex_center(center)
 					
-					center = _poisson_dd_2d(topLeft, bottomRight, chunkLen, chunks, chunkLen)
-					center = grid.hex_center(center)
+					#var x_offset = null
+					#var y_offset = null
+					#if center.x <= ((bounding_area[1][0] - bounding_area[0][0])/ 2):
+						#x_offset = RESOURCE_WATER_OFFSET
+					#else:
+						#x_offset = -1 * RESOURCE_WATER_OFFSET
+						#
+					#if center.y <= ((bounding_area[1][1] - bounding_area[0][1]) / 2):
+						#y_offset = RESOURCE_WATER_OFFSET
+					#else:
+						#y_offset = -1 * RESOURCE_WATER_OFFSET
+							#
+					#while point_in_water(center):
+						#if FLAG_VERBOSE: print("")
+						#if FLAG_VERBOSE: print("ADJUSTING FOR WATER HERE: ")
+						#if FLAG_VERBOSE: print(center)
+						#if FLAG_VERBOSE: print("")
+						#center.x += x_offset
+						#center.y += y_offset
+						#if FLAG_VERBOSE: print("NOW HERE: ")
+						#if FLAG_VERBOSE: print(center)
+						#if FLAG_VERBOSE: print("")
+							#
+				
 					
 					if FLAG_VERBOSE: print("")
 					if FLAG_VERBOSE: print("GENERATING " + r[r.size() - 1] + " HERE: ")
@@ -390,15 +424,54 @@ func _generate_points(coverTerrain, resources) -> Array:
 					
 					var chunk_index = Vector2i(int(floor((center.x - topLeft.x) / chunkLen)),int(floor((center.y - topLeft.y) / chunkLen)))
 					chunks[chunk_index.x][chunk_index.y].append(Vector2(center.x - topLeft.x, center.y - topLeft.y))
-
+					
+					if center.x <= 0 or center.y <= 0:
+						center = Vector2(0,0)
+						while center.x == 0 or point_in_water(center):
+							center.x = randi_range(bounding_area[0][0],bounding_area[1][0])
+							center.y = randi_range(bounding_area[0][1],bounding_area[1][1])
 					resourcePointsList.append([r[1], center])
 			else:
 				var center = Vector2(0,0)
+				while center.x == 0 or point_in_water(center):
+					center.x = randi_range(bounding_area[0][0],bounding_area[1][0])
+					center.y = randi_range(bounding_area[0][1],bounding_area[1][1])
+				#var x_offset = null
+				#var y_offset = null
 				
-				center.x = randi_range(bounding_area[0][0],bounding_area[1][0])
-				center.y = randi_range(bounding_area[0][1],bounding_area[1][1])
+				#if center.x <= ((bounding_area[1][0] - bounding_area[0][0])/ 2):
+					#x_offset = RESOURCE_WATER_OFFSET
+				#else:
+					#x_offset = -1 * RESOURCE_WATER_OFFSET
+					#
+				#if center.y <= ((bounding_area[1][1] - bounding_area[0][1]) / 2):
+					#y_offset = RESOURCE_WATER_OFFSET
+				#else:
+					#y_offset = -1 * RESOURCE_WATER_OFFSET
+						#
+				#while point_in_water(center):
+					#if FLAG_VERBOSE: print("")
+					#if FLAG_VERBOSE: print("ADJUSTING FOR WATER HERE: ")
+					#if FLAG_VERBOSE: print(center)
+					#if FLAG_VERBOSE: print("")
+					#center.x += x_offset
+					#center.y += y_offset
+					#if FLAG_VERBOSE: print("NOW HERE: ")
+					#if FLAG_VERBOSE: print(center)
+					#if FLAG_VERBOSE: print("")
+				
 				center = grid.hex_center(center)
 				resourcePointsList.append([r[1], center])
+	if FLAG_VERBOSE: print("")
+	
+	var unplaced = 0
+	for r in resourcePointsList:
+		if r[1].x < 0:
+			print("UNPLACED: " + str(r[0]))
+			unplaced += 1
+			
+	if FLAG_VERBOSE: print("CHECKING FOR UNPLACED RESOURCES: " + str(unplaced))
+	if FLAG_VERBOSE: print("")
 	return [coverTerrainPointsList, resourcePointsList]
 	"""
 	var points = PackedVector3Array() # (x, y, feature index)
@@ -582,12 +655,47 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array, resources: Array): 
 	
 	generatingMap = roughenMap(generatingMap)
 	
+	
+	#Resource management
 	for r in resources:
 		var rX = floor((r[1][0]) / PIXELS_PER_TILE)
 		var rY = floor((r[1][1]) / PIXELS_PER_TILE)
+		#
+		var quad = null
 		
+		if rX <= (MAP_RESOLUTION.x / 2) / 2 or (rX >= (MAP_RESOLUTION.x / 2) and rX <= (MAP_RESOLUTION.x * 3/4)):
+			quad = RESOURCE_WATER_OFFSET
+		else:
+			quad = -1 * RESOURCE_WATER_OFFSET
+		if rY <= MAP_RESOLUTION.y / 2 :
+			quad = RESOURCE_WATER_OFFSET
+		else:
+			quad = -1 * RESOURCE_WATER_OFFSET
+		var surroundingWater = 3
+		
+		while surroundingWater >= 2: # ADD A PUSHING SIMILAR TO THIS FOR BIOME SPECIFIC RESOURCES
+			surroundingWater = 0
+			if generatingMap[rY + 1][rX + 1] == 2: #2: WATER
+				surroundingWater += 1
+			if generatingMap[rY + 1][rX - 1] == 2:
+				surroundingWater += 1
+			if generatingMap[rY - 1][rX + 1] == 2:
+				surroundingWater += 1
+			if generatingMap[rY - 1][rX - 1] == 2:
+				surroundingWater += 1
+			if FLAG_VERBOSE: print("")
+			if FLAG_VERBOSE: print("RESOURCE AT: ")
+			if FLAG_VERBOSE: print(str(rX) + ", " + str(rY))
+			if FLAG_VERBOSE: print("HAS " + str(surroundingWater) + " PIXELS")
+			
+			if surroundingWater >= 2:
+				rX += quad
+				rY += quad
+				if FLAG_VERBOSE: print("ADJUSTING ACCORDINGLY")
 		
 		generatingMap[rY][rX] = r[0] #Setting to the resource ID
+		
+	#For debugging the grid
 	for row: int in MAP_RESOLUTION.y:
 		for col: int in MAP_RESOLUTION.x:
 			var i = vertices.size()  # index of first vertex in this quad
@@ -699,7 +807,9 @@ func roughenMap(base_map: Array) -> Array:
 
 			var sample_x = clamp(floori(x + warp_x), inner_x_min, inner_x_max)
 			var sample_y = clamp(floori(y + warp_y), inner_y_min, inner_y_max)
-
+			
+			while base_map[sample_y][sample_x] in resource_index:
+				print("AHHHH")
 			result[y].append(base_map[sample_y][sample_x])
 	if FLAG_VERBOSE: print("result border sample: ", result[0][0], " ", result[0][1], " ", result[1][0])
 	return result
@@ -711,4 +821,4 @@ func point_in_water(point):
 	for w in waterAreas:
 		if point_in_polygon(point, w):
 			return true
-	return true
+	return false

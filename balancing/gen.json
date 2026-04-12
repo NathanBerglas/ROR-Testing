@@ -112,7 +112,7 @@
 			"radius": null,
 			"num_points": null,
 			"neighbour_count": null,
-			"min_distance": 100,
+			"min_distance": 50,
 		},
 		{
 			"name": "iron",
@@ -123,7 +123,7 @@
 			"radius": null,
 			"num_points": null,
 			"neighbour_count": null,
-			"min_distance": 150,
+			"min_distance": 50,
 		},
 		{
 			"name": "rubies",
