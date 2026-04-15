@@ -403,37 +403,22 @@ func takeDamage(b, x):
 func is_placeable(building) -> bool: #Only for if a body is FAKE
 	var center = get_global_mouse_position()
 	var centerHex = grid.axial_probe(grid.coord_to_axial_hex(center))
-	if grid.probe(center).classification != 0:
-		return false
-	else:
-		if building.type == "Farm":
-			if grid.probe(center).type != "ARABLE":
-				return false
-		elif building.type == "StoneMine":
-			if grid.probe(center).type != "STONE":
-				return false
-			
-		elif building.type == "LumberJack":
-			if grid.probe(center).type != "FOREST":
-				return false
-				
 	for h in building.HEX_SHAPE:
 		centerHex = grid.coord_to_axial_hex(center) + h
 		if grid.axial_probe(centerHex).classification != 0:
-			
 			return false
 		else:
-			
+			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland, Stone, Iron, Ruby, Diamonds]
+			var tile_biome = grid.axial_probe(centerHex).biome
 			if building.type == "Farm":
-				if grid.axial_probe(centerHex).type != "ARABLE":
+				if !tile_biome in [5]: # plains
 					return false
 			elif building.type == "StoneMine":
-				if grid.axial_probe(centerHex).type != "STONE":
+				if !tile_biome in [7, 8, 9, 10]: # stone, ruby, diamond
 					return false
-			
 			elif building.type == "LumberJack":
-				if grid.axial_probe(centerHex).type != "FOREST":
-					return false	
+				if !tile_biome in [0, 4]: # forest and rainforest
+					return false
 	return true
 
 
@@ -529,7 +514,6 @@ func finishDragging(buildingName):
 	
 	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2, [buildings[buildings.size() - 1]])
 	for h in buildings[buildings.size() - 1].HEX_SHAPE:
-		
 		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()) + h, 2, [buildings[buildings.size() - 1]])
 	return true
 
