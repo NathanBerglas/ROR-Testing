@@ -15,8 +15,8 @@ func _on_button_pressed():
 func _on_button_released():
 	parentObject.manageCaravan(id)
 
-func set_id(id):
-	self.id = id
+func set_id(new_id):
+	self.id = new_id
 	
 func set_text(text):
 	self.text = text

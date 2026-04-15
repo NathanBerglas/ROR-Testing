@@ -110,7 +110,7 @@ func _on_newCaravan_button_released():
 	manageCaravan(instance.id)
 
 func _on_finishManaging_button_pressed():
-	var what = "huh"
+	return
 	
 func _on_finishManaging_button_released():
 	if managingCaravanMenu.visible == false:
@@ -142,7 +142,7 @@ func _on_finishManaging_button_released():
 
 
 func _on_removeRoute_button_pressed():
-	var what = "huh"
+	return
 	
 func _on_removeRoute_button_released():
 	if managingCaravanMenu.visible == false:
@@ -170,14 +170,14 @@ func removeRoute(idToRemove):
 			break
 		i += 1
 		
-	var max = 1
+	var routemax = 1
 	for r in managedCaravanButtons:
 		if r.routeNumber > removingRoute:
-			if r.routeNumber > max:
-				max = r.routeNumber
+			if r.routeNumber > routemax:
+				routemax = r.routeNumber
 			r.routeNumber -= 1
 			r.text = str(r.routeNumber + 1) + " - Manage Caravan " + str(r.routeNumber)
-	routeNumTracker = max
+	routeNumTracker = routemax
 	var t = 0
 	while t < tempTargets.size():
 		tempTargets.pop_at(i).queue_free()

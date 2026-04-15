@@ -136,11 +136,11 @@ func _show_points(points: PackedVector3Array):
 		add_child(instance)
 
 # 1 dimensional poisson disk distribution
-func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
-	var start_time = Time.get_ticks_usec()
-	var range: int = max-min
-	var min_distance: float = ceil(range / n) / density # The farthest each can get and still fit divided by density. If density >= 1, all can fit
-	var chunk_count: int = int(range / min_distance)
+func _poisson_dd_1d(interval_min: int, interval_max: int, n: int, density: float) -> Array:
+	#var start_time = Time.get_ticks_usec()
+	var interval_range: int = interval_max - interval_min
+	var min_distance: float = ceil(interval_range / n) / density # The farthest each can get and still fit divided by density. If density >= 1, all can fit
+	var chunk_count: int = int(interval_range / min_distance)
 	 
 	var p_points: PackedInt32Array
 	var chunks: Array[Array] = [] # Each point is placed in a chunk. Each chunk is exactly min_distance wide starting from min (stretches to max)
@@ -150,7 +150,7 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 	for i in n: # For each point
 		for attempt in max_poisson_attempts_1d: # Cap number of attempts in case to prevent infinite loop
 			var sucess = true
-			var x = randi_range(min, max)
+			var x = randi_range(interval_min, interval_max)
 			# Assign which chunk it is in
 			var chunk_id = min(floor(x / min_distance),chunk_count-1)
 			if (chunk_id > 0): # If it's not in the first chunk
@@ -186,8 +186,8 @@ func _poisson_dd_1d(min: int, max: int, n: int, density: float) -> Array:
 # chunks: Array - A 2d array of chunks, each chunk is an array of points previously generated with tile coordinates
 # Note: The diagonal of each chunk is equal to minimum_distance
 func _poisson_dd_2d(top_left: Vector2i, bottom_right: Vector2i, min_distance: float, chunks: Array[Array], chunkLength: int) -> Vector2i:
-	var range_x: int = bottom_right.x - top_left.x
-	var range_y: int = bottom_right.y - top_left.y
+	#var range_x: int = bottom_right.x - top_left.x
+	#var range_y: int = bottom_right.y - top_left.y
 	#if FLAG_VERBOSE: print(top_left)
 	#if FLAG_VERBOSE: print(bottom_right)
 
@@ -479,7 +479,8 @@ func _generate_points(coverTerrain, resources) -> Array:
 	if FLAG_VERBOSE: print("CHECKING FOR UNPLACED RESOURCES: " + str(unplaced))
 	if FLAG_VERBOSE: print("")
 	return [coverTerrainPointsList, resourcePointsList]
-	"""
+	
+"""
 	var points = PackedVector3Array() # (x, y, feature index)
 		
 	# Points and chunks
@@ -542,7 +543,7 @@ func _generate_points(coverTerrain, resources) -> Array:
 				
 	if FLAG_VERBOSE: print(points.size())
 	return [points, chunks]
-	"""
+"""
 
 # Generates the mesh
 func _generate_mesh(baseTerrain: Array, coverTerrain: Array, resources: Array): # 
@@ -572,7 +573,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array, resources: Array): 
 			var x: int = col * quad_size + terrainOffset
 			var y: int = row * quad_size
 			
-			var i = vertices.size()  # index of first vertex in this quad
+			#var i = vertices.size()  # index of first vertex in this quad
 			
 
 			

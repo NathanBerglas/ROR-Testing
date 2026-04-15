@@ -198,7 +198,7 @@ func _on_wallCorner_button_released():
 	stone -= 50
 	
 func _on_combatBuildingMenu_button_pressed():
-	var what = "HUH"
+	return
 	
 	
 func _on_combatBuildingMenu_button_released():
@@ -206,30 +206,33 @@ func _on_combatBuildingMenu_button_released():
 	resourceBuildingMenu.visible = false
 	
 func _on_closeCombatMenu_button_pressed():
-	var what = "HUH"
+	return
+	
 func _on_closeCombatMenu_button_released():
 	combatBuildingMenu.visible = false
 	
 	
 func _on_resourceBuildingMenu_button_pressed():
-	var what = "HUH"
+	return
 	
 func _on_resourceBuildingMenu_button_released():
 	resourceBuildingMenu.visible = true
 	combatBuildingMenu.visible = false
 
+
 func _on_closeResourceMenu_button_pressed():
-	var what = "huh"
+	return
 
 
 func _on_closeResourceMenu_button_released():
 	resourceBuildingMenu.visible = false
 
+
 func _on_manageCaravans_button_pressed():
 	if RCLICK_ResourceHub.visible == false:
 		return
-	
-	
+
+
 func _on_manageCaravans_button_released():
 	if RCLICK_ResourceHub.visible == false:
 		return
@@ -239,16 +242,15 @@ func _on_manageCaravans_button_released():
 	
 	
 	RCLICK_ResourceHub.visible = false
-	
+
+
 #Start dragging the farm if has enough money
 func _on_farm_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
 		print("Ya Broke")
 		return
-	
-	
 	beginDragging("Farm")
-	
+
 
 #finishes dragging the farm and places
 func _on_farm_button_released():
@@ -261,7 +263,7 @@ func _on_farm_button_released():
 	food -= 500
 	wood -= 500
 	stone -= 500
-	
+
 
 #starts draggin the lumberJack
 func _on_lumberJack_button_pressed():
@@ -269,11 +271,10 @@ func _on_lumberJack_button_pressed():
 		print("Ya Broke")
 		return
 	beginDragging("LumberJack")
-	
+
 
 #finishes dragging the lumberJack and places
 func _on_lumberJack_button_released():
-	
 	if buildingDraggin != "LumberJack" or wood < 500 or stone < 500 or food < 500:
 		buildingDraggin = null
 		return
@@ -282,16 +283,15 @@ func _on_lumberJack_button_released():
 	food -= 500
 	wood -= 500
 	stone -= 500
-	
+
+
 #Starts draggin the Stone mine
 func _on_stoneMine_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
 		print("Ya Broke")
 		return
-	
-	
 	beginDragging("StoneMine")
-	
+
 
 #finishes dragging the Stone Mine and places
 func _on_stoneMine_button_released():
@@ -313,48 +313,45 @@ func _on_resourceHub_button_pressed():
 		return
 	
 	beginDragging("ResourceHub")
-	
+
 
 #finishes dragging the resource hub and places
 func _on_resourceHub_button_released():
-	
 	if buildingDraggin != "ResourceHub" or wood < 5000 or stone < 5000 or food < 5000:
 		buildingDraggin = null
 		return
 	if finishDragging("ResourceHub") == false:
 		return
 	print("Added Resource Hub")
-	
 	food -= 5000
 	wood -= 5000
 	stone -= 5000
-	
+
+
 func _on_barracks_button_pressed():
 	if food < 1000 or wood < 1000 or stone < 1000:
 		print("Ya Broke")
 		return
 	beginDragging("Barracks")
-	
+
+
 func _on_barracks_button_released():
-	
 	if buildingDraggin != "Barracks" or food < 1000 or wood < 1000 or stone < 1000:
 		buildingDraggin = null
 		return
-	
 	if finishDragging("Barracks") == false:
 		return
 	var tempVector = grid.coord_to_axial_hex(get_global_mouse_position())
 	tempVector.x += 1
 	grid.update_grid(tempVector, 1, ["Training Ground"])
-	
 	food -= 1000
 	wood -= 1000
 	stone -= 1000
-	
+
+
 func _process(delta): #runs every tick
 	cleanBuildings()
 	hoveringText()
-	
 	#Opens up the right click menu
 	if Input.is_action_just_pressed("right_click_menu"):
 		var probing_hex = grid.probe(get_global_mouse_position())
@@ -392,23 +389,32 @@ func _process(delta): #runs every tick
 	hud.updateFood(food) 
 	hud.updateWood(wood) 
 	hud.updateStone(stone) 
+
+
 func sendCaravans():
 	return
 	#for b in buildings:
 	#	if b.type == "Farm":
 			#if b.collectedFood >= 1000:
+
 func addFood(foodChange): #Changing money
 	food += foodChange
 	hud.updateFood(food)
+	
+	
 func addWood(woodChange): #Changing money
 	wood += woodChange
 	hud.updateWood(wood)
+	
+	
 func addStone(stoneChange): #Changing money
 	stone += stoneChange
 	hud.updateStone(stone)
 	
+	
 func takeDamage(b, x):
 	b.hp -= x
+	
 	
 func is_placeable(building) -> bool: #Only for if a body is FAKE
 	
@@ -437,15 +443,11 @@ func is_placeable(building) -> bool: #Only for if a body is FAKE
 			return true
 
 
-
-
-
 func cleanBuildings():
 	
 	for b in buildings:
 		if b.hp <= 0:
 			freeBuilding(b.BUILDING_UNIQUE_ID)
-			
 
 
 func hoveringText():
@@ -468,8 +470,9 @@ func hoveringText():
 		resourceBuildingLabel.visible = true
 	else:
 		resourceBuildingLabel.visible = false
+		
+		
 func freeBuilding(ID):
-	
 	for i in range(buildings.size()):
 		if buildings[i].BUILDING_UNIQUE_ID == ID:
 			grid.update_grid(buildings[i].pos, 0, [])
@@ -481,6 +484,7 @@ func freeBuilding(ID):
 			
 			object.queue_free()
 			return
+
 
 func beginDragging(buildingName):
 	
@@ -519,7 +523,8 @@ func beginDragging(buildingName):
 	add_child(instance) #Adding the instance
 	
 	buildings.push_back(instance)
-	 
+
+
 func finishDragging(buildingName):
 	buildingDraggin = null
 	

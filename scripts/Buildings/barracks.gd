@@ -9,12 +9,12 @@ var spawnTimer = 0 #Tracking when to give troops
 #func _ready(): #I EXIST!
 
 	
-func spawn(p, delta, position, grid): #Generates meeple every 5 seconds
+func spawn(p, delta, spawn_pos, grid): #Generates meeple every 5 seconds
 	if self.fake: return
 	
 	spawnTimer += delta
 	if spawnTimer >= 5:
-		var tempVector = position
+		var tempVector = spawn_pos
 		tempVector.x += 1
 		
 		p.spawn_meeple(grid.axial_hex_to_coord(tempVector))
