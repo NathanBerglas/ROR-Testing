@@ -10,7 +10,20 @@ var collectedFood = 0
 	#$MultiplayerSynchronizer.set_multiplayer_authority()
 
 
+var size = 1
 
+const HEX_SHAPE := [
+	Vector2i(1, 0),
+	Vector2i(1, -1),
+	Vector2i(0, -1),
+	Vector2i(-1, 0),
+	Vector2i(-1, 1),
+	Vector2i(0, 1),
+]
+
+func _ready():
+	set_size(size)
+	
 func generateFood(p, delta): #Generates income every 10 seconds
 	if self.fake: return
 	

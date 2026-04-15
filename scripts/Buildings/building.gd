@@ -6,6 +6,7 @@ class_name Building
 #A list of the costs of each building
 var buildingCosts = [["Barracks", 1000], ["Farm", 500]] 
 
+
 var fake = false #Check if this is dragging or NAH
 var playerID = 0
 var hp = 100
@@ -13,3 +14,7 @@ var type = ""
 var pos = null
 var BUILDING_UNIQUE_ID = 0
 var controller = null
+
+
+func set_size(size):
+	self.scale = Vector2i(1, 1) * size

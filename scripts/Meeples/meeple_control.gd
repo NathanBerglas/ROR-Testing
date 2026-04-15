@@ -148,13 +148,16 @@ func _process(delta): #Runs every tick
 							
 		selecting = Vector2(0, 0) #No more selecting :(
 		selection_box.visible = false
-	
+		
 	if Input.is_action_just_pressed("attack"):
 		var attackLoc = grid.coord_to_axial_hex(get_global_mouse_position())
 		for m in unorderedMeeples:
 			if m.selected:
 				#var tile = grid.axial_probe(attackLoc)
 				if grid.axial_probe(attackLoc).objectsInside.size() > 0:
+					
+					# TODO Set the target of the attack to be whatever attacking location is closest to meeple, so
+					# meeple can get in range of the edge of a multihex building
 					m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
 					if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " attacking: ", m.attackTarget)
 					if !m.inAttackRange(attackLoc):

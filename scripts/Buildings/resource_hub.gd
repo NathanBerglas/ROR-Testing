@@ -29,6 +29,18 @@ var managedCaravanButtons = []
 
 var routeManaging = 0
 
+
+var size = 1
+const HEX_SHAPE := [
+	Vector2i(1, 0),
+	Vector2i(1, -1),
+	Vector2i(0, -1),
+	Vector2i(-1, 0),
+	Vector2i(-1, 1),
+	Vector2i(0, 1),
+]
+	
+	
 func _ready():
 	newCaravanButton.button_down.connect(_on_newCaravan_button_pressed)
 	newCaravanButton.button_up.connect(_on_newCaravan_button_released)
@@ -41,6 +53,7 @@ func _ready():
 
 	manageCaravanMenu.visible = false
 	managingCaravanMenu.visible = false
+	set_size(size)
 
 func _process(delta):
 	if Input.is_action_just_pressed("right_click_menu"):
