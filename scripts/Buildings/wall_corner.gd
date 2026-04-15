@@ -6,7 +6,12 @@ extends Building
 
 var segments = []
 
+var size = 0.8
+const HEX_SHAPE := []
 
+func _ready():
+	set_size(size)
+	
 #func _ready():
 	#$MultiplayerSynchronizer.set_multiplayer_authority()
 

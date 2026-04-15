@@ -354,6 +354,10 @@ func _generate_points(coverTerrain, resources) -> Array:
 				
 				var chunk_index = Vector2i(int(floor((center.x - topLeft.x) / chunkLen)),int(floor((center.y - topLeft.y) / chunkLen)))
 				
+				if chunk_index.x >= chunks.size():
+					chunk_index.x = chunks.size() - 1
+				if chunk_index.y >= chunks[chunk_index.x].size():
+					chunk_index.y = chunks[chunk_index.x].size() - 1
 				chunks[chunk_index.x][chunk_index.y].append(Vector2(center.x - topLeft.x, center.y - topLeft.y))
 				var radius = randf_range(type[4][0], type[4][1])
 				for j in neighbourCount:

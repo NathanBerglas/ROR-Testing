@@ -1,19 +1,19 @@
-[gd_scene load_steps=3 format=3 uid="uid://vr7ll0w6bfdx"]
+[gd_scene format=3 uid="uid://vr7ll0w6bfdx"]
 
 [ext_resource type="Script" uid="uid://b8tva5qsfa7ah" path="res://scripts/Buildings/barracks.gd" id="1_dveo5"]
 [ext_resource type="Texture2D" uid="uid://dmme2pmdcs6we" path="res://assets/barracks.png" id="2_1vdwa"]
 
-[node name="Barracks" type="Node2D"]
+[node name="Barracks" type="Node2D" unique_id=1447086411]
 script = ExtResource("1_dveo5")
 
-[node name="RigidBody2D" type="RigidBody2D" parent="."]
+[node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=877286676]
 freeze = true
 
-[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D"]
+[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D" unique_id=1515904999]
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("2_1vdwa")
 
-[node name="HP_BAR" type="ProgressBar" parent="."]
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=1459608685]
 offset_left = -82.0
 offset_top = -89.0
 offset_right = 82.0
