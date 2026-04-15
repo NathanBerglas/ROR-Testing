@@ -17,12 +17,12 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="ROR Testing"
 run/main_scene="uid://cqyjg1x55n0jr"
 config/features=PackedStringArray("4.6", "Forward Plus")
+run/max_fps=144
 boot_splash/image="uid://bts1p38b5qivq"
-config/icon="res://assets/icon.svg"
 
 [autoload]
 
-GameManager="*res://scripts/GameManager.gd"
+GameManager="*res://scripts/main/game_manager.gd"
 
 [debug]
 
@@ -50,9 +50,16 @@ version_control/autoload_on_startup=true
 folder_colors={
 "res://addons/": "gray",
 "res://assets/": "red",
+"res://assets/buildings/": "red",
+"res://assets/hexs/": "red",
+"res://assets/legacy/": "gray",
+"res://assets/menus/": "gray",
 "res://balancing/": "teal",
 "res://scenes/": "purple",
-"res://scripts/": "pink"
+"res://scenes/legacy/": "gray",
+"res://scripts/": "pink",
+"res://scripts/menus/": "gray",
+"res://text_files/": "gray"
 }
 
 [gui]

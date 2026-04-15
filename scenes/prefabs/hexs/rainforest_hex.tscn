@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://bhlvtw4s8cmd5"]
+
+[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hexs/hex_border.png" id="1_fx8j3"]
+[ext_resource type="Texture2D" uid="uid://cpxs6lhto1qs0" path="res://assets/hexs/rainForestHex.png" id="2_jgu1p"]
+
+[node name="RainforestHex" type="Node2D" unique_id=721380759]
+
+[node name="Border" type="Sprite2D" parent="." unique_id=247640585]
+z_index = 1
+scale = Vector2(0.098, 0.098)
+texture = ExtResource("1_fx8j3")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=313152916]
+scale = Vector2(0.09788654, 0.097656265)
+texture = ExtResource("2_jgu1p")

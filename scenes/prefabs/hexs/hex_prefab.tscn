@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://w5sjmbbv6a8b"]
 
-[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hex_border.png" id="2_oli5t"]
+[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hexs/hex_border.png" id="2_oli5t"]
 
 [node name="HexPrefab" type="Node2D" unique_id=811786069]
 

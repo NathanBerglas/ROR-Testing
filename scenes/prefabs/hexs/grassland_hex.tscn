@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://bcbvc55ld6n5c"]
+
+[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hexs/hex_border.png" id="1_tkj7j"]
+[ext_resource type="Texture2D" uid="uid://dyq1ly5s3jdy" path="res://assets/hexs/grasslandHex.png" id="2_tkj7j"]
+
+[node name="GrasslandHex" type="Node2D" unique_id=475457553]
+
+[node name="Border" type="Sprite2D" parent="." unique_id=1102676931]
+z_index = 1
+scale = Vector2(0.098, 0.098)
+texture = ExtResource("1_tkj7j")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1720295827]
+position = Vector2(3.516674e-06, -9.536743e-07)
+scale = Vector2(0.09788654, 0.097656265)
+texture = ExtResource("2_tkj7j")

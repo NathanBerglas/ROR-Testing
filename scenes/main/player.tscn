@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://dhecsdio6ymnp"]
+
+[ext_resource type="Script" uid="uid://c5g8gaakh6ukg" path="res://scripts/main/player.gd" id="1_qlg0r"]
+[ext_resource type="PackedScene" uid="uid://dl2hwpslhw3xd" path="res://scenes/main/grid.tscn" id="2_tuyoq"]
+[ext_resource type="PackedScene" uid="uid://bujhjvi3667ko" path="res://scenes/main/buildingControl.tscn" id="3_fjrip"]
+[ext_resource type="PackedScene" uid="uid://bbjr8sh5hxnjt" path="res://scenes/main/camera.tscn" id="4_smehm"]
+[ext_resource type="PackedScene" uid="uid://8s5fbc42yax2" path="res://scenes/main/meepleControl.tscn" id="5_ur7pv"]
+
+[node name="Player" type="Node2D" unique_id=1618287504]
+script = ExtResource("1_qlg0r")
+
+[node name="Grid" parent="." unique_id=1554468060 node_paths=PackedStringArray("meeple_control") instance=ExtResource("2_tuyoq")]
+meeple_control = NodePath("../MeepleControl")
+
+[node name="BuildingControl" parent="." unique_id=1989412738 instance=ExtResource("3_fjrip")]
+
+[node name="Camera" parent="." unique_id=732688784 instance=ExtResource("4_smehm")]
+position = Vector2(20000, 323)
+
+[node name="MeepleControl" parent="." unique_id=553136144 instance=ExtResource("5_ur7pv")]

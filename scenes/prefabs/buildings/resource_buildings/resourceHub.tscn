@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://bvicor1lw62ay"]
+
+[ext_resource type="Script" uid="uid://c2c525006en2n" path="res://scripts/buildings/resource_buildings/resource_hub.gd" id="1_ptywy"]
+[ext_resource type="PackedScene" uid="uid://cjbl8iopdsxjb" path="res://scenes/menus/manageCaravanButton.tscn" id="2_4a1a5"]
+[ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="2_ptywy"]
+[ext_resource type="PackedScene" uid="uid://ckihem7no8ate" path="res://scenes/legacy/caravanTarget.tscn" id="3_26xkw"]
+[ext_resource type="PackedScene" uid="uid://yaght1yrplnl" path="res://scenes/prefabs/meeples/resource_meeples/caravan.tscn" id="4_ylua4"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ptywy"]
+
+[node name="ResourceHub" type="Node2D" unique_id=1057711618]
+script = ExtResource("1_ptywy")
+manageCaravanButton = ExtResource("2_4a1a5")
+caravanTarget = ExtResource("3_26xkw")
+caravan = ExtResource("4_ylua4")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_ptywy")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=991196017]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false
+
+[node name="manageCaravans" type="VBoxContainer" parent="." unique_id=159111704]
+z_index = 2
+offset_right = 199.0
+offset_bottom = 66.0
+
+[node name="newCaravanButton" type="Button" parent="manageCaravans" unique_id=416117789]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ptywy")
+text = "1 - New Caravan Route"
+
+[node name="managingCarvanMenu" type="VBoxContainer" parent="." unique_id=746309620]
+offset_left = 20.0
+offset_top = 123.0
+offset_right = 154.0
+offset_bottom = 189.0
+
+[node name="finishManagingButton" type="Button" parent="managingCarvanMenu" unique_id=1195105643]
+layout_mode = 2
+text = "Finish Managing"
+icon_alignment = 1
+expand_icon = true
+
+[node name="removeRouteButton" type="Button" parent="managingCarvanMenu" unique_id=142757787]
+layout_mode = 2
+text = "Remove Route"

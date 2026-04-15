@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://dqw3pwnw258w8"]
+
+[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hexs/hex_border.png" id="1_fb8tt"]
+[ext_resource type="Texture2D" uid="uid://blj1nmmosgtu0" path="res://assets/hexs/stoneHex.png" id="2_7stuq"]
+
+[node name="StoneHex" type="Node2D" unique_id=552597812]
+
+[node name="Border" type="Sprite2D" parent="." unique_id=614406726]
+z_index = 1
+scale = Vector2(0.098, 0.098)
+texture = ExtResource("1_fb8tt")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1120859631]
+position = Vector2(3.516674e-06, -9.536743e-07)
+scale = Vector2(0.09788654, 0.097656265)
+texture = ExtResource("2_7stuq")

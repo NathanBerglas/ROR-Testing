@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://bt878poxkdcfw"]
+
+[ext_resource type="Texture2D" uid="uid://daaehoaetm3qq" path="res://assets/hexs/plainsHex.png" id="1_82ktj"]
+[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hexs/hex_border.png" id="2_ss0tj"]
+
+[node name="PlainsHex" type="Node2D" unique_id=1935592180]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=606349313]
+position = Vector2(3.516674e-06, -9.536743e-07)
+scale = Vector2(0.09788654, 0.097656265)
+texture = ExtResource("1_82ktj")
+
+[node name="Border" type="Sprite2D" parent="." unique_id=1906112609]
+scale = Vector2(0.098, 0.098)
+texture = ExtResource("2_ss0tj")

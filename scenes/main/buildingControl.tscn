@@ -1,0 +1,313 @@
+[gd_scene format=3 uid="uid://bujhjvi3667ko"]
+
+[ext_resource type="Script" uid="uid://bgv44hfc0ifr3" path="res://scripts/main/building_control.gd" id="1_kvhp6"]
+[ext_resource type="PackedScene" uid="uid://crdqwkqqtjfod" path="res://scenes/prefabs/buildings/resource_buildings/Farm.tscn" id="2_fbp8a"]
+[ext_resource type="Script" uid="uid://c4jvo5hivmdi5" path="res://scripts/menus/hud.gd" id="2_oj14w"]
+[ext_resource type="PackedScene" uid="uid://b6t8bbcr80x3s" path="res://scenes/prefabs/buildings/resource_buildings/LumberJacks.tscn" id="3_bfbke"]
+[ext_resource type="PackedScene" uid="uid://vr7ll0w6bfdx" path="res://scenes/prefabs/buildings/combat_buildings/barracks.tscn" id="3_fbp8a"]
+[ext_resource type="PackedScene" uid="uid://dxr3aaa3ro1mf" path="res://scenes/prefabs/buildings/resource_buildings/StoneMine.tscn" id="4_cq801"]
+[ext_resource type="Texture2D" uid="uid://chvsahw5yjflm" path="res://assets/buildings/farm.png" id="5_fbp8a"]
+[ext_resource type="PackedScene" uid="uid://bvicor1lw62ay" path="res://scenes/prefabs/buildings/resource_buildings/resourceHub.tscn" id="5_u7xp7"]
+[ext_resource type="Texture2D" uid="uid://dmme2pmdcs6we" path="res://assets/buildings/barracks.png" id="5_vw06n"]
+[ext_resource type="Texture2D" uid="uid://bmdh3cno6m74l" path="res://assets/buildings/stoneMine.png" id="7_gftes"]
+[ext_resource type="PackedScene" uid="uid://btb83rswug0t1" path="res://scenes/prefabs/buildings/combat_buildings/wallCorner.tscn" id="7_t6ejh"]
+[ext_resource type="Texture2D" uid="uid://cnamqjcjw6sa1" path="res://assets/menus/resourceBuildingMenuButton.png" id="8_3co7m"]
+[ext_resource type="PackedScene" uid="uid://ch580mkbsdw2n" path="res://scenes/prefabs/buildings/combat_buildings/wallSegment.tscn" id="8_hlxnr"]
+[ext_resource type="Texture2D" uid="uid://b2jmavmsncpfu" path="res://assets/menus/combatBuildingMenuButton.png" id="8_rj1gy"]
+[ext_resource type="Texture2D" uid="uid://bmjqv3d2068k3" path="res://assets/buildings/lumberJacks.png" id="8_w1qyp"]
+[ext_resource type="PackedScene" uid="uid://dh3llecy2aj26" path="res://scenes/prefabs/buildings/combat_buildings/turret.tscn" id="9_k0c8h"]
+[ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="11_cq801"]
+[ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/buildings/WallCorner.png" id="16_t6ejh"]
+[ext_resource type="Texture2D" uid="uid://duhlw8ydi84fg" path="res://assets/buildings/turrent.png" id="19_2hoj7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_at16l"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cq801"]
+
+[node name="BuildingControl" type="Node2D" unique_id=390504468]
+script = ExtResource("1_kvhp6")
+farm_prefab = ExtResource("2_fbp8a")
+stoneMine_prefab = ExtResource("4_cq801")
+lumberJack_prefab = ExtResource("3_bfbke")
+resourceHub_prefab = ExtResource("5_u7xp7")
+barracks_prefab = ExtResource("3_fbp8a")
+wallCorner_prefab = ExtResource("7_t6ejh")
+wallSegment_prefab = ExtResource("8_hlxnr")
+turret_prefab = ExtResource("9_k0c8h")
+
+[node name="buildingHud" type="CanvasLayer" parent="." unique_id=815674145]
+script = ExtResource("2_oj14w")
+
+[node name="Food" type="Label" parent="buildingHud" unique_id=2073406]
+offset_left = 8.0
+offset_right = 282.0
+offset_bottom = 55.0
+theme_override_font_sizes/font_size = 40
+text = "Food: 1000"
+metadata/_edit_use_anchors_ = true
+
+[node name="Stone" type="Label" parent="buildingHud" unique_id=351734712]
+offset_left = 8.0
+offset_top = 113.0
+offset_right = 282.0
+offset_bottom = 168.0
+theme_override_font_sizes/font_size = 40
+text = "Stone: 1000"
+metadata/_edit_use_anchors_ = true
+
+[node name="combatBuildingsLabel" type="Label" parent="buildingHud" unique_id=983631813]
+offset_left = 457.0
+offset_top = 136.0
+offset_right = 743.0
+offset_bottom = 249.0
+theme_override_font_sizes/font_size = 40
+text = "Opens Combat
+Building Menu"
+metadata/_edit_use_anchors_ = true
+
+[node name="resourceBuildingLabel" type="Label" parent="buildingHud" unique_id=1115077520]
+offset_left = 792.0
+offset_top = 137.0
+offset_right = 1104.0
+offset_bottom = 250.0
+theme_override_font_sizes/font_size = 40
+text = "Opens Resource
+Building Menu"
+horizontal_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Lumber" type="Label" parent="buildingHud" unique_id=1233910810]
+offset_left = 8.0
+offset_top = 56.0
+offset_right = 282.0
+offset_bottom = 111.0
+theme_override_font_sizes/font_size = 40
+text = "Lumber: 1000"
+metadata/_edit_use_anchors_ = true
+
+[node name="resourceBuildingButton" type="Button" parent="buildingHud" unique_id=1378047722]
+offset_left = 870.0
+offset_top = 2.0
+offset_right = 1005.0
+offset_bottom = 137.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("8_3co7m")
+flat = true
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="combatBuildingButton" type="Button" parent="buildingHud" unique_id=478958744]
+offset_left = 531.0
+offset_top = 4.0
+offset_right = 666.0
+offset_bottom = 139.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("8_rj1gy")
+flat = true
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="resourceBuildingHud" type="CanvasLayer" parent="." unique_id=1220890351]
+
+[node name="ScrollContainer" type="ScrollContainer" parent="resourceBuildingHud" unique_id=246695275]
+visible = false
+offset_left = 17.0
+offset_top = 177.0
+offset_right = 322.0
+offset_bottom = 896.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="resourceBuildingHud/ScrollContainer" unique_id=613882232]
+layout_mode = 2
+alignment = 1
+
+[node name="LumberJackButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=973437938]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_font_sizes/font_size = 43
+theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
+text = "
+"
+icon = ExtResource("8_w1qyp")
+flat = true
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="ResourceHubButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=1643912074]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_font_sizes/font_size = 43
+theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
+icon = ExtResource("11_cq801")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="StoneMineButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=1972255775]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_font_sizes/font_size = 43
+theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
+icon = ExtResource("7_gftes")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="FarmButton" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=1861200771]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_font_sizes/font_size = 43
+theme_override_styles/focus = SubResource("StyleBoxEmpty_at16l")
+icon = ExtResource("5_fbp8a")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="closeResourceMenu" type="Button" parent="resourceBuildingHud/ScrollContainer/VBoxContainer" unique_id=465479200]
+layout_mode = 2
+text = "Close"
+
+[node name="FarmButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1757334247]
+visible = false
+z_index = 1
+z_as_relative = false
+offset_left = 167.0
+offset_top = 593.0
+offset_right = 343.0
+offset_bottom = 725.0
+theme_override_font_sizes/font_size = 30
+text = "Farm - 500F
+            500W
+            500S"
+metadata/_edit_use_anchors_ = true
+
+[node name="StoneMineButtonLabel2" type="Label" parent="resourceBuildingHud" unique_id=185697737]
+visible = false
+offset_left = 159.0
+offset_top = 455.0
+offset_right = 423.0
+offset_bottom = 587.0
+theme_override_font_sizes/font_size = 30
+text = "Stone Mine - 500F
+                       500W
+                       500S"
+metadata/_edit_use_anchors_ = true
+
+[node name="LumberJackButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1467269347]
+visible = false
+offset_left = 163.0
+offset_top = 177.0
+offset_right = 435.0
+offset_bottom = 309.0
+theme_override_font_sizes/font_size = 30
+text = "LumberJack - 500F
+                        500W
+                        500S"
+metadata/_edit_use_anchors_ = true
+
+[node name="ResourceHubButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1235039629]
+visible = false
+offset_left = 160.0
+offset_top = 319.0
+offset_right = 481.0
+offset_bottom = 451.0
+theme_override_font_sizes/font_size = 30
+text = "Resource Hub - 5000F
+                        	    5000W
+                            5000S"
+metadata/_edit_use_anchors_ = true
+
+[node name="combatBuildingHud" type="CanvasLayer" parent="." unique_id=485597457]
+
+[node name="ScrollContainer" type="ScrollContainer" parent="combatBuildingHud" unique_id=662035960]
+offset_left = 17.0
+offset_top = 177.0
+offset_right = 322.0
+offset_bottom = 896.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="combatBuildingHud/ScrollContainer" unique_id=770048414]
+layout_mode = 2
+alignment = 1
+
+[node name="BarracksButton" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=2041240677]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("5_vw06n")
+flat = true
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="wallCornerButton" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=1404969341]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("16_t6ejh")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="turretButton" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=652666463]
+custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("19_2hoj7")
+flat = true
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="closeCombatMenu" type="Button" parent="combatBuildingHud/ScrollContainer/VBoxContainer" unique_id=98211182]
+layout_mode = 2
+text = "Close"
+
+[node name="BarracksButtonLabel" type="Label" parent="combatBuildingHud" unique_id=1610006482]
+visible = false
+offset_left = 160.0
+offset_top = 182.0
+offset_right = 409.0
+offset_bottom = 314.0
+theme_override_font_sizes/font_size = 30
+text = "Barracks - 1000F
+                   1000W
+                   1000S"
+metadata/_edit_use_anchors_ = true
+
+[node name="wallCornerButtonLabel" type="Label" parent="combatBuildingHud" unique_id=1721244334]
+visible = false
+offset_left = 170.0
+offset_top = 317.0
+offset_right = 419.0
+offset_bottom = 449.0
+theme_override_font_sizes/font_size = 30
+text = "Wall - 	50F
+           50W
+           50S"
+metadata/_edit_use_anchors_ = true
+
+[node name="turretButtonLabel" type="Label" parent="combatBuildingHud" unique_id=986655145]
+visible = false
+offset_left = 166.0
+offset_top = 455.0
+offset_right = 415.0
+offset_bottom = 587.0
+theme_override_font_sizes/font_size = 30
+text = "Turret - 500F
+              500W
+              500S"
+metadata/_edit_use_anchors_ = true
+
+[node name="RclickMenuResourceHub" type="VBoxContainer" parent="." unique_id=890369603]
+z_index = 2
+offset_right = 199.0
+offset_bottom = 66.0
+
+[node name="manageCaravansButton" type="Button" parent="RclickMenuResourceHub" unique_id=1297992487]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_cq801")
+text = "1- Manage Caravans"
