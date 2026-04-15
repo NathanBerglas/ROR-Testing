@@ -7,8 +7,6 @@ add nexus -> Jacob
 
 Biome gen -> Nate
 
-MMA -> Nate
-
 
 Ruins with runes -> need biome gen first
 

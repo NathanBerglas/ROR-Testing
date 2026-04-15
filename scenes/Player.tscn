@@ -15,6 +15,6 @@ meeple_control = NodePath("../MeepleControl")
 [node name="BuildingControl" parent="." unique_id=1989412738 instance=ExtResource("2_mdl7e")]
 
 [node name="Camera" parent="." unique_id=732688784 instance=ExtResource("3_qu4a1")]
-position = Vector2(577, 323)
+position = Vector2(20000, 323)
 
 [node name="MeepleControl" parent="." unique_id=553136144 instance=ExtResource("1_3li8b")]

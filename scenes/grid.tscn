@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c55deqr6361v3" path="res://scenes/BiomeGen/BiomeGen.tscn" id="5_726jt"]
 [ext_resource type="PackedScene" uid="uid://w5sjmbbv6a8b" path="res://scenes/prefabs/hexs/hex_prefab.tscn" id="5_jaoqn"]
 [ext_resource type="PackedScene" uid="uid://sb6uk17uy178" path="res://scenes/prefabs/hexs/forestHex.tscn" id="7_8kere"]
-[ext_resource type="PackedScene" uid="uid://b0wt475ct167j" path="res://scenes/prefabs/waterHex.tscn" id="8_awic7"]
+[ext_resource type="PackedScene" uid="uid://b0wt475ct167j" path="res://scenes/prefabs/hexs/waterHex.tscn" id="8_awic7"]
 [ext_resource type="PackedScene" uid="uid://bp5yb3vufyjyu" path="res://scenes/prefabs/hexs/tundraHex.tscn" id="9_37306"]
 [ext_resource type="PackedScene" uid="uid://cb277dnckgs4w" path="res://scenes/prefabs/hexs/sandHex.tscn" id="10_f7i2a"]
 [ext_resource type="PackedScene" uid="uid://bhlvtw4s8cmd5" path="res://scenes/prefabs/hexs/rainforestHex.tscn" id="11_8ulmy"]

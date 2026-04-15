@@ -5,5 +5,5 @@
 [node name="HexPrefab" type="Node2D" unique_id=811786069]
 
 [node name="Border" type="Sprite2D" parent="." unique_id=1367156687]
-scale = Vector2(0.098, 0.098)
+visible = false
 texture = ExtResource("2_oli5t")

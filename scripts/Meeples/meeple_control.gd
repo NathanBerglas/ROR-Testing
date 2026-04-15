@@ -8,7 +8,7 @@ extends Node2D
 @onready var RCLICKATTACK= $VBoxContainer/Attack
 @onready var RCLICKMENU = $VBoxContainer
 
-const MEEPLE_TICKS_PER_SECOND = 20
+const MEEPLE_TICKS_PER_SECOND = 60
 var time_since_last_meeple_tick = 0
 #The list of meeple groups, their targets, and their colours
 var MEEPLE_ID_INDEX = 0
@@ -57,7 +57,8 @@ func _ready() -> void:
 func _process(delta): #Runs every tick
 	time_since_last_meeple_tick += delta
 	#if playerID == multiplayer.get_unique_id():
-	if time_since_last_meeple_tick > 1.0 / MEEPLE_TICKS_PER_SECOND:
+	if time_since_last_meeple_tick > (1.0 / MEEPLE_TICKS_PER_SECOND):
+		time_since_last_meeple_tick = 0
 		meeple_process()
 	
 	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
@@ -183,8 +184,9 @@ func _physics_process(delta: float) -> void:
 			continue
 		var next_hex: Vector2 = grid.axial_hex_to_coord(m.path[1])
 		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
+		var speed = 2 * m.speed / (grid.grid[m.path[0].x][m.path[0].y].traversal_difficulty + grid.grid[m.path[1].x][m.path[1].y].traversal_difficulty)
 		if (next_hex - m.global_position).length() >= m.speed * delta: # Not yet arrived
-			m.global_position += dir_to_next_hex * m.speed * delta
+			m.global_position += dir_to_next_hex * speed * delta
 		else: # Just entered the hex
 			m.pause_a_tick = true
 			m.global_position = next_hex

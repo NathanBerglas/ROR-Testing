@@ -8,9 +8,10 @@ const debuggingGrid = false
 #var PIXELS_PER_TILE: int
 
 # Map Area
-@export var BORDER_RESOLUTION: int = 10
+@export var BORDER_RESOLUTION: int = 40
+@export var BEACH_RESOLUTION: int = 10
 @export var PIXELS_PER_TILE: int = 10
-var MAP_RESOLUTION: Vector2i = Vector2i(620, 320)
+var MAP_RESOLUTION: Vector2i = Vector2i(1080, 580)
 
 
 # Gen Data
@@ -427,7 +428,7 @@ func _generate_points(coverTerrain, resources) -> Array:
 					if chunk_index.x >= chunks.size():
 						chunk_index.x = chunks.size() - 1
 					if chunk_index.y >= chunks[chunk_index.x].size():
-						chunk_index.y = chunks[chunk_index.x].size()
+						chunk_index.y = chunks[chunk_index.x].size() - 1
 					chunks[chunk_index.x][chunk_index.y].append(Vector2(center.x - topLeft.x, center.y - topLeft.y))
 					
 					if center.x <= 0 or center.y <= 0:
@@ -577,7 +578,7 @@ func _generate_mesh(baseTerrain: Array, coverTerrain: Array, resources: Array): 
 			
 
 			#Hard sets quads to ocean
-			if col < (BORDER_RESOLUTION - 1) or row < BORDER_RESOLUTION - 1 or col > (MAP_RESOLUTION.x - (BORDER_RESOLUTION) + 1) or row > (MAP_RESOLUTION.y - BORDER_RESOLUTION + 1):
+			if col < (BORDER_RESOLUTION - BEACH_RESOLUTION) or row < BORDER_RESOLUTION - BEACH_RESOLUTION or col > (MAP_RESOLUTION.x - (BORDER_RESOLUTION) + BEACH_RESOLUTION) or row > (MAP_RESOLUTION.y - BORDER_RESOLUTION + BEACH_RESOLUTION):
 				
 				var color = 2 #WATER
 				#colors.append_array([color, color, color, color])

@@ -1,7 +1,7 @@
 extends Node2D
 
 # Grid constants
-@export var HEX_SIZE: float = 10
+@export var HEX_SIZE: float = 50
 @export var GRID_COUNT: Vector2i = Vector2i(466,214)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
@@ -29,6 +29,10 @@ var grid: Array = []
 @export var rubyHex_prefab: PackedScene
 
 const border_colours: PackedColorArray = [Color.DARK_GRAY, Color.DARK_RED, Color.SEA_GREEN, Color.STEEL_BLUE, Color.SKY_BLUE]
+
+
+#[forest, tundra, water, sand, rainforest, plains, grassland, stone, iron, ruby, diamond]
+const traversal_difficulty_by_biome = [0.25, 0.5, 1.0, 0.75, 0.15, 1.0, 0.8, 1.0, 0.75, 0.75, 0.5]
 
 const HEX_DIRS := [
 	Vector2i(1, 0),
@@ -284,24 +288,23 @@ func _ready():
 			var tileToCreate = tile.new(Vector2i(q, r))
 			row.append(tileToCreate)
 			
-			if tileToCreate.type == "ARABLE":
-				var instance = arable_land_prefab.instantiate()
-				# Set instance's data
-				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
-				add_child(instance)
-			elif tileToCreate.type == "FOREST":
-				var instance = forest_prefab.instantiate()
-				# Set instance's data
-				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
-				add_child(instance)
-			elif tileToCreate.type == "STONE":
-				var instance = stone_deposit_prefab.instantiate()
-				# Set instance's data
-				instance.global_position = axial_hex_to_coord(tileToCreate.hex)
-				add_child(instance)
+			#if tileToCreate.type == "ARABLE":
+				#var instance = arable_land_prefab.instantiate()
+				## Set instance's data
+				#instance.global_position = axial_hex_to_coord(tileToCreate.hex)
+				#add_child(instance)
+			#elif tileToCreate.type == "FOREST":
+				#var instance = forest_prefab.instantiate()
+				## Set instance's data
+				#instance.global_position = axial_hex_to_coord(tileToCreate.hex)
+				#add_child(instance)
+			#elif tileToCreate.type == "STONE":
+				#var instance = stone_deposit_prefab.instantiate()
+				## Set instance's data
+				#instance.global_position = axial_hex_to_coord(tileToCreate.hex)
+				#add_child(instance)
 		
 		grid.append(row)
-	update_astar()
 	# Draw Grid
 	
 	for row in grid:
@@ -318,38 +321,44 @@ func _ready():
 			var new_hex = null
 			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
 			if index.x >= biomeGen.MAP_RESOLUTION.x or index.y >= biomeGen.MAP_RESOLUTION.y:
-				new_hex = hex_prefab.instantiate()
+				continue
 			else:
 				if biomeGen.debuggingGrid == false:
 					if biomeGen.map[index.y][index.x] == 0:
 						new_hex = forestHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 1:
+					elif biomeGen.map[index.y][index.x] == 1:
 						new_hex = tundraHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 2:
+					elif biomeGen.map[index.y][index.x] == 2:
 						new_hex = waterHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 3:
+					elif biomeGen.map[index.y][index.x] == 3:
 						new_hex = sandHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 4:
+					elif biomeGen.map[index.y][index.x] == 4:
 						new_hex = rainforestHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 5:
+					elif biomeGen.map[index.y][index.x] == 5:
 						new_hex = plainsHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 6:
+					elif biomeGen.map[index.y][index.x] == 6:
 						new_hex = grasslandHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 7:
+					elif biomeGen.map[index.y][index.x] == 7:
 						new_hex = stoneHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 8:
+					elif biomeGen.map[index.y][index.x] == 8:
 						new_hex = ironHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 9:
+					elif biomeGen.map[index.y][index.x] == 9:
 						new_hex = rubyHex_prefab.instantiate()
-					if biomeGen.map[index.y][index.x] == 10:
+					elif biomeGen.map[index.y][index.x] == 10:
 						new_hex = diamondHex_prefab.instantiate()
+					else:
+						print(biomeGen.map[index.y][index.x])
 				
 			if new_hex == null:
-				new_hex = hex_prefab.instantiate()
+				continue
 			
 			new_hex.position = axial_hex_to_coord(Vector2i(q, r))
-			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2
+			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2 * 8
 			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
 			self.add_child(new_hex)
 			h.hex_pf = new_hex
-	
+			h.biome = biomeGen.map[index.y][index.x]
+			if h.biome == 2: #water
+				h.traversable = false
+			h.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
+	update_astar()
