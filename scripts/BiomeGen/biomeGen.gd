@@ -423,6 +423,11 @@ func _generate_points(coverTerrain, resources) -> Array:
 					if FLAG_VERBOSE: print("")
 					
 					var chunk_index = Vector2i(int(floor((center.x - topLeft.x) / chunkLen)),int(floor((center.y - topLeft.y) / chunkLen)))
+					
+					if chunk_index.x >= chunks.size():
+						chunk_index.x = chunks.size() - 1
+					if chunk_index.y >= chunks[chunk_index.x].size():
+						chunk_index.y = chunks[chunk_index.x].size()
 					chunks[chunk_index.x][chunk_index.y].append(Vector2(center.x - topLeft.x, center.y - topLeft.y))
 					
 					if center.x <= 0 or center.y <= 0:
