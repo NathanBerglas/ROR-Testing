@@ -20,6 +20,7 @@ const HEX_SHAPE := [
 ]
 
 
+
 func _ready():
 	set_size(size)
 	

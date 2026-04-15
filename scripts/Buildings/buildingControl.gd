@@ -351,7 +351,6 @@ func _on_barracks_button_released():
 	wood -= 1000
 	stone -= 1000
 	
-	
 func _process(delta): #runs every tick
 	cleanBuildings()
 	hoveringText()
@@ -387,7 +386,7 @@ func _process(delta): #runs every tick
 			if m.target == null:
 				m.getTarget(grid)
 			else:
-				m.attack()
+				m.attack(delta)
 	sendCaravans()
 	
 	hud.updateFood(food) 

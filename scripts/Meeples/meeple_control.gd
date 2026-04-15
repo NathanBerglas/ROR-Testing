@@ -323,7 +323,11 @@ func freeMeeple(id):
 	if FLAG_VERBOSE: print("Deleting meeple ", id)
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
-			grid.update_grid(unorderedMeeples[i].path[0], 0, [])
+			if !unorderedMeeples[i].shouldBeMoving:
+				grid.update_grid(unorderedMeeples[i].path[0], 0, [])
+			else:
+				if !grid.axial_probe(unorderedMeeples[i].path[1]).classification == 3: # no other meeple inside
+					grid.update_grid(unorderedMeeples[i].path[1], 0, [])
 			unorderedMeeples.pop_at(i).queue_free()
 			return
 
