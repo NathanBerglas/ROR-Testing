@@ -36,7 +36,7 @@ var selecting = Vector2(0,0)
 
 var MEEPLE_ID_COUNTER = 1
  
-const FLAG_VERBOSE = true
+const FLAG_VERBOSE = false
 const FLAG_DEBUG = true
 
 func _ready() -> void:

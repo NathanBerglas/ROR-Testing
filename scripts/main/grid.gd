@@ -3,35 +3,19 @@ extends Node2D
 # Grid constants
 @export var HEX_SIZE: float = 64
 @export var GRID_COUNT: Vector2i = Vector2i(466,214)
-@export var arable_land_prefab: PackedScene
-@export var forest_prefab: PackedScene
-@export var stone_deposit_prefab: PackedScene
 @export var biomeGenScene: PackedScene
 @export var meeple_control: Node2D
-const SQRT_3 = (111.0 / 128.0) * 2 #(idk)
+const SQRT_3 = (111.0 / 128.0) * 2
 
 var biomeGen = null
 var created = false
 var grid: Array = [] 
 
-@export var hex_prefab: PackedScene
-@export var forestHex_prefab: PackedScene
-@export var waterHex_prefab: PackedScene
-@export var tundraHex_prefab: PackedScene
-@export var sandHex_prefab: PackedScene
-@export var rainforestHex_prefab: PackedScene
-@export var grasslandHex_prefab: PackedScene
-@export var plainsHex_prefab: PackedScene
-@export var diamondHex_prefab: PackedScene
-@export var ironHex_prefab: PackedScene
-@export var stoneHex_prefab: PackedScene
-@export var rubyHex_prefab: PackedScene
 @onready var white_border: TileMapLayer = $"White Border"
 @onready var black_border: TileMapLayer = $"Black Border"
 @onready var interior: TileMapLayer = $Interior
 
-
-const border_colours: PackedColorArray = [Color.DARK_GRAY, Color.DARK_RED, Color.SEA_GREEN, Color.STEEL_BLUE, Color.SKY_BLUE]
+const border_colours: PackedInt32Array = [1, 13, 14, 15, 16]
 
 #[forest, tundra, water, sand, rainforest, plains, grassland, stone, iron, ruby, diamond]
 const traversal_difficulty_by_biome = [0.25, 0.5, 1.0, 0.75, 0.15, 1.0, 0.8, 1.0, 0.75, 0.75, 0.5]
@@ -49,11 +33,10 @@ var astar = AStar2D.new()
 
 var terrainOffset = null
 
-const FLAG_VERBOSE = true
+const FLAG_VERBOSE = false
 
 class tile:
 	var hex: Vector2i # (q, r)
-	var hex_pf: Node
 	var classification: int = 0 # 0 is empty, 1 is obstruction, 2 is building, and 3 is stationary meeple, 4 is moving meeple
 	var traversable: bool = true
 	var traversal_difficulty: float = 1.0 # Must be nonzero for AStar (i think?)
@@ -72,7 +55,7 @@ func update_grid(hex: Vector2i, classification: int, objects: Array):
 	tile_to_update.traversable = (classification==0 || classification==4 || classification==3)
 	tile_to_update.objectsInside = objects
 	astar.set_point_disabled(_hex_to_id(hex), !tile_to_update.traversable)
-	#tile_to_update.hex_pf.get_node("Border").modulate = border_colours[tile_to_update.classification]
+	white_border.set_cell(tile_to_update.hex, border_colours[tile_to_update.classification], Vector2i(0, 0))
 
 
 func axial_probe(coordinate: Vector2i):
@@ -263,41 +246,26 @@ func _ready():
 		var row: Array = []
 		for r in range(GRID_COUNT.y):
 			var tileToCreate = tile.new(Vector2i(q, r))
+			var center = axial_hex_to_coord(tileToCreate.hex)
+			if center.x > terrainOffset and center.x < (biomeGen.MAP_RESOLUTION.x * biomeGen.PIXELS_PER_TILE) + terrainOffset:
+				var index = Vector2i(
+					int(floor((center.x - terrainOffset) / biomeGen.getPixelsPerTile())),
+					int(floor((center.y) / biomeGen.getPixelsPerTile()))
+				)
+				#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
+				if index.x <= biomeGen.MAP_RESOLUTION.x and index.y <= biomeGen.MAP_RESOLUTION.y:
+					if biomeGen.debuggingGrid == false:
+						const def = Vector2i(0, 0)
+						black_border.set_cell(tileToCreate.hex, 0, def)
+						white_border.set_cell(tileToCreate.hex, 1, def)
+						interior.set_cell(tileToCreate.hex, 2 + biomeGen.map[index.y][index.x], def)
+					tileToCreate.biome = biomeGen.map[index.y][index.x]
+					if tileToCreate.biome == 2: #water
+						tileToCreate.traversable = false
+					tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
 			row.append(tileToCreate)
 		grid.append(row)
-	# Draw Grid
-	
-	for row in grid:
-		for h in row:
-			var q = h.hex.x
-			var r = h.hex.y
-			
-			var center = Vector2(q,r)
-			center = axial_hex_to_coord(center)
-			if center.x < terrainOffset or center.x > (biomeGen.MAP_RESOLUTION.x * biomeGen.PIXELS_PER_TILE) + terrainOffset:
-				continue
-			var index = Vector2i(int(floor((center.x - terrainOffset) / biomeGen.getPixelsPerTile())),int(floor((center.y) / biomeGen.getPixelsPerTile())))
-			
-			var new_hex = null
-			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
-			if index.x >= biomeGen.MAP_RESOLUTION.x or index.y >= biomeGen.MAP_RESOLUTION.y:
-				continue
-			else:
-				if biomeGen.debuggingGrid == false:
-					const def = Vector2i(0, 0)
-					black_border.set_cell(h.hex, 0, def)
-					white_border.set_cell(h.hex, 1, def)
-					interior.set_cell(h.hex, 2 + biomeGen.map[index.y][index.x], def)
-			if new_hex == null:
-				continue
 
-			new_hex.position = axial_hex_to_coord(Vector2i(q, r))
-			new_hex.scale = Vector2i(1, 1) * HEX_SIZE / 100 * 2 * 8
-			new_hex.get_node("Border").modulate = Color.DARK_GRAY 
-			self.add_child(new_hex)
-			h.hex_pf = new_hex
-			h.biome = biomeGen.map[index.y][index.x]
-			if h.biome == 2: #water
-				h.traversable = false
-			h.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
+			
+			
 	update_astar()

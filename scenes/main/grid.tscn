@@ -1,10 +1,12 @@
 [gd_scene format=3 uid="uid://dl2hwpslhw3xd"]
 
 [ext_resource type="Script" uid="uid://bt6iu1yiwbo2w" path="res://scripts/main/grid.gd" id="1_t5fjg"]
-[ext_resource type="PackedScene" uid="uid://cyobk0wdymhvp" path="res://scenes/legacy/arableLand.tscn" id="2_w88cy"]
-[ext_resource type="PackedScene" uid="uid://dg77d0mctts7" path="res://scenes/legacy/forest.tscn" id="3_gnlqp"]
-[ext_resource type="PackedScene" uid="uid://bey5vvkq0u1fp" path="res://scenes/legacy/stoneDeposit.tscn" id="4_jaoqn"]
 [ext_resource type="PackedScene" uid="uid://c55deqr6361v3" path="res://scenes/main/BiomeGen.tscn" id="5_726jt"]
+[ext_resource type="Texture2D" uid="uid://bv84gos6cdl2j" path="res://assets/hexs/hex_border_unocupied.png" id="7_x0jyy"]
+[ext_resource type="Texture2D" uid="uid://b24vg132bmqqi" path="res://assets/hexs/hex_border_building.png" id="11_86vwy"]
+[ext_resource type="Texture2D" uid="uid://b0qllhnkhp832" path="res://assets/hexs/hex_border_meeple.png" id="12_dlt7c"]
+[ext_resource type="Texture2D" uid="uid://b4lq7453wu8xw" path="res://assets/hexs/hex_border_meeple_moving.png" id="13_6px1y"]
+[ext_resource type="Texture2D" uid="uid://ckf17qc245nqc" path="res://assets/hexs/hex_border_obstructed.png" id="14_n3dit"]
 [ext_resource type="Texture2D" uid="uid://tnx1nxxeor7u" path="res://assets/hexs/blank_hex.png" id="18_y70s5"]
 [ext_resource type="Texture2D" uid="uid://bvhu0tpupfs78" path="res://assets/hexs/diamond_hex_interior.png" id="19_y70s5"]
 [ext_resource type="Texture2D" uid="uid://cjwb8fy24nc8f" path="res://assets/hexs/forest_hex_interior.png" id="20_l1a7h"]
@@ -21,11 +23,11 @@
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ial4f"]
 texture = ExtResource("18_y70s5")
-texture_region_size = Vector2i(109, 126)
+texture_region_size = Vector2i(111, 128)
 0:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x1h4u"]
-texture = ExtResource("25_o6h7g")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_41bje"]
+texture = ExtResource("7_x0jyy")
 texture_region_size = Vector2i(111, 128)
 0:0/0 = 0
 
@@ -41,6 +43,26 @@ texture_region_size = Vector2i(111, 128)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uje54"]
 texture = ExtResource("19_y70s5")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pjfk4"]
+texture = ExtResource("14_n3dit")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cq1sd"]
+texture = ExtResource("11_86vwy")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y70s5"]
+texture = ExtResource("12_dlt7c")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_l1a7h"]
+texture = ExtResource("13_6px1y")
 texture_region_size = Vector2i(111, 128)
 0:0/0 = 0
 
@@ -84,12 +106,16 @@ texture = ExtResource("27_j85fq")
 texture_region_size = Vector2i(111, 128)
 0:0/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x1h4u"]
+texture = ExtResource("25_o6h7g")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
 [sub_resource type="TileSet" id="TileSet_gd4e4"]
 tile_shape = 3
 tile_layout = 2
 tile_size = Vector2i(111, 128)
 sources/0 = SubResource("TileSetAtlasSource_ial4f")
-sources/1 = SubResource("TileSetAtlasSource_x1h4u")
 sources/2 = SubResource("TileSetAtlasSource_32yh6")
 sources/3 = SubResource("TileSetAtlasSource_uikrf")
 sources/4 = SubResource("TileSetAtlasSource_4ayuh")
@@ -101,12 +127,15 @@ sources/9 = SubResource("TileSetAtlasSource_d20d3")
 sources/10 = SubResource("TileSetAtlasSource_x67q5")
 sources/11 = SubResource("TileSetAtlasSource_f5u3n")
 sources/12 = SubResource("TileSetAtlasSource_uje54")
+sources/99 = SubResource("TileSetAtlasSource_x1h4u")
+sources/1 = SubResource("TileSetAtlasSource_41bje")
+sources/13 = SubResource("TileSetAtlasSource_pjfk4")
+sources/14 = SubResource("TileSetAtlasSource_cq1sd")
+sources/15 = SubResource("TileSetAtlasSource_y70s5")
+sources/16 = SubResource("TileSetAtlasSource_l1a7h")
 
 [node name="Grid" type="Node2D" unique_id=1852769152]
 script = ExtResource("1_t5fjg")
-arable_land_prefab = ExtResource("2_w88cy")
-forest_prefab = ExtResource("3_gnlqp")
-stone_deposit_prefab = ExtResource("4_jaoqn")
 biomeGenScene = ExtResource("5_726jt")
 
 [node name="Black Border" type="TileMapLayer" parent="." unique_id=843985072]
