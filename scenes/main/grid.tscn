@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dl2hwpslhw3xd"]
 
 [ext_resource type="Script" uid="uid://bt6iu1yiwbo2w" path="res://scripts/main/grid.gd" id="1_t5fjg"]
+[ext_resource type="PackedScene" uid="uid://w5sjmbbv6a8b" path="res://scenes/legacy/hexs/hex_prefab.tscn" id="3_o2lpr"]
 [ext_resource type="PackedScene" uid="uid://c55deqr6361v3" path="res://scenes/main/BiomeGen.tscn" id="5_726jt"]
 [ext_resource type="Texture2D" uid="uid://bv84gos6cdl2j" path="res://assets/hexs/hex_border_unocupied.png" id="7_x0jyy"]
 [ext_resource type="Texture2D" uid="uid://b24vg132bmqqi" path="res://assets/hexs/hex_border_building.png" id="11_86vwy"]
@@ -137,6 +138,7 @@ sources/16 = SubResource("TileSetAtlasSource_l1a7h")
 [node name="Grid" type="Node2D" unique_id=1852769152]
 script = ExtResource("1_t5fjg")
 biomeGenScene = ExtResource("5_726jt")
+debug_hex_prefab = ExtResource("3_o2lpr")
 
 [node name="Black Border" type="TileMapLayer" parent="." unique_id=843985072]
 position = Vector2(-55, -64)

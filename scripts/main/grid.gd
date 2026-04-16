@@ -5,11 +5,13 @@ extends Node2D
 @export var GRID_COUNT: Vector2i = Vector2i(466,214)
 @export var biomeGenScene: PackedScene
 @export var meeple_control: Node2D
+@export var debug_hex_prefab: PackedScene
 const SQRT_3 = (111.0 / 128.0) * 2
 
 var biomeGen = null
 var created = false
 var grid: Array = [] 
+
 
 @onready var white_border: TileMapLayer = $"White Border"
 @onready var black_border: TileMapLayer = $"Black Border"
@@ -93,9 +95,9 @@ func _hex_in_bounds(hex: Vector2i) -> bool:
 
 
 # Takes the coordinates, ie. pixel position on map and coverts it to a hex position, ie. (q, r)
-func coord_to_axial_hex(coordinate: Vector2i):
-	var q: int = int(round((SQRT_3 / 3.0 * coordinate.x - 1.0 / 3.0 * coordinate.y) / HEX_SIZE))
-	var r: int = int(round((2.0 / 3.0 * coordinate.y) / HEX_SIZE))
+func coord_to_axial_hex(coordinate: Vector2):
+	var q: int = int(round((1 / SQRT_3  * coordinate.x - 1.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE))
+	var r: int = int(round((2.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE))
 	if _hex_in_bounds(Vector2i(q, r)):
 		return _hex_round(Vector2(q, r))
 	else:
@@ -104,10 +106,10 @@ func coord_to_axial_hex(coordinate: Vector2i):
 
 func axial_hex_to_coord(hex: Vector2i):
 	var x: float = HEX_SIZE * SQRT_3 * (hex.x + hex.y * 0.5)
-	var y: float = HEX_SIZE * 1.5 * hex.y
+	var y: float = HEX_SIZE * (SQRT_3 * SQRT_3) / 2 * hex.y
 	return Vector2(x, y)
 
-
+	
 func hex_center(coordinate: Vector2i):
 	return axial_hex_to_coord(coord_to_axial_hex(coordinate))
 
@@ -237,6 +239,13 @@ func hex_egress(egressing_hex):
 
 
 func _ready():
+	#for i in range(0, 1000):
+		#var test_hex = Vector2i(i,i)
+		#if coord_to_axial_hex(axial_hex_to_coord(test_hex)) != test_hex:
+			#print(test_hex)
+			#print(axial_hex_to_coord(test_hex))
+			#print(coord_to_axial_hex(axial_hex_to_coord(test_hex)))
+			#
 	terrainOffset = int(HEX_SIZE * SQRT_3 * (GRID_COUNT.y * 0.5))
 	biomeGen = biomeGenScene.instantiate()
 	biomeGen.terrainOffset = terrainOffset
@@ -256,6 +265,9 @@ func _ready():
 				if index.x <= biomeGen.MAP_RESOLUTION.x and index.y <= biomeGen.MAP_RESOLUTION.y:
 					if biomeGen.debuggingGrid == false:
 						const def = Vector2i(0, 0)
+						var new_hex_debug = debug_hex_prefab.instantiate()
+						#new_hex_debug.position = center
+						add_child(new_hex_debug)
 						black_border.set_cell(tileToCreate.hex, 0, def)
 						white_border.set_cell(tileToCreate.hex, 1, def)
 						interior.set_cell(tileToCreate.hex, 2 + biomeGen.map[index.y][index.x], def)
