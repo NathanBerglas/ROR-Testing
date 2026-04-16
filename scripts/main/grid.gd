@@ -1,18 +1,18 @@
 extends Node2D
 
 # Grid constants
-@export var HEX_SIZE: float = 50
+@export var HEX_SIZE: float = 64
 @export var GRID_COUNT: Vector2i = Vector2i(466,214)
 @export var arable_land_prefab: PackedScene
 @export var forest_prefab: PackedScene
 @export var stone_deposit_prefab: PackedScene
 @export var biomeGenScene: PackedScene
 @export var meeple_control: Node2D
-const SQRT_3 = 1.73205080757
+const SQRT_3 = (111.0 / 128.0) * 2 #(idk)
 
 var biomeGen = null
 var created = false
-var grid: Array = []
+var grid: Array = [] 
 
 @export var hex_prefab: PackedScene
 @export var forestHex_prefab: PackedScene
@@ -26,6 +26,10 @@ var grid: Array = []
 @export var ironHex_prefab: PackedScene
 @export var stoneHex_prefab: PackedScene
 @export var rubyHex_prefab: PackedScene
+@onready var white_border: TileMapLayer = $"White Border"
+@onready var black_border: TileMapLayer = $"Black Border"
+@onready var interior: TileMapLayer = $Interior
+
 
 const border_colours: PackedColorArray = [Color.DARK_GRAY, Color.DARK_RED, Color.SEA_GREEN, Color.STEEL_BLUE, Color.SKY_BLUE]
 
@@ -43,14 +47,9 @@ const HEX_DIRS := [
 
 var astar = AStar2D.new()
 
-const TILE_TYPE_CHANCES = 100000000
-const ARABLE_CHANCE = 0
-const FOREST_CHANCE = 0
-const STONE_CHANCE = 0
-
 var terrainOffset = null
 
-const FLAG_VERBOSE = false
+const FLAG_VERBOSE = true
 
 class tile:
 	var hex: Vector2i # (q, r)
@@ -61,21 +60,10 @@ class tile:
 	var biome: int = 0 # 0 is undefined biome
 	var objectsInside: Array = []
 	var queue: Array = []
-	var type: String = "NULL"
 	func _init(init_hex, _classification = 0):
 		self.hex = init_hex
 		self.classification = _classification
 		self.traversable = (classification == 0 || classification == 4 || classification==3) # Only traversable if empty or moving meeple
-	
-		var random = randi_range(0,TILE_TYPE_CHANCES)
-		if random == ARABLE_CHANCE:
-			self.type = "ARABLE"
-		elif random == FOREST_CHANCE:
-			self.type = "FOREST"
-		elif random == STONE_CHANCE:
-			self.type = "STONE"
-		else:
-			self.type = "BASIC_BITCH"
 
 
 func update_grid(hex: Vector2i, classification: int, objects: Array):
@@ -84,7 +72,7 @@ func update_grid(hex: Vector2i, classification: int, objects: Array):
 	tile_to_update.traversable = (classification==0 || classification==4 || classification==3)
 	tile_to_update.objectsInside = objects
 	astar.set_point_disabled(_hex_to_id(hex), !tile_to_update.traversable)
-	tile_to_update.hex_pf.get_node("Border").modulate = border_colours[tile_to_update.classification]
+	#tile_to_update.hex_pf.get_node("Border").modulate = border_colours[tile_to_update.classification]
 
 
 func axial_probe(coordinate: Vector2i):
@@ -296,30 +284,10 @@ func _ready():
 				continue
 			else:
 				if biomeGen.debuggingGrid == false:
-					if biomeGen.map[index.y][index.x] == 0:
-						new_hex = forestHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 1:
-						new_hex = tundraHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 2:
-						new_hex = waterHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 3:
-						new_hex = sandHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 4:
-						new_hex = rainforestHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 5:
-						new_hex = plainsHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 6:
-						new_hex = grasslandHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 7:
-						new_hex = stoneHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 8:
-						new_hex = ironHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 9:
-						new_hex = rubyHex_prefab.instantiate()
-					elif biomeGen.map[index.y][index.x] == 10:
-						new_hex = diamondHex_prefab.instantiate()
-					else:
-						print(biomeGen.map[index.y][index.x])
+					const def = Vector2i(0, 0)
+					black_border.set_cell(h.hex, 0, def)
+					white_border.set_cell(h.hex, 1, def)
+					interior.set_cell(h.hex, 2 + biomeGen.map[index.y][index.x], def)
 			if new_hex == null:
 				continue
 
@@ -333,20 +301,3 @@ func _ready():
 				h.traversable = false
 			h.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
 	update_astar()
-
-
-#if tileToCreate.type == "ARABLE":
-				#var instance = arable_land_prefab.instantiate()
-				## Set instance's data
-				#instance.global_position = axial_hex_to_coord(tileToCreate.hex)
-				#add_child(instance)
-			#elif tileToCreate.type == "FOREST":
-				#var instance = forest_prefab.instantiate()
-				## Set instance's data
-				#instance.global_position = axial_hex_to_coord(tileToCreate.hex)
-				#add_child(instance)
-			#elif tileToCreate.type == "STONE":
-				#var instance = stone_deposit_prefab.instantiate()
-				## Set instance's data
-				#instance.global_position = axial_hex_to_coord(tileToCreate.hex)
-				#add_child(instance)

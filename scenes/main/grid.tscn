@@ -5,18 +5,102 @@
 [ext_resource type="PackedScene" uid="uid://dg77d0mctts7" path="res://scenes/legacy/forest.tscn" id="3_gnlqp"]
 [ext_resource type="PackedScene" uid="uid://bey5vvkq0u1fp" path="res://scenes/legacy/stoneDeposit.tscn" id="4_jaoqn"]
 [ext_resource type="PackedScene" uid="uid://c55deqr6361v3" path="res://scenes/main/BiomeGen.tscn" id="5_726jt"]
-[ext_resource type="PackedScene" uid="uid://w5sjmbbv6a8b" path="res://scenes/prefabs/hexs/hex_prefab.tscn" id="5_jaoqn"]
-[ext_resource type="PackedScene" uid="uid://sb6uk17uy178" path="res://scenes/prefabs/hexs/forest_hex.tscn" id="7_8kere"]
-[ext_resource type="PackedScene" uid="uid://b0wt475ct167j" path="res://scenes/prefabs/hexs/water_hex.tscn" id="8_awic7"]
-[ext_resource type="PackedScene" uid="uid://bp5yb3vufyjyu" path="res://scenes/prefabs/hexs/tundra_hex.tscn" id="9_37306"]
-[ext_resource type="PackedScene" uid="uid://cb277dnckgs4w" path="res://scenes/prefabs/hexs/sand_hex.tscn" id="10_f7i2a"]
-[ext_resource type="PackedScene" uid="uid://bhlvtw4s8cmd5" path="res://scenes/prefabs/hexs/rainforest_hex.tscn" id="11_8ulmy"]
-[ext_resource type="PackedScene" uid="uid://bcbvc55ld6n5c" path="res://scenes/prefabs/hexs/grassland_hex.tscn" id="12_wqld8"]
-[ext_resource type="PackedScene" uid="uid://bt878poxkdcfw" path="res://scenes/prefabs/hexs/plains_hex.tscn" id="13_idg7c"]
-[ext_resource type="PackedScene" uid="uid://bkcddsyke5dko" path="res://scenes/prefabs/hexs/diamond_hex.tscn" id="14_37306"]
-[ext_resource type="PackedScene" uid="uid://bsfbxr4p83kd2" path="res://scenes/prefabs/hexs/iron_hex.tscn" id="15_8ulmy"]
-[ext_resource type="PackedScene" uid="uid://dqw3pwnw258w8" path="res://scenes/prefabs/hexs/stone_hex.tscn" id="16_wqld8"]
-[ext_resource type="PackedScene" uid="uid://clc1r1k5rss53" path="res://scenes/prefabs/hexs/ruby_hex.tscn" id="17_idg7c"]
+[ext_resource type="Texture2D" uid="uid://tnx1nxxeor7u" path="res://assets/hexs/blank_hex.png" id="18_y70s5"]
+[ext_resource type="Texture2D" uid="uid://bvhu0tpupfs78" path="res://assets/hexs/diamond_hex_interior.png" id="19_y70s5"]
+[ext_resource type="Texture2D" uid="uid://cjwb8fy24nc8f" path="res://assets/hexs/forest_hex_interior.png" id="20_l1a7h"]
+[ext_resource type="Texture2D" uid="uid://dekg4hcd2tvrr" path="res://assets/hexs/grassland_hex_interior.png" id="21_pjfk4"]
+[ext_resource type="Texture2D" uid="uid://cl8fjj1hs4ray" path="res://assets/hexs/iron_hex_interior.png" id="22_y4vhc"]
+[ext_resource type="Texture2D" uid="uid://desbknqnemoj0" path="res://assets/hexs/plains_hex_interior.png" id="23_bf0rv"]
+[ext_resource type="Texture2D" uid="uid://dmr48nf3l6evw" path="res://assets/hexs/rainforest_hex_interior.png" id="24_o2v3b"]
+[ext_resource type="Texture2D" uid="uid://cnpl31x4tksg0" path="res://assets/hexs/ruby_hex_interior.png" id="25_k5oc8"]
+[ext_resource type="Texture2D" uid="uid://ctq55t37jhlra" path="res://assets/hexs/hex_border.png" id="25_o6h7g"]
+[ext_resource type="Texture2D" uid="uid://sdqvwe7m1tkc" path="res://assets/hexs/sand_hex_interior.png" id="26_o6h7g"]
+[ext_resource type="Texture2D" uid="uid://iinav4cxlugm" path="res://assets/hexs/stone_hex_interior.png" id="27_j85fq"]
+[ext_resource type="Texture2D" uid="uid://civ6draq5br5i" path="res://assets/hexs/tundra_hex_interior.png" id="28_0aro0"]
+[ext_resource type="Texture2D" uid="uid://cx6hu53ds1pxu" path="res://assets/hexs/water_hex_interior.png" id="29_rbj6h"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ial4f"]
+texture = ExtResource("18_y70s5")
+texture_region_size = Vector2i(109, 126)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x1h4u"]
+texture = ExtResource("25_o6h7g")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x67q5"]
+texture = ExtResource("22_y4vhc")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_f5u3n"]
+texture = ExtResource("25_k5oc8")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uje54"]
+texture = ExtResource("19_y70s5")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_32yh6"]
+texture = ExtResource("20_l1a7h")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uikrf"]
+texture = ExtResource("28_0aro0")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4ayuh"]
+texture = ExtResource("29_rbj6h")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7bomv"]
+texture = ExtResource("26_o6h7g")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tv2ky"]
+texture = ExtResource("24_o2v3b")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_a3lmw"]
+texture = ExtResource("23_bf0rv")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_issi6"]
+texture = ExtResource("21_pjfk4")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d20d3"]
+texture = ExtResource("27_j85fq")
+texture_region_size = Vector2i(111, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_gd4e4"]
+tile_shape = 3
+tile_layout = 2
+tile_size = Vector2i(111, 128)
+sources/0 = SubResource("TileSetAtlasSource_ial4f")
+sources/1 = SubResource("TileSetAtlasSource_x1h4u")
+sources/2 = SubResource("TileSetAtlasSource_32yh6")
+sources/3 = SubResource("TileSetAtlasSource_uikrf")
+sources/4 = SubResource("TileSetAtlasSource_4ayuh")
+sources/5 = SubResource("TileSetAtlasSource_7bomv")
+sources/6 = SubResource("TileSetAtlasSource_tv2ky")
+sources/7 = SubResource("TileSetAtlasSource_a3lmw")
+sources/8 = SubResource("TileSetAtlasSource_issi6")
+sources/9 = SubResource("TileSetAtlasSource_d20d3")
+sources/10 = SubResource("TileSetAtlasSource_x67q5")
+sources/11 = SubResource("TileSetAtlasSource_f5u3n")
+sources/12 = SubResource("TileSetAtlasSource_uje54")
 
 [node name="Grid" type="Node2D" unique_id=1852769152]
 script = ExtResource("1_t5fjg")
@@ -24,15 +108,15 @@ arable_land_prefab = ExtResource("2_w88cy")
 forest_prefab = ExtResource("3_gnlqp")
 stone_deposit_prefab = ExtResource("4_jaoqn")
 biomeGenScene = ExtResource("5_726jt")
-hex_prefab = ExtResource("5_jaoqn")
-forestHex_prefab = ExtResource("7_8kere")
-waterHex_prefab = ExtResource("8_awic7")
-tundraHex_prefab = ExtResource("9_37306")
-sandHex_prefab = ExtResource("10_f7i2a")
-rainforestHex_prefab = ExtResource("11_8ulmy")
-grasslandHex_prefab = ExtResource("12_wqld8")
-plainsHex_prefab = ExtResource("13_idg7c")
-diamondHex_prefab = ExtResource("14_37306")
-ironHex_prefab = ExtResource("15_8ulmy")
-stoneHex_prefab = ExtResource("16_wqld8")
-rubyHex_prefab = ExtResource("17_idg7c")
+
+[node name="Black Border" type="TileMapLayer" parent="." unique_id=843985072]
+position = Vector2(-55, -64)
+tile_set = SubResource("TileSet_gd4e4")
+
+[node name="White Border" type="TileMapLayer" parent="." unique_id=1825089729]
+position = Vector2(-55, -64)
+tile_set = SubResource("TileSet_gd4e4")
+
+[node name="Interior" type="TileMapLayer" parent="." unique_id=1702281265]
+position = Vector2(-55, -64)
+tile_set = SubResource("TileSet_gd4e4")

@@ -5,5 +5,5 @@
 [node name="HexPrefab" type="Node2D" unique_id=811786069]
 
 [node name="Border" type="Sprite2D" parent="." unique_id=1367156687]
-visible = false
+z_index = 14
 texture = ExtResource("2_oli5t")

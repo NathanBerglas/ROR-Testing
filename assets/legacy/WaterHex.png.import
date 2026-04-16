@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ensnolavh0l5"
-path="res://.godot/imported/ForestHex.png-123a81b90be969b86680096cc51fa224.ctex"
+uid="uid://bnfd1151d46u7"
+path="res://.godot/imported/WaterHex.png-d5290f7b3349faf401ccebe4497f3c43.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/hexs/ForestHex.png"
-dest_files=["res://.godot/imported/ForestHex.png-123a81b90be969b86680096cc51fa224.ctex"]
+source_file="res://assets/legacy/WaterHex.png"
+dest_files=["res://.godot/imported/WaterHex.png-d5290f7b3349faf401ccebe4497f3c43.ctex"]
 
 [params]
 

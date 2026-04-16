@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cpxs6lhto1qs0"
-path="res://.godot/imported/rainForestHex.png-70b0894f26fdc1aad9cf434750c581d2.ctex"
+uid="uid://dekg4hcd2tvrr"
+path="res://.godot/imported/grassland_hex_interior.png-d2c19c340afe95526925403ca85a5c1b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/hexs/rainForestHex.png"
-dest_files=["res://.godot/imported/rainForestHex.png-70b0894f26fdc1aad9cf434750c581d2.ctex"]
+source_file="res://assets/hexs/grassland_hex_interior.png"
+dest_files=["res://.godot/imported/grassland_hex_interior.png-d2c19c340afe95526925403ca85a5c1b.ctex"]
 
 [params]
 

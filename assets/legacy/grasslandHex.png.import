@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://daaehoaetm3qq"
-path="res://.godot/imported/plainsHex.png-103d71089d5b80b77179375302fcf6ee.ctex"
+uid="uid://dyq1ly5s3jdy"
+path="res://.godot/imported/grasslandHex.png-e0f101a37e2a01944fd4f272707129c9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/hexs/plainsHex.png"
-dest_files=["res://.godot/imported/plainsHex.png-103d71089d5b80b77179375302fcf6ee.ctex"]
+source_file="res://assets/legacy/grasslandHex.png"
+dest_files=["res://.godot/imported/grasslandHex.png-e0f101a37e2a01944fd4f272707129c9.ctex"]
 
 [params]
 

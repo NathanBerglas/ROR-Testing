@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dl8csxcl67htg"
-path="res://.godot/imported/sandHex.png-48942735acd442c2159d10606dae115d.ctex"
+uid="uid://cpxs6lhto1qs0"
+path="res://.godot/imported/rainForestHex.png-b8fccd3d30665a44e86b1be6335d4a02.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/hexs/sandHex.png"
-dest_files=["res://.godot/imported/sandHex.png-48942735acd442c2159d10606dae115d.ctex"]
+source_file="res://assets/legacy/rainForestHex.png"
+dest_files=["res://.godot/imported/rainForestHex.png-b8fccd3d30665a44e86b1be6335d4a02.ctex"]
 
 [params]
 
