@@ -97,7 +97,7 @@ func _hex_in_bounds(hex: Vector2i) -> bool:
 # Takes the coordinates, ie. pixel position on map and coverts it to a hex position, ie. (q, r)
 func coord_to_axial_hex(coordinate: Vector2):
 	var q: int = int(round((1 / SQRT_3  * coordinate.x - 1.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE))
-	var r: int = int(round((2.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE))
+	var r: int = int(round((2.0 / 3.0 * coordinate.y) / HEX_SIZE))
 	if _hex_in_bounds(Vector2i(q, r)):
 		return _hex_round(Vector2(q, r))
 	else:
@@ -106,7 +106,7 @@ func coord_to_axial_hex(coordinate: Vector2):
 
 func axial_hex_to_coord(hex: Vector2i):
 	var x: float = HEX_SIZE * SQRT_3 * (hex.x + hex.y * 0.5)
-	var y: float = HEX_SIZE * (SQRT_3 * SQRT_3) / 2 * hex.y
+	var y: float = HEX_SIZE * 3.0 / 2 * hex.y
 	return Vector2(x, y)
 
 	
@@ -277,7 +277,36 @@ func _ready():
 					tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
 			row.append(tileToCreate)
 		grid.append(row)
-
-			
-			
 	update_astar()
+
+
+func _process(_delta):
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		draw_debug_square()
+
+
+var debug_points = []
+func draw_debug_square():
+	var mouse_pos = get_global_mouse_position()
+	var center = Vector2i(mouse_pos)
+	const square_radius = 100
+	for x in range(center.x - square_radius, center.x + square_radius):
+		for y in range(center.y - square_radius, center.y + square_radius):
+			var pos = Vector2(x, y)
+			var color = color_from_cell(coord_to_axial_hex(pos))
+			debug_points.append({ "pos": pos, "color": color })
+	queue_redraw()
+
+
+func color_from_cell(cell: Vector2i) -> Color:
+	var hash = int(cell.x) * 73856093 ^ int(cell.y) * 19349663
+	# Extract pseudo-random RGB from hash
+	var r = float((hash >> 16) & 0xFF) / 255.0
+	var g = float((hash >> 8) & 0xFF) / 255.0
+	var b = float(hash & 0xFF) / 255.0
+	return Color(r, g, b, 1)  # 50% opacity
+
+
+func _draw():
+	for point in debug_points:
+		draw_rect(Rect2(point.pos, Vector2(1, 1)), point.color)

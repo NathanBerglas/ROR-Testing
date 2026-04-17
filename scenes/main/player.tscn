@@ -10,6 +10,8 @@
 script = ExtResource("1_qlg0r")
 
 [node name="Grid" parent="." unique_id=1554468060 node_paths=PackedStringArray("meeple_control") instance=ExtResource("2_tuyoq")]
+z_index = 999
+z_as_relative = false
 meeple_control = NodePath("../MeepleControl")
 
 [node name="BuildingControl" parent="." unique_id=1989412738 instance=ExtResource("3_fjrip")]
