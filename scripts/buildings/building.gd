@@ -14,7 +14,7 @@ var type = ""
 var pos = null
 var BUILDING_UNIQUE_ID = 0
 var controller = null
-
+var superType = "Building"
 
 func set_size(size):
 	self.scale = Vector2i(1, 1) * size

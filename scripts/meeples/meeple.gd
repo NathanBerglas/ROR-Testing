@@ -32,7 +32,7 @@ var groupNum = 0
 var min_distance = 9 # Squared
 var HP = 1
 var type = "Meeple"
-
+var superType = "Building"
 
 func _ready():
 	label.text = str(HP)

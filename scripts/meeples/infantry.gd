@@ -17,8 +17,18 @@ func _process(delta): #runs on each meeple every tick
 			if inAttackRange(attackTarget.path[0]):
 				attack(attackTarget, delta)
 		else:
-			if inAttackRange(attackTarget.pos):
-				attack(attackTarget, delta)
+			if attackTarget.superType == "Building":
+				var in_range = false
+				if inAttackRange(attackTarget.pos):
+					in_range = true
+				for h in attackTarget.HEX_SHAPE:
+					if inAttackRange(attackTarget.pos + h):
+						in_range = true
+				if in_range:
+					attack(attackTarget, delta)
+			else:
+				if inAttackRange(attackTarget.pos):
+					attack(attackTarget, delta)
 	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
 		#_go_to_target(delta)
 	

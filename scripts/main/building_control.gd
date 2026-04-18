@@ -515,6 +515,8 @@ func finishDragging(buildingName):
 	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2, [buildings[buildings.size() - 1]])
 	for h in buildings[buildings.size() - 1].HEX_SHAPE:
 		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()) + h, 2, [buildings[buildings.size() - 1]])
+	
+	
 	return true
 
 

@@ -158,8 +158,10 @@ func _process(delta): #Runs every tick
 					
 					# TODO Set the target of the attack to be whatever attacking location is closest to meeple, so
 					# meeple can get in range of the edge of a multihex building
+					print(grid.axial_probe(attackLoc).objectsInside)
 					m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
 					if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " attacking: ", m.attackTarget)
+					
 					if !m.inAttackRange(attackLoc):
 						m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
 					#m.path = []
