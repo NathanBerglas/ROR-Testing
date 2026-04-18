@@ -149,6 +149,5 @@ position = Vector2(-55, -64)
 tile_set = SubResource("TileSet_gd4e4")
 
 [node name="Interior" type="TileMapLayer" parent="." unique_id=1702281265]
-visible = false
 position = Vector2(-55, -64)
 tile_set = SubResource("TileSet_gd4e4")
