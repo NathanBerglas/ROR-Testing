@@ -109,11 +109,11 @@ func _ready() -> void:
 		if data[4][i] == 3:
 			resourceExtents.append([data[2][i], resource_index[i - biome_index.size()], data[3][i],  data[9][i], data[1][i]])
 	
-	var pointsList = _generate_points(coverTerrainExtents, resourceExtents)
+	#var pointsList = _generate_points(coverTerrainExtents, resourceExtents)
 	
-	var coverTerrainPointsList = pointsList[0]
-	var resourcePointsList = pointsList[1]
-	map = _generate_mesh(baseTerrain, coverTerrainPointsList, resourcePointsList)
+	#var coverTerrainPointsList = pointsList[0]
+	#var resourcePointsList = pointsList[1]
+	#map = _generate_mesh(baseTerrain, coverTerrainPointsList, resourcePointsList)
 	
 	if FLAG_VERBOSE: print("working?")
 	ellapsed = Time.get_ticks_msec() - previous_time

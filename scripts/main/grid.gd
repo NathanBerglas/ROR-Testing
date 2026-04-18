@@ -96,8 +96,30 @@ func _hex_in_bounds(hex: Vector2i) -> bool:
 
 # Takes the coordinates, ie. pixel position on map and coverts it to a hex position, ie. (q, r)
 func coord_to_axial_hex(coordinate: Vector2):
-	var q: int = int(round((1 / SQRT_3  * coordinate.x - 1.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE))
-	var r: int = int(round((2.0 / 3.0 * coordinate.y) / HEX_SIZE))
+	const HEX_WIDTH = 111.0
+	const HEX_HEIGHT = 128.0
+	#var q: int = int(round((1 / SQRT_3  * coordinate.x - 1.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE))
+	#var r: int = int(round((2.0 / 3.0 * coordinate.y) / HEX_SIZE))
+	var x = int(round(coordinate.x / HEX_WIDTH * 2.0 + 0.5)) % 2
+	var y = int(round(coordinate.y / HEX_HEIGHT * 2 / SQRT_3 / SQRT_3 - 0.5)) % 2
+	var x_0 = int(coordinate.x + HEX_WIDTH) % int(round(HEX_WIDTH * 2.0))
+	var y_0 = int(coordinate.y) % int(HEX_HEIGHT * SQRT_3 * SQRT_3 / 2)
+	var y_offset = 0
+	var x_offset = 0
+	#if (y_0 - 32) < 64 + (111 / (64-32)) * x_0:
+	#	y_offset = 15 
+	if (x_0^2 + y_0^2) < 32:
+		y_offset = 3
+	#var y_0 = round((int(round(coordinate.y)) % int(HEX_HEIGHT)) / HEX_HEIGHT * SQRT_3)
+	#if x_0 > SQRT_3:
+		#x_0 = 0
+	#elif x_0 SQRT_3:
+		#x_0 = 2
+	#else:
+		#x_0 = 1
+	var q = y + y_offset
+	var r = x + x_offset
+
 	if _hex_in_bounds(Vector2i(q, r)):
 		return _hex_round(Vector2(q, r))
 	else:
@@ -270,11 +292,14 @@ func _ready():
 						add_child(new_hex_debug)
 						black_border.set_cell(tileToCreate.hex, 0, def)
 						white_border.set_cell(tileToCreate.hex, 1, def)
-						interior.set_cell(tileToCreate.hex, 2 + biomeGen.map[index.y][index.x], def)
-					tileToCreate.biome = biomeGen.map[index.y][index.x]
-					if tileToCreate.biome == 2: #water
-						tileToCreate.traversable = false
-					tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
+						#interior.set_cell(tileToCreate.hex, 2 + biomeGen.map[index.y][index.x], def)
+					#tileToCreate.biome = biomeGen.map[index.y][index.x]
+					#if tileToCreate.biome == 2: #water
+					#	tileToCreate.traversable = false
+					#tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
+			else:
+				black_border.set_cell(tileToCreate.hex, 0, Vector2i(0, 0))
+				white_border.set_cell(tileToCreate.hex, 1, Vector2i(0, 0))
 			row.append(tileToCreate)
 		grid.append(row)
 	update_astar()
