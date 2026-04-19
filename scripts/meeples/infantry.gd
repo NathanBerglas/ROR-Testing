@@ -19,8 +19,6 @@ func _process(delta): #runs on each meeple every tick
 		else:
 			if attackTarget.superType == "Building":
 				var in_range = false
-				if inAttackRange(attackTarget.pos):
-					in_range = true
 				for h in attackTarget.HEX_SHAPE:
 					if inAttackRange(attackTarget.pos + h):
 						in_range = true

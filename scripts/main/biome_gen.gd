@@ -12,6 +12,7 @@ const debuggingGrid = false
 @export var BEACH_RESOLUTION: int = 10
 @export var PIXELS_PER_TILE: int = 10
 var MAP_RESOLUTION: Vector2i = Vector2i(1080, 580)
+var nexusSpawn = [(((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) / 5) + BORDER_RESOLUTION) * PIXELS_PER_TILE, ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) / 2 + BORDER_RESOLUTION) * PIXELS_PER_TILE]
 
 # Gen Data
 @export var gen_data: JSON
@@ -76,7 +77,7 @@ func _ready() -> void:
 	#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points, neighbour counts, point min Distance
 		
 	var data = get_data()
-	
+	nexusSpawn[0] += terrainOffset
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	GLOBAL_chunk_length = data[0] * 0.70711 # min_distance / sqrt(2)
@@ -108,6 +109,8 @@ func _ready() -> void:
 	for i in range(data[4].size()):
 		if data[4][i] == 3:
 			resourceExtents.append([data[2][i], resource_index[i - biome_index.size()], data[3][i],  data[9][i], data[1][i]])
+	
+	
 	
 	var pointsList = _generate_points(coverTerrainExtents, resourceExtents)
 	
@@ -278,32 +281,34 @@ func get_data() -> Array:
 			
 	for a in features.size():
 		if FLAG_VERBOSE: print("BEEP BOOP: SCALING: " + features[a])
+		
 		for area in spawn_area[a]:
+			if area is Array:
+				if FLAG_VERBOSE: print("PRE-SCALED SPAWN AREA FOR: " + features[a] + ": ")
+				if FLAG_VERBOSE: print(area[0][0])
+				if FLAG_VERBOSE: print(area[0][1])
+				if FLAG_VERBOSE: print(area[1][0])
+				if FLAG_VERBOSE: print(area[1][1])
+				
+				area[0][0] = int(area[0][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
+				area[0][1] = int(area[0][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
+				
+				area[1][0] = int(area[1][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
+				area[1][1] = int(area[1][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
+				
+				if FLAG_VERBOSE: print("SCALED SPAWN AREA FOR " + features[a] + ": ")
+				if FLAG_VERBOSE: print(area[0][0])
+				if FLAG_VERBOSE: print(area[0][1])
+				if FLAG_VERBOSE: print(area[1][0])
+				if FLAG_VERBOSE: print(area[1][1])
+				if FLAG_VERBOSE: print("")
 			
-			if FLAG_VERBOSE: print("PRE-SCALED SPAWN AREA FOR: " + features[a] + ": ")
-			if FLAG_VERBOSE: print(area[0][0])
-			if FLAG_VERBOSE: print(area[0][1])
-			if FLAG_VERBOSE: print(area[1][0])
-			if FLAG_VERBOSE: print(area[1][1])
-			
-			area[0][0] = int(area[0][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
-			area[0][1] = int(area[0][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
-			
-			area[1][0] = int(area[1][0] * scalingFactor.x) + BORDER_RESOLUTION * PIXELS_PER_TILE
-			area[1][1] = int(area[1][1] * scalingFactor.y) + BORDER_RESOLUTION * PIXELS_PER_TILE
-			
-			if FLAG_VERBOSE: print("SCALED SPAWN AREA FOR " + features[a] + ": ")
-			if FLAG_VERBOSE: print(area[0][0])
-			if FLAG_VERBOSE: print(area[0][1])
-			if FLAG_VERBOSE: print(area[1][0])
-			if FLAG_VERBOSE: print(area[1][1])
-			if FLAG_VERBOSE: print("")
-	
 	if FLAG_VERBOSE: print("DONE SCALING")
 	#Calculate number of features
 	var number_of_features = 0
 	for f in features.size():
-		number_of_features += occurences[f]
+		if occurences[f] != null:
+			number_of_features += occurences[f]
 	#if FLAG_VERBOSE: print(number_of_features)
 	var arrayToReturn = [sqrt((((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE) * ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) * PIXELS_PER_TILE)) / (number_of_features * PI * sphere_packing_constant)), features, spawn_area, occurences, layers, roughness, radius, num_points, neighbourCounts, minDistances]
 	# Return min_distance, features, spawn_area, occurences, roughness, radius, num_points
@@ -358,6 +363,7 @@ func _generate_points(coverTerrain, resources) -> Array:
 					var offset = Vector2i(randi_range(-1 * radius, radius),  randi_range(-1 * radius, radius))
 					var blob = generate_blob(center + offset, radius, type[5], type[3])
 					if type[1] == 0:
+						
 						waterAreas.append(blob)
 					coverTerrainPointsList.append([type[6], type[1], blob])
 	

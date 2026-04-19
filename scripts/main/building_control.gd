@@ -43,6 +43,7 @@ extends Node2D
 @onready var closeResourceBuilding = $resourceBuildingHud/ScrollContainer/VBoxContainer/closeResourceMenu
 @onready var resourceBuildingLabel = $buildingHud/resourceBuildingLabel
 
+
 #IDK why this is here
 @onready var selection_box = $ColorRect
 
@@ -50,7 +51,8 @@ extends Node2D
 @onready var RCLICK_ResourceHub = $RclickMenuResourceHub
 @onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
 
-
+@export var nexus_prefab: PackedScene
+var nexusSpawn = null
 #Players Money
 var food = 10000
 var wood = 10000
@@ -127,7 +129,8 @@ func _ready(): #Runs on start, connects buttons
 	combatButtons.append([wallCornerButton, wallCornerLabel])
 	combatButtons.append([turretButton, turretLabel])
 	RCLICK_ResourceHub.visible = false
-
+	
+	
 	#print(playerID)
 	
 
@@ -532,3 +535,37 @@ func finishDragging(buildingName):
 	var result = space_state.intersect_shape(query)
 	return result.is_empty()  # True = no collision, so placeable
 """
+
+func spawnNexus():
+	nexusSpawn = grid.biomeGen.nexusSpawn
+	var instance = nexus_prefab.instantiate()
+	
+	var vectorNexusSpawn = Vector2(nexusSpawn[0], nexusSpawn[1])
+	
+	instance.fake = true
+	instance.type = "Nexus"
+	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
+	#var toAdd = ["Farm", get_global_mouse_position(), instance]
+	instance.BUILDING_UNIQUE_ID = buildingIDTracker
+	buildingIDTracker += 1
+	instance.controller = self
+	instance.global_position = vectorNexusSpawn
+	add_child(instance) #Adding the instance
+	buildings.push_back(instance)
+	print(vectorNexusSpawn)
+	#If not placeable, REMOVED
+	while !is_placeable(buildings[buildings.size() - 1]):
+		var tempPlace = instance.get_global_position()
+		tempPlace.x += grid.HEX_WIDTH
+		tempPlace.y += grid.HEX_HEIGHT
+		instance.set_global_position(tempPlace)
+	print(instance.get_global_position())
+	print(grid.coord_to_axial_hex(instance.get_global_position()))
+	buildings[buildings.size() - 1].fake = false
+	buildings[buildings.size() - 1].global_position = grid.hex_center(instance.get_global_position())
+	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(instance.get_global_position())
+	
+	
+	
+	for h in buildings[buildings.size() - 1].HEX_SHAPE:
+		grid.update_grid(grid.coord_to_axial_hex(instance.get_global_position()) + h, 2, [buildings[buildings.size() - 1]])

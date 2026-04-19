@@ -12,6 +12,7 @@ var time_since_last_attack = 0
 var size = 0.9
 const HEX_SHAPE := [
 	Vector2i(0, 1),
+	Vector2i(0, 0),
 	Vector2i(-1, 1)]
 
 

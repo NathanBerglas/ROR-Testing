@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://b2jmavmsncpfu" path="res://assets/menus/combatBuildingMenuButton.png" id="8_rj1gy"]
 [ext_resource type="Texture2D" uid="uid://bmjqv3d2068k3" path="res://assets/buildings/lumberJacks.png" id="8_w1qyp"]
 [ext_resource type="PackedScene" uid="uid://dh3llecy2aj26" path="res://scenes/prefabs/buildings/combat_buildings/turret.tscn" id="9_k0c8h"]
+[ext_resource type="PackedScene" uid="uid://dqjl8bsde3lkv" path="res://scenes/prefabs/buildings/Nexus.tscn" id="10_v74i5"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="11_cq801"]
 [ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/buildings/WallCorner.png" id="16_t6ejh"]
 [ext_resource type="Texture2D" uid="uid://duhlw8ydi84fg" path="res://assets/buildings/turrent.png" id="19_2hoj7"]
@@ -36,6 +37,7 @@ barracks_prefab = ExtResource("3_fbp8a")
 wallCorner_prefab = ExtResource("7_t6ejh")
 wallSegment_prefab = ExtResource("8_hlxnr")
 turret_prefab = ExtResource("9_k0c8h")
+nexus_prefab = ExtResource("10_v74i5")
 
 [node name="buildingHud" type="CanvasLayer" parent="." unique_id=815674145]
 script = ExtResource("2_oj14w")

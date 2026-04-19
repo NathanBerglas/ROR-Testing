@@ -13,10 +13,12 @@ func _ready() -> void:
 	$BuildingControl.teammates.push_back($MeepleControl)
 	$MeepleControl.grid = $Grid
 	$BuildingControl.grid = $Grid
+	$BuildingControl.nexusSpawn = $Grid.biomeGen.nexusSpawn
 	
 	$MeepleControl.set_z_index(MEEPLE_Z_INDEX)
 	$BuildingControl.set_z_index(BUILDING_Z_INDEX)
 	$BuildingControl/buildingHud.visible = true
+	$BuildingControl.spawnNexus()
  
 
 #func _process(_delta): #Runs every tick

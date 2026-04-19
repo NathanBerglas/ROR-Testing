@@ -7,6 +7,7 @@ var spawnTimer = 0 #Tracking when to give troops
 
 var size = 1
 const HEX_SHAPE := [
+	Vector2i(0, 0),
 	Vector2i(1, 0),
 	Vector2i(1, -1),
 	Vector2i(0, -1),

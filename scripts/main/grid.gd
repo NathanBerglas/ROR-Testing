@@ -271,10 +271,10 @@ func _ready():
 						black_border.set_cell(tileToCreate.hex, 0, def)
 						white_border.set_cell(tileToCreate.hex, 1, def)
 						interior.set_cell(tileToCreate.hex, 2 + biomeGen.map[index.y][index.x], def)
-					#tileToCreate.biome = biomeGen.map[index.y][index.x]
-					#if tileToCreate.biome == 2: #water
-					#	tileToCreate.traversable = false
-					#tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
+					tileToCreate.biome = biomeGen.map[index.y][index.x]
+					if tileToCreate.biome == 2: #water
+						tileToCreate.traversable = false
+					tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
 			row.append(tileToCreate)
 		grid.append(row)
 	update_astar()

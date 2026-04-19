@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://dqjl8bsde3lkv"]
+
+[ext_resource type="Script" uid="uid://m1ww8sb5uhu8" path="res://scripts/buildings/nexus.gd" id="1_csaqb"]
+[ext_resource type="Texture2D" uid="uid://3rmujlbnqpcu" path="res://assets/buildings/nexus.png" id="2_csaqb"]
+
+[node name="nexus" type="Node2D" unique_id=1057711618]
+script = ExtResource("1_csaqb")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_csaqb")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=991196017]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+max_value = 1000.0
+show_percentage = false

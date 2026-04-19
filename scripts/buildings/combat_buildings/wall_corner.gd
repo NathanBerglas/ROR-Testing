@@ -7,7 +7,9 @@ extends Building
 var segments = []
 
 var size = 0.8
-const HEX_SHAPE := []
+const HEX_SHAPE := [
+	Vector2i(0, 0),
+]
 
 func _ready():
 	set_size(size)
