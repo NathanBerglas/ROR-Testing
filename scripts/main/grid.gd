@@ -1,4 +1,6 @@
 extends Node2D
+const FLAG_VERBOSE = true
+
 
 # Grid constants
 @export var HEX_SIZE: float = 64
@@ -35,7 +37,6 @@ var astar = AStar2D.new()
 
 var terrainOffset = null
 
-const FLAG_VERBOSE = false
 
 class tile:
 	var hex: Vector2i # (q, r)
@@ -191,11 +192,6 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 	var decision_made = false
 	var ingressing_tile = grid[ingressing_hex.x][ingressing_hex.y]
 	if len(ingressing_tile.queue) > 0:
-		#ingressing_tile.queue.push_back(meeple_requesting)
-		#meeple_requesting.inqueue = true
-		#if FLAG_VERBOSE: print("Adding another meeple, ", meeple_requesting.UNIQUEID, " to the queue on hex ", ingressing_tile.hex)
-		#decision = "PENDING"
-		#decision_made = true
 		decision = "REDIRECTED"
 		decision_made = true
 	elif ingressing_tile.classification == 0:
@@ -209,7 +205,7 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
 	if !decision_made:
 		var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
-		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]):
+		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]) and meeple_requesting.type == "Infantry":
 			meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
 			#update_grid(ingressing_hex, 3, [meeple_requesting] + ingressing_tile.objectsInside)
 			decision = "APPROVED"

@@ -515,10 +515,12 @@ func finishDragging(buildingName):
 	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(get_global_mouse_position())
 	
 	
+	
 	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2, [buildings[buildings.size() - 1]])
 	for h in buildings[buildings.size() - 1].HEX_SHAPE:
 		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()) + h, 2, [buildings[buildings.size() - 1]])
-	
+	if buildingName == "ResourceHub":
+		buildings[buildings.size() - 1].meepleDocPos = grid.coord_to_axial_hex(get_global_mouse_position()) + Vector2i(1,0)
 	
 	return true
 
@@ -552,15 +554,15 @@ func spawnNexus():
 	instance.global_position = vectorNexusSpawn
 	add_child(instance) #Adding the instance
 	buildings.push_back(instance)
-	print(vectorNexusSpawn)
+	#print(vectorNexusSpawn)
 	#If not placeable, REMOVED
 	while !is_placeable(buildings[buildings.size() - 1]):
 		var tempPlace = instance.get_global_position()
 		tempPlace.x += grid.HEX_WIDTH
 		tempPlace.y += grid.HEX_HEIGHT
 		instance.set_global_position(tempPlace)
-	print(instance.get_global_position())
-	print(grid.coord_to_axial_hex(instance.get_global_position()))
+	#print(instance.get_global_position())
+	#print(grid.coord_to_axial_hex(instance.get_global_position()))
 	buildings[buildings.size() - 1].fake = false
 	buildings[buildings.size() - 1].global_position = grid.hex_center(instance.get_global_position())
 	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(instance.get_global_position())

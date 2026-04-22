@@ -1,5 +1,8 @@
 extends Building
 
+
+const FLAG_VERBOSE = false
+
 @onready var shapey = $Sprite2D
 @onready var HPBar = $HP_BAR
 
@@ -15,7 +18,9 @@ extends Building
 @export var caravan: PackedScene
 
 const CARAVAN_WAIT_TIMER = 2
-
+const MAX_CARAVAN_STOPS = 3
+const CARAVAN_TICKS_PER_SECOND = 60
+var time_since_last_caravan_tick = 0
 
 var manageCaravanButtonIDTracker = 1
 var routeNumTracker = 1
@@ -31,16 +36,15 @@ var routeManaging = 0
 
 
 var size = 1
-const HEX_SHAPE := [
+const HEX_SHAPE := [ #Vector2i(1, 0) for meeple dock
 	Vector2i(0, 0),
-	Vector2i(1, 0),
+	Vector2i(-1, 0),
 	Vector2i(1, -1),
 	Vector2i(0, -1),
-	Vector2i(-1, 0),
 	Vector2i(-1, 1),
 	Vector2i(0, 1),
 ]
-	
+var meepleDocPos = null
 	
 func _ready():
 	newCaravanButton.button_down.connect(_on_newCaravan_button_pressed)
@@ -57,42 +61,65 @@ func _ready():
 	set_size(size)
 
 func _process(delta):
+	time_since_last_caravan_tick += delta
+	#if playerID == multiplayer.get_unique_id():
+	if time_since_last_caravan_tick > (1.0 / CARAVAN_TICKS_PER_SECOND):
+		caravan_process(time_since_last_caravan_tick)
+		time_since_last_caravan_tick = 0
 	if Input.is_action_just_pressed("right_click_menu"):
 		if managingCaravanMenu.visible == true:
 			_on_finishManaging_button_released()
 		manageCaravanMenu.visible = false
 		managingCaravanMenu.visible = false
-	if Input.is_action_just_pressed("select"):
+	if Input.is_action_just_pressed("select"): #Managing a route -> Make a new target
 		if routeManaging != 0 and controller.grid.coord_to_axial_hex(get_global_mouse_position()) != controller.grid.coord_to_axial_hex(self.get_global_position()):
-			if tempRoute.size() < 3:
+			if tempRoute.size() < 3 and controller.grid.hex_center(get_global_mouse_position()) not in tempRoute:
+				
 				tempRoute.append(controller.grid.hex_center(get_global_mouse_position()))
 				var instance = caravanTarget.instantiate()
 				add_child(instance)
 				instance.label.text = str(tempRoute.size())
 				instance.set_global_position(controller.grid.hex_center(get_global_mouse_position()))
 				tempTargets.append(instance)
+				
 	
-	for r in managedRoutes:
+	for r in managedRoutes: #Timing to send caravans out
 		if r[0][0] != -1:
+			print("Time Time, thats the sound of the time")
 			r[0][0] += delta
-			print(r[0])
+			#print(r[0])
 			if r[0][0] > CARAVAN_WAIT_TIMER:
 				r[0][0] = -1
 				sendCaravan(r, r[0][1])
 
 		
 	for c in managedCaravans: #When Caravans return home
-		if c.path == null or c.path.size() == 0:
-			
+		if c.returned:
 			if c.routeRemoved == false:
-				for r in managedRoutes:
-					
-					
+				for r in managedRoutes:	
 					if r[0][1] == c.UNIQUEID:
 						r[0][0] = 0
-
 			freeCaravan(c.UNIQUEID)
 			
+func _physics_process(delta: float) -> void:
+	for c in managedCaravans:
+		if !c.shouldBeMoving:
+			continue
+		var next_hex: Vector2 = controller.grid.axial_hex_to_coord(c.path[1])
+		var dir_to_next_hex = (next_hex - c.global_position) / (next_hex - c.global_position).length()
+		var speed = 2 * c.speed / (controller.grid.grid[c.path[0].x][c.path[0].y].traversal_difficulty + controller.grid.grid[c.path[1].x][c.path[1].y].traversal_difficulty)
+		if (next_hex - c.global_position).length() >= c.speed * delta: # Not yet arrived
+
+			c.global_position += dir_to_next_hex * speed * delta
+		else: # Just entered the hex
+			c.pause_a_tick = true
+			c.global_position = next_hex
+			var next_hex_tile = controller.grid.axial_probe(c.path[1])
+			controller.grid.update_grid(c.path[1], 3, [c])
+			c.path.pop_front()
+			#if FLAG_VERBOSE: print("Meeple ", c.UNIQUEID, " has stopped moving at position ", c.global_position, " in hex: ", next_hex)
+			c.shouldBeMoving = false
+
 
 func _on_newCaravan_button_pressed():
 	if manageCaravanMenu.visible == false:
@@ -138,9 +165,11 @@ func _on_finishManaging_button_released():
 		for r in managedRoutes:
 			if r[0][1] == routeManaging:
 				tempArray.append([r[0][0], routeManaging])
-				
+	
+	var tempTempArray = []
 	for v in tempRoute:
-		tempArray.append(v)
+		tempTempArray.append(v)
+	tempArray.append(tempTempArray)
 	if routeManaging > managedRoutes.size():
 		managedRoutes.append(tempArray)
 	else:
@@ -153,8 +182,7 @@ func _on_finishManaging_button_released():
 		tempTargets.pop_at(i).queue_free()
 	
 	routeManaging = 0
-
-
+	
 func _on_removeRoute_button_pressed():
 	return
 	
@@ -210,26 +238,83 @@ func manageCaravan(id):
 	
 func sendCaravan(route, routeID):
 	var instance = caravan.instantiate()
-	var tempPath = []
 	
-	var i = 1
-	while i < route.size():
-		tempPath.append(route[i])
-		i += 1
+	var meepleDocPos = controller.grid.coord_to_axial_hex(self.get_global_position()) + Vector2i(1,0)
 	
-	tempPath.append(self.get_global_position())
 	
-	instance.path = tempPath
+	
+	instance.queued_path = controller.grid.find_path(meepleDocPos, controller.grid.coord_to_axial_hex(route[1][0]), false, false) #To first locations
 	instance.UNIQUEID = routeID
+	controller.grid.update_grid(meepleDocPos, 3, [instance])
 	add_child(instance)
+	instance.set_global_position(controller.grid.axial_hex_to_coord(meepleDocPos))
+	instance.route = route
+	instance.path = [meepleDocPos]
+	instance.totalStops = route[1].size()
+	instance.stop = 0
 	managedCaravans.append(instance)
-
-func freeCaravan(caravanID):
+	
+func freeCaravan(caravanID): 
 	var i = 0
 	while i < managedCaravans.size():
 		if managedCaravans[i].UNIQUEID == caravanID:
 			managedCaravans.pop_at(i).queue_free()
+			return
 		i += 1
+
+func caravan_process(delta):
+	for c in managedCaravans:
+		if c.atStop:
+			
+			c.stopTimer += delta
+			
+			if c.stopTimer >= c.MAX_STOP_TIMER:
+				
+				c.atStop = false
+				c.stopTimer = 0
+				c.stop += 1
+				if c.stop < c.totalStops:
+					c.queued_path = controller.grid.find_path(c.path[0], controller.grid.coord_to_axial_hex(c.route[1][c.stop]), false, false) 
+				else:
+					c.queued_path = controller.grid.find_path(c.path[0], meepleDocPos, false, false) 
+		if c.pause_a_tick:
+			c.pause_a_tick = false
+			
+			continue
+		if (c.shouldBeMoving || c.waiting):
+			
+			continue
+		if not c.queued_path.is_empty():
+			
+			
+			c.path = controller.grid.find_path(c.path[0], c.queued_path[c.queued_path.size() - 1], false, false)
+			#c.path = c.queued_path#.slice(1) # Remove first hex in queued path
+			c.queued_path = []
+		if (c.path.size() > 1):
+			var ingress_result = controller.grid.hex_ingress(c.path[1], c)
+			if (ingress_result == "REDIRECTED"): # Redirected
+				c.redirected_from.append(c.path[1])
+				c.queued_path = controller.grid.redirected_find_path(c.path, false, false, c.redirected_from)
+			else:
+				c.redirected_from = []
+				if (ingress_result == "APPROVED"):
+					controller.grid.hex_egress(c.path[0])
+					c.shouldBeMoving = true
+					continue
+				elif (ingress_result == "PENDING"):
+					c.redirected_from = []
+					c.waiting = true
+					if FLAG_VERBOSE: print("Meeple ", c.UNIQUEID, " set to waiting due to pending ingress.")
+					continue
+		if c.path.size() == 1 and c.queued_path.size() == 0:
+			
+			if controller.grid.coord_to_axial_hex(c.get_global_position()) == meepleDocPos:
+				c.returned = true
+			else:
+				c.atStop = true
+
+
+
 func updateHPBar():
 	if self.fake:
 		HPBar.visible = false

@@ -3,7 +3,7 @@ extends Node2D
 @export var targetMarker: Sprite2D
 @export var infantry_prefab: PackedScene
 @onready var selection_box = $ColorRect
-@onready var RCLICKORDER = $VBoxContainer/Order
+@onready var RCLICKORDER = $VBoxContainer/Merge
 @onready var RCLICKGROUP = $VBoxContainer/Group
 @onready var RCLICKATTACK= $VBoxContainer/Attack
 @onready var RCLICKMENU = $VBoxContainer
@@ -36,7 +36,7 @@ var selecting = Vector2(0,0)
 
 var MEEPLE_ID_COUNTER = 1
  
-const FLAG_VERBOSE = false
+const FLAG_VERBOSE = true
 const FLAG_DEBUG = true
 
 func _ready() -> void:
@@ -158,7 +158,7 @@ func _process(delta): #Runs every tick
 					
 					# TODO Set the target of the attack to be whatever attacking location is closest to meeple, so
 					# meeple can get in range of the edge of a multihex building
-					print(grid.axial_probe(attackLoc).objectsInside)
+					
 					m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
 					if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " attacking: ", m.attackTarget)
 					
@@ -249,7 +249,7 @@ func spawn_meeple(pos):
 
 #Order all the selected meeples to that place
 func _on_order_button_pressed():
-	order_meeple(get_global_mouse_position())
+	order_meeple(RCLICKMENU.get_global_position())
 
 
 func _on_order_button_released(): #Menu gone :(

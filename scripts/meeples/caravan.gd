@@ -1,20 +1,27 @@
 extends meeple
 
-
+const MAX_STOP_TIMER = 1
 
 var woodCarrying = 0
 var foodCarrying = 0
 var stoneCarrying = 0
 
+var atStop = false
+var stopTimer = 0
+var stop = null
+var totalStops = null
 var routeRemoved = false
+
 var pathwayNodes = []
 var tempPathwayNodes = []
 
+var route = null
+var returned = false
 
 func _ready():
-	self.rb = $RigidBody2D
-	self.sprite = $RigidBody2D/Sprite2D
-	self.label = $RigidBody2D/Label
+	self.rb = $CharecterBody2D
+	self.sprite = $Sprite2D
+	self.label = $Label
 	self.type = "Caravan"
 
 
