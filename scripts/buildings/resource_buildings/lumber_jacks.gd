@@ -4,7 +4,7 @@ extends Building
 
 var woodTimer = 0 #Tracking when to give $$$
 
-
+var saved_wood = 0
 
 #func _ready():
 	#$MultiplayerSynchronizer.set_multiplayer_authority()
@@ -23,6 +23,7 @@ const HEX_SHAPE := [
 
 func _ready():
 	set_size(size)
+	type = "lumberjack"
 	
 
 func generateWood(p, delta): #Generates income every 10 seconds
@@ -30,7 +31,7 @@ func generateWood(p, delta): #Generates income every 10 seconds
 	
 	woodTimer += delta
 	if woodTimer >= 10:
-		p.addWood(200)
+		saved_wood += 200
 		woodTimer = 0
 	
 	

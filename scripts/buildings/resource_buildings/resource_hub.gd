@@ -85,7 +85,7 @@ func _process(delta):
 	
 	for r in managedRoutes: #Timing to send caravans out
 		if r[0][0] != -1:
-			print("Time Time, thats the sound of the time")
+			
 			r[0][0] += delta
 			#print(r[0])
 			if r[0][0] > CARAVAN_WAIT_TIMER:
@@ -99,6 +99,10 @@ func _process(delta):
 				for r in managedRoutes:	
 					if r[0][1] == c.UNIQUEID:
 						r[0][0] = 0
+			controller.food += c.foodCarrying
+			controller.wood += c.woodCarrying
+			controller.stone += c.stoneCarrying
+			print("Food delivered: " + str(c.foodCarrying))
 			freeCaravan(c.UNIQUEID)
 			
 func _physics_process(delta: float) -> void:
@@ -258,6 +262,7 @@ func freeCaravan(caravanID):
 	var i = 0
 	while i < managedCaravans.size():
 		if managedCaravans[i].UNIQUEID == caravanID:
+			controller.grid.update_grid(managedCaravans[i].path[0], 0, [])
 			managedCaravans.pop_at(i).queue_free()
 			return
 		i += 1
@@ -268,6 +273,20 @@ func caravan_process(delta):
 			
 			c.stopTimer += delta
 			
+			for h in controller.grid.HEX_DIRS:
+				if controller.grid.axial_probe(c.path[0] + h).classification == 2:
+					
+					var objectInside = controller.grid.axial_probe(c.path[0] + h).objectsInside[0]
+					
+					if objectInside.type == "stoneMine":
+						objectInside.saved_stone -= 1
+						c.stoneCarrying += 1
+					if objectInside.type == "farm":
+						objectInside.saved_food -= 1
+						c.foodCarrying += 1
+					if objectInside.type == "lumberjack":
+						objectInside.saved_wood -= 1
+						c.woodCarrying += 1
 			if c.stopTimer >= c.MAX_STOP_TIMER:
 				
 				c.atStop = false

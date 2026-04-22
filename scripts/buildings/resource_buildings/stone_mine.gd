@@ -4,6 +4,7 @@ extends Building
 
 var stoneTimer = 0 #Tracking when to give $$$
 
+var saved_stone = 0
 
 
 #func _ready():
@@ -17,14 +18,14 @@ const HEX_SHAPE := [
 
 func _ready():
 	set_size(size)
-	
+	type = "stoneMine"
 
 func generateStone(p, delta): #Generates income every 10 seconds
 	if self.fake: return
 	
 	stoneTimer += delta
 	if stoneTimer >= 10:
-		p.addStone(200)
+		saved_stone += 200
 		stoneTimer = 0
 	
 	

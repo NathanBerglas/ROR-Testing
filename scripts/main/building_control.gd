@@ -413,13 +413,13 @@ func is_placeable(building) -> bool: #Only for if a body is FAKE
 		else:
 			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland, Stone, Iron, Ruby, Diamonds]
 			var tile_biome = grid.axial_probe(centerHex).biome
-			if building.type == "Farm":
+			if building.type == "farm":
 				if !tile_biome in [5]: # plains
 					return false
-			elif building.type == "StoneMine":
+			elif building.type == "stoneMine":
 				if !tile_biome in [7, 8, 9, 10]: # stone, ruby, diamond
 					return false
-			elif building.type == "LumberJack":
+			elif building.type == "lumberjack":
 				if !tile_biome in [0, 4]: # forest and rainforest
 					return false
 	return true

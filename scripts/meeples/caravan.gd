@@ -1,6 +1,6 @@
 extends meeple
 
-const MAX_STOP_TIMER = 1
+const MAX_STOP_TIMER = 2
 
 var woodCarrying = 0
 var foodCarrying = 0
