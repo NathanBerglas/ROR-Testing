@@ -41,7 +41,7 @@ offset_left = 50.0
 offset_top = 25.0
 offset_right = 184.0
 offset_bottom = 48.0
-text = "Type Name Here:"
+text = "Type Adress Here:"
 
 [node name="waitingLabel" type="Label" parent="." unique_id=1010313990]
 visible = false
