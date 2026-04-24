@@ -5,7 +5,8 @@ const FLAG_VERBOSE = true
 # Grid constants
 @export var HEX_SIZE: float = 64
 @export var GRID_COUNT: Vector2i = Vector2i(466,214)
-@export var biomeGenScene: PackedScene
+
+
 @export var meeple_control: Node2D
 @export var debug_hex_prefab: PackedScene
 const SQRT_3 = (111.0 / 128.0) * 2
@@ -35,7 +36,13 @@ const HEX_DIRS := [
 
 var astar = AStar2D.new()
 
-var terrainOffset = null
+var terrainOffset = int(HEX_SIZE * SQRT_3 * (GRID_COUNT.y * 0.5))
+
+var BMAP_RESOLUTIONx = null
+var BPIXELS_PER_TILE = null
+var BMAP_RESOLUTIONy = null
+var Bdebugging_grid = null
+var Bmap = null
 
 
 class tile:
@@ -242,35 +249,35 @@ func _ready():
 			#print(axial_hex_to_coord(test_hex))
 			#print(coord_to_axial_hex(axial_hex_to_coord(test_hex)))
 			#
-	terrainOffset = int(HEX_SIZE * SQRT_3 * (GRID_COUNT.y * 0.5))
-	biomeGen = biomeGenScene.instantiate()
-	biomeGen.terrainOffset = terrainOffset
-	biomeGen.grid = self
-	add_child(biomeGen)
+	
+	#BterrainOffset = terrainOffset
+	#Bgrid = self
+	#add_child(biomeGen)
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
 		for r in range(GRID_COUNT.y):
 			var tileToCreate = tile.new(Vector2i(q, r))
 			var center = axial_hex_to_coord(tileToCreate.hex)
-			if center.x > terrainOffset and center.x < (biomeGen.MAP_RESOLUTION.x * biomeGen.PIXELS_PER_TILE) + terrainOffset:
+			
+			if center.x > terrainOffset and center.x < (BMAP_RESOLUTIONx * BPIXELS_PER_TILE) + terrainOffset:
 				var index = Vector2i(
-					int(floor((center.x - terrainOffset) / biomeGen.getPixelsPerTile())),
-					int(floor((center.y) / biomeGen.getPixelsPerTile()))
+					int(floor((center.x - terrainOffset) / BPIXELS_PER_TILE)),
+					int(floor((center.y) / BPIXELS_PER_TILE))
 				)
 				#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland]
-				if index.x <= biomeGen.MAP_RESOLUTION.x and index.y <= biomeGen.MAP_RESOLUTION.y:
-					if biomeGen.debuggingGrid == false:
+				if index.x <= BMAP_RESOLUTIONx and index.y <= BMAP_RESOLUTIONy:
+					if Bdebugging_grid == false:
 						const def = Vector2i(0, 0)
 						var new_hex_debug = debug_hex_prefab.instantiate()
 						#new_hex_debug.position = center
 						add_child(new_hex_debug)
 						black_border.set_cell(tileToCreate.hex, 0, def)
 						white_border.set_cell(tileToCreate.hex, 1, def)
-						interior.set_cell(tileToCreate.hex, 2 + biomeGen.map[index.y][index.x], def)
-					tileToCreate.biome = biomeGen.map[index.y][index.x]
+						interior.set_cell(tileToCreate.hex, 2 + Bmap[index.y][index.x], def)
+					tileToCreate.biome = Bmap[index.y][index.x]
 					if tileToCreate.biome == 2: #water
 						tileToCreate.traversable = false
-					tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[biomeGen.map[index.y][index.x]]
+					tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[Bmap[index.y][index.x]]
 			row.append(tileToCreate)
 		grid.append(row)
 	update_astar()
