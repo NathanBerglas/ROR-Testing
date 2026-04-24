@@ -8,6 +8,8 @@
 
 [node name="Player" type="Node2D" unique_id=1618287504]
 script = ExtResource("1_qlg0r")
+buildingControlScene = ExtResource("3_fjrip")
+meepleControlScene = ExtResource("5_ur7pv")
 
 [node name="BuildingControl" parent="." unique_id=1989412738 instance=ExtResource("3_fjrip")]
 

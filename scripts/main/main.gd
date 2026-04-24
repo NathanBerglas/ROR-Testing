@@ -165,4 +165,5 @@ func start_game(biomeGenInfo): # [BMAP_RESOLUTIONx, BPIXELS_PER_TILE, BMAP_RESOL
 		player.get_node("Grid").BMAP_RESOLUTIONy = biomeGenInfo[2]
 		player.get_node("Grid").Bdebugging_grid = biomeGenInfo[3]
 		player.get_node("Grid").Bmap = biomeGenInfo[4]
+	player.playerID = multiplayer.get_unique_id()
 	add_child(player)

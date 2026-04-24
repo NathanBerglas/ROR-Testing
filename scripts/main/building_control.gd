@@ -70,12 +70,13 @@ var buildings = []
 
 var teammates = [] #list of teammates
 var grid # the grid controller
-var playerID = 0
+var playerID = null
 var buildingIDTracker = 0
 var caravanIDTracker = 1
 
 
 func _ready(): #Runs on start, connects buttons
+	
 	farmButton.button_down.connect(_on_farm_button_pressed)
 	farmButton.button_up.connect(_on_farm_button_released)
 	

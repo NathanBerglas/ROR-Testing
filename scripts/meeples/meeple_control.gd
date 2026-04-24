@@ -8,6 +8,8 @@ extends Node2D
 @onready var RCLICKATTACK= $VBoxContainer/Attack
 @onready var RCLICKMENU = $VBoxContainer
 
+var playerID = null
+
 const MEEPLE_TICKS_PER_SECOND = 60
 var time_since_last_meeple_tick = 0
 #The list of meeple groups, their targets, and their colours
@@ -55,6 +57,8 @@ func _ready() -> void:
 
 
 func _process(delta): #Runs every tick
+	if multiplayer.get_unique_id() != playerID: 
+		return
 	time_since_last_meeple_tick += delta
 	#if playerID == multiplayer.get_unique_id():
 	if time_since_last_meeple_tick > (1.0 / MEEPLE_TICKS_PER_SECOND):
