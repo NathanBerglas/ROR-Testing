@@ -1,5 +1,7 @@
 extends Node2D
 
+#Example Order:          [0, (2029, 19281)]
+
 @export var targetMarker: Sprite2D
 @export var infantry_prefab: PackedScene
 @onready var selection_box = $ColorRect
@@ -8,7 +10,12 @@ extends Node2D
 @onready var RCLICKATTACK= $VBoxContainer/Attack
 @onready var RCLICKMENU = $VBoxContainer
 
+#Multiplayer Variables
+var time_print = 0
 var playerID = null
+var queued_orders_recieved_in_control = []
+var queued_orders_to_send_in_control = []
+const ORDERS = [0,1,2,3,4,5,6] #0: Spawn meeple, 1: Super Order Meeples
 
 const MEEPLE_TICKS_PER_SECOND = 60
 var time_since_last_meeple_tick = 0
@@ -41,6 +48,7 @@ var MEEPLE_ID_COUNTER = 1
 const FLAG_VERBOSE = true
 const FLAG_DEBUG = true
 
+
 func _ready() -> void:
 	
 	#Setting base states for the selection box and the right click menu
@@ -57,123 +65,120 @@ func _ready() -> void:
 
 
 func _process(delta): #Runs every tick
-	if multiplayer.get_unique_id() != playerID: 
-		return
+	if queued_orders_recieved_in_control.size() > 0:
+		print(queued_orders_recieved_in_control)
+	if queued_orders_to_send_in_control.size() > 0:
+		print(queued_orders_to_send_in_control)
+	process_orders()
+
+	time_print += delta
 	time_since_last_meeple_tick += delta
 	#if playerID == multiplayer.get_unique_id():
 	if time_since_last_meeple_tick > (1.0 / MEEPLE_TICKS_PER_SECOND):
 		time_since_last_meeple_tick = 0
 		meeple_process()
 	
-	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-		if grid.probe(get_global_mouse_position()).classification == 3:
-			grid.probe(get_global_mouse_position()).objectsInside[0].update_hp(1)
-			return
-		elif grid.probe(get_global_mouse_position()).classification != 0:
-			if FLAG_VERBOSE: print("Failed to place meeple. Hex obstructed")
-			return
-		spawn_meeple(get_global_mouse_position())
+	if multiplayer.get_unique_id() == playerID: 
+		if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
+			queued_orders_to_send_in_control.append([0,[get_global_mouse_position()]])
 
-	#Orders all meeples to a location
-	elif Input.is_action_just_pressed("super_order"):
-		var dest = grid.coord_to_axial_hex(get_global_mouse_position())
-		targetMarker.global_position = grid.hex_center(get_global_mouse_position())
+		#Orders all meeples to a location
+		elif Input.is_action_just_pressed("super_order"):
+			queued_orders_to_send_in_control.append([1,[get_global_mouse_position()]])
+			
 		
-		for m in unorderedMeeples:
-			if m.groupNum == 0:
-				m.queued_path = grid.find_path(m.path[0], dest, true, false)
-	
-	#Opens up the right click menu
-	elif Input.is_action_just_pressed("right_click_menu"):
-		if grid.probe(get_global_mouse_position()).classification == 3:
-			RCLICKMENU.set_global_position(get_global_mouse_position())
-			RCLICKMENU.visible = true
+		#Opens up the right click menu
+		elif Input.is_action_just_pressed("right_click_menu"):
+			if grid.probe(get_global_mouse_position()).classification == 3:
+				RCLICKMENU.set_global_position(get_global_mouse_position())
+				RCLICKMENU.visible = true
+			elif Input.is_action_just_pressed("order"):
+				RCLICKMENU.visible = false	
+				order_meeple(get_global_mouse_position())
+
 		elif Input.is_action_just_pressed("order"):
-			RCLICKMENU.visible = false	
+			
 			order_meeple(get_global_mouse_position())
-
-	elif Input.is_action_just_pressed("order"):
-		order_meeple(get_global_mouse_position())
-	
-	#Starts the selction process
-	elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
-		RCLICKMENU.visible = false
-		selecting = get_global_mouse_position()
-		if !Input.is_action_pressed("preserve_selection"):
-			var clicked_meeple_hex = grid.probe(get_global_mouse_position()).hex
-			for m in unorderedMeeples:
-				if m.path[0] != clicked_meeple_hex:
-						m.is_unselected()
-			
-	#Used to build the selection box if
-	elif Input.is_action_pressed("select") and teammates[0].buildingDraggin == null:
-		#selectingTime += delta
-		#if selectingTime > 0.25:
-		if InputEventMouseMotion:
-			selection_box.visible = true
-			update_selection_box()
-			
-	#Logic for when the select button is released
-	elif Input.is_action_just_released("select"):
-		#selectingTime += delta
-		#if selectingTime < 0.25: #No selecting box
-		#	var hit = false
-		#	var groupHit = null
-		#	#iterates through all meeples to find the clicked meeples group
-		#	#it selects all meeples in the group
-		#	for m in unorderedMeeples: 
-		#		if m.hasMouse():
-		#			hit = true
-		#			m.is_selected()
-		#			if m.groupNum > 0:
-		#				groupHit = m.groupNum
-		#			break
-		#	for m in unorderedMeeples:
-		#		if m.groupNum == groupHit:
-		#			m.is_selected()
-		#	if hit == false:		
-		#		for m in unorderedMeeples:
-		#			m.is_unselected()
-		#else:
-		#Same thing but for all meeples in the rectangle
-		var rect = Rect2(selection_box.global_position, selection_box.size)
-		#var groupsHit = []
-		for m in unorderedMeeples:
-			if rect.has_point(m.get_global_position()):
-				m.is_selected()
-				#groupsHit.push_back(m.groupNum)
-			
-			#for g in groupsHit: #Needs a redo -> at worst its O(n^2)
-			#	if g == 0:
-			#		continue
-			#	for m in unorderedMeeples:
-			#		if m.groupNum == g:
-			#			m.is_selected()
-							
-		selecting = Vector2(0, 0) #No more selecting :(
-		selection_box.visible = false
 		
-	if Input.is_action_just_pressed("attack"):
-		var attackLoc = grid.coord_to_axial_hex(get_global_mouse_position())
-		for m in unorderedMeeples:
-			if m.selected:
-				#var tile = grid.axial_probe(attackLoc)
-				if grid.axial_probe(attackLoc).objectsInside.size() > 0:
-					
-					# TODO Set the target of the attack to be whatever attacking location is closest to meeple, so
-					# meeple can get in range of the edge of a multihex building
-					
-					m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
-					if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " attacking: ", m.attackTarget)
-					
-					if !m.inAttackRange(attackLoc):
-						m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
-					#m.path = []
-					#for h in tempPath:
-					#	m.path.append(h)
-					
-					#m.dest = grid.hex_center(attackLoc)
-				m.is_unselected()
+		#Starts the selction process
+		elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
+			RCLICKMENU.visible = false
+			selecting = get_global_mouse_position()
+			if !Input.is_action_pressed("preserve_selection"):
+				var clicked_meeple_hex = grid.probe(get_global_mouse_position()).hex
+				for m in unorderedMeeples:
+					if m.path[0] != clicked_meeple_hex:
+							m.is_unselected()
+				
+		#Used to build the selection box if
+		elif Input.is_action_pressed("select") and teammates[0].buildingDraggin == null:
+			#selectingTime += delta
+			#if selectingTime > 0.25:
+			if InputEventMouseMotion:
+				selection_box.visible = true
+				update_selection_box()
+				
+		#Logic for when the select button is released
+		elif Input.is_action_just_released("select"):
+			#selectingTime += delta
+			#if selectingTime < 0.25: #No selecting box
+			#	var hit = false
+			#	var groupHit = null
+			#	#iterates through all meeples to find the clicked meeples group
+			#	#it selects all meeples in the group
+			#	for m in unorderedMeeples: 
+			#		if m.hasMouse():
+			#			hit = true
+			#			m.is_selected()
+			#			if m.groupNum > 0:
+			#				groupHit = m.groupNum
+			#			break
+			#	for m in unorderedMeeples:
+			#		if m.groupNum == groupHit:
+			#			m.is_selected()
+			#	if hit == false:		
+			#		for m in unorderedMeeples:
+			#			m.is_unselected()
+			#else:
+			#Same thing but for all meeples in the rectangle
+			var rect = Rect2(selection_box.global_position, selection_box.size)
+			#var groupsHit = []
+			for m in unorderedMeeples:
+				if rect.has_point(m.get_global_position()):
+					m.is_selected()
+					#groupsHit.push_back(m.groupNum)
+				
+				#for g in groupsHit: #Needs a redo -> at worst its O(n^2)
+				#	if g == 0:
+				#		continue
+				#	for m in unorderedMeeples:
+				#		if m.groupNum == g:
+				#			m.is_selected()
+								
+			selecting = Vector2(0, 0) #No more selecting :(
+			selection_box.visible = false
+			
+		if Input.is_action_just_pressed("attack"):
+			var attackLoc = grid.coord_to_axial_hex(get_global_mouse_position())
+			for m in unorderedMeeples:
+				if m.selected:
+					#var tile = grid.axial_probe(attackLoc)
+					if grid.axial_probe(attackLoc).objectsInside.size() > 0:
+						
+						# TODO Set the target of the attack to be whatever attacking location is closest to meeple, so
+						# meeple can get in range of the edge of a multihex building
+						
+						m.attackTarget = grid.axial_probe(attackLoc).objectsInside[0]
+						if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " attacking: ", m.attackTarget)
+						
+						if !m.inAttackRange(attackLoc):
+							m.queued_path = grid.find_path(grid.coord_to_axial_hex(m.rb.get_global_position()), attackLoc, true, true)
+						#m.path = []
+						#for h in tempPath:
+						#	m.path.append(h)
+						
+						#m.dest = grid.hex_center(attackLoc)
+					m.is_unselected()
 	"""
 	else:
 		var MEEPLE_CONTROL_INDEX = 0
@@ -229,6 +234,7 @@ func update_selection_box():
 		
 	selection_box.global_position = top_left
 	selection_box.size = size
+
 
 
 func spawn_meeple(pos):
@@ -652,3 +658,35 @@ Meeple Move Algorithm: MMA
 	Yes:	Call meeple_end_merge -> Delete Self
 	No: 	Pop current hex from path -> Set moving flag to false -> Break
 '''
+
+
+func process_orders(): #Change this to basically process as many as possible. Idk how, like funny logic
+	if queued_orders_recieved_in_control.size() > 0:
+		var order = queued_orders_recieved_in_control.pop_at(0)
+		
+		#If statements for orders based on order - update later 
+		if order[0] == 0:
+			spawn_meeple_order(order[1])
+		if order[0] == 1:
+			super_order_order(order[1])
+func spawn_meeple_order(position):
+	var pixel_position = position[0]
+	if grid.probe(pixel_position).classification == 3:
+		grid.probe(pixel_position).objectsInside[0].update_hp(1)
+		return
+	elif grid.probe(pixel_position).classification != 0:
+		if FLAG_VERBOSE: print("Failed to place meeple. Hex obstructed")
+		return
+	
+	spawn_meeple(pixel_position)
+	
+func super_order_order(position):
+	print("")
+	print(multiplayer.get_unique_id())
+	print(position)
+	var dest = grid.coord_to_axial_hex(position[0])
+	for m in unorderedMeeples:
+		if m.groupNum == 0:
+			m.queued_path = grid.find_path(m.path[0], dest, true, false)
+			print(m.queued_path)
+	print("")

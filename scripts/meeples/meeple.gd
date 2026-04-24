@@ -1,6 +1,8 @@
 extends Node2D
 class_name meeple
 
+var playerID = null
+
 @export var speed: float = 200
 @export var acceleration: float = 300
 

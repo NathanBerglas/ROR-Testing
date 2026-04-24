@@ -138,7 +138,7 @@ func start_game(biomeGenInfo): # [BMAP_RESOLUTIONx, BPIXELS_PER_TILE, BMAP_RESOL
 	
 	player = playerScene.instantiate()
 	if multiplayer.is_server():
-		print(player.get_child_count())
+		#print(player.get_child_count())
 		
 		biomeGen = biomeGenScene.instantiate()
 		
