@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://vvafiiypvyxb"]
+
+[ext_resource type="PackedScene" uid="uid://dlf1n01bma0ir" path="res://scenes/prefabs/meeples/meeple.tscn" id="1_37a0o"]
+[ext_resource type="Script" uid="uid://b32p4q6vmg88j" path="res://scripts/meeples/infantry.gd" id="2_r40e3"]
+[ext_resource type="Texture2D" uid="uid://djrtig3nyd533" path="res://assets/meeples/blue_footsoldier_sheet.png" id="3_37a0o"]
+
+[node name="Meeple" unique_id=934984987 instance=ExtResource("1_37a0o")]
+script = ExtResource("2_r40e3")
+
+[node name="Sprite2D" parent="." index="1" unique_id=803099803]
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_37a0o")

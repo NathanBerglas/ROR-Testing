@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://8s5fbc42yax2"]
 
-[ext_resource type="Script" uid="uid://5sxahsim667x" path="res://scripts/Meeples/meeple_control.gd" id="1_py3r1"]
+[ext_resource type="Script" uid="uid://5sxahsim667x" path="res://scripts/meeples/meeple_control.gd" id="1_py3r1"]
 [ext_resource type="PackedScene" uid="uid://c3bfvpwmvjpgd" path="res://scenes/prefabs/meeples/combat_meeples/infantry.tscn" id="2_jurxu"]
 [ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeples/meeple.png" id="3_hkl3t"]
+[ext_resource type="PackedScene" uid="uid://vvafiiypvyxb" path="res://scenes/prefabs/meeples/combat_meeples/infantryEnemy.tscn" id="3_ogcjo"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mbxmy"]
 
@@ -11,7 +12,8 @@
 [node name="MeepleControl" type="Node2D" unique_id=1638019337 node_paths=PackedStringArray("targetMarker")]
 script = ExtResource("1_py3r1")
 targetMarker = NodePath("TargetMarker")
-infantry_prefab = ExtResource("2_jurxu")
+infantry_prefab_team = ExtResource("2_jurxu")
+infantry_prefab_enemy = ExtResource("3_ogcjo")
 
 [node name="TargetMarker" type="Sprite2D" parent="." unique_id=373247193]
 modulate = Color(0, 0.21960784, 1, 0.39215687)

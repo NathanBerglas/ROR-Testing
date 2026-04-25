@@ -112,7 +112,8 @@ func is_unselected():
 
 func _on_rigid_body_2d_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
 	if Input.is_action_just_pressed("select"):
-		if selected:
-			is_unselected()
-		else:
-			is_selected()
+		if playerID == multiplayer.get_unique_id():
+			if selected:
+				is_unselected()
+			else:
+				is_selected()

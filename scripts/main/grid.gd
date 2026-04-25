@@ -187,8 +187,8 @@ func redirected_find_path(path, partialPathBoolean, attackingBoolean, pathToDisa
 	for h in pathToDisable:
 		astar.set_point_disabled(_hex_to_id(h), 1)
 		pathsCheck.append(astar.is_point_disabled(_hex_to_id(h)))
-	var new_path = find_path(path[0], path[path.size() - 1], partialPathBoolean, attackingBoolean)
 	
+	var new_path = find_path(path[0], path[path.size() - 1], partialPathBoolean, attackingBoolean)
 	for h in range(pathToDisable.size()):
 		astar.set_point_disabled(_hex_to_id(pathToDisable[h]), pathsCheck[h])
 	return new_path
@@ -212,7 +212,10 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
 	if !decision_made:
 		var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
-		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]) and meeple_requesting.type == "Infantry":
+		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]) \
+		and meeple_requesting.type == "Infantry" \
+		and meeple_in_ingressing_hex.playerID == meeple_requesting.playerID:
+			
 			meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
 			#update_grid(ingressing_hex, 3, [meeple_requesting] + ingressing_tile.objectsInside)
 			decision = "APPROVED"

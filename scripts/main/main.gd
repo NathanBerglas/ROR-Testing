@@ -1,5 +1,6 @@
 extends Node
 
+const ONLINE = false
 @export var Address = null
 @export var port = 9999
 
@@ -109,13 +110,17 @@ func _on_host_button_pressed() -> void:
 	multiplayer.set_multiplayer_peer(peer)
 	waitingLabel.text = "WAITING FOR PLAYERS"
 	waitingLabel.visible = true
-	upnp_setup()
+	if ONLINE:
+		upnp_setup()
 
 
 func _on_join_button_pressed() -> void:
 
 	peer = ENetMultiplayerPeer.new()
-	Address = $LineEdit.text
+	if ONLINE:
+		Address = $LineEdit.text
+	else:
+		Address = "127.0.0.1"
 	var error = peer.create_client(Address, port)
 	
 	if error != OK:
@@ -132,6 +137,7 @@ func _on_start_button_pressed() -> void:
 		start_game(null)
 	return
 	pass # Replace with function body.
+
 
 #Called on the server and all clients when someone connects
 func peer_connected(id):
@@ -198,11 +204,6 @@ func start_game(biomeGenInfo): # [BMAP_RESOLUTIONx, BPIXELS_PER_TILE, BMAP_RESOL
 		player.get_node("Grid").Bmap = biomeGenInfo[4]
 	player.playerID = multiplayer.get_unique_id()
 	add_child(player)
-	
-	
-	
-	
-	
 	
 	
 func upnp_setup():
