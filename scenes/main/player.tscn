@@ -11,12 +11,8 @@ script = ExtResource("1_qlg0r")
 buildingControlScene = ExtResource("3_fjrip")
 meepleControlScene = ExtResource("5_ur7pv")
 
-[node name="BuildingControl" parent="." unique_id=1989412738 instance=ExtResource("3_fjrip")]
-
 [node name="Camera" parent="." unique_id=732688784 instance=ExtResource("4_smehm")]
 position = Vector2(11877, 0)
 
-[node name="MeepleControl" parent="." unique_id=553136144 instance=ExtResource("5_ur7pv")]
-
 [node name="Grid" parent="." unique_id=1852769152 node_paths=PackedStringArray("meeple_control") instance=ExtResource("2_tuyoq")]
-meeple_control = NodePath("../MeepleControl")
+meeple_control = NodePath("")

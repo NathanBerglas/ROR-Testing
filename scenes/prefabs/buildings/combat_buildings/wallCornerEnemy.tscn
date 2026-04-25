@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://b68p435fysnhc"]
+
+[ext_resource type="Script" uid="uid://d3l4icn2pv767" path="res://scripts/buildings/combat_buildings/wall_corner.gd" id="1_343b0"]
+[ext_resource type="Texture2D" uid="uid://bt7nc8h8rlyqx" path="res://assets/buildings/WallCornerEnemy.png" id="2_343b0"]
+
+[node name="wallCorner" type="Node2D" unique_id=2129524693]
+script = ExtResource("1_343b0")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=365241787]
+freeze = true
+
+[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D" unique_id=1807959290]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_343b0")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=776780238]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

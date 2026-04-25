@@ -1,48 +1,62 @@
 extends Node2D
-@onready var hud = $buildingHud
+
+var FLAG_VERBOSE_MULTI = false
+
+
 
 #Ensuring all of our prebabs and their buttons are loaded in
+@onready var hud = $buildingHud
+
 @onready var farmButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/FarmButton
 @onready var farmLabel = $resourceBuildingHud/FarmButtonLabel
 @export var farm_prefab: PackedScene
+@export var farm_prefabEnemy: PackedScene
 
 @onready var stoneMineButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/StoneMineButton
 @onready var stoneMineLabel = $resourceBuildingHud/StoneMineButtonLabel2
 @export var stoneMine_prefab: PackedScene
+@export var stoneMine_prefabEnemy: PackedScene
 
 @onready var lumberJackButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/LumberJackButton
 @onready var lumberJackLabel = $resourceBuildingHud/LumberJackButtonLabel
 @export var lumberJack_prefab: PackedScene
+@export var lumberJack_prefabEnemy: PackedScene
 
 @onready var resourceHubButton = $resourceBuildingHud/ScrollContainer/VBoxContainer/ResourceHubButton
 @onready var resourceHubLabel = $resourceBuildingHud/ResourceHubButtonLabel
 @export var resourceHub_prefab: PackedScene
+@export var resourceHub_prefabEnemy: PackedScene
 
 @onready var barracksButton = $combatBuildingHud/ScrollContainer/VBoxContainer/BarracksButton
 @onready var barracksLabel = $combatBuildingHud/BarracksButtonLabel
 @export var barracks_prefab: PackedScene
+@export var barracks_prefabEnemy: PackedScene
 
 @onready var wallCornerButton = $combatBuildingHud/ScrollContainer/VBoxContainer/wallCornerButton
 @onready var wallCornerLabel = $combatBuildingHud/wallCornerButtonLabel
 @export var wallCorner_prefab: PackedScene
+@export var wallCorner_prefabEnemy: PackedScene
 @export var wallSegment_prefab: PackedScene
+@export var wallSegment_prefabEnemy: PackedScene
 
 @onready var turretButton = $combatBuildingHud/ScrollContainer/VBoxContainer/turretButton
 @onready var turretLabel = $combatBuildingHud/turretButtonLabel
 @export var turret_prefab: PackedScene
+@export var turret_prefabEnemy: PackedScene
 
 #Combat building menu
 @onready var combatBuildingMenu = $combatBuildingHud/ScrollContainer
 @onready var closeCombatBuilding = $combatBuildingHud/ScrollContainer/VBoxContainer/closeCombatMenu
 @onready var combatBuildingMenuButton = $buildingHud/combatBuildingButton
 @onready var combatBuildingLabel = $buildingHud/combatBuildingsLabel
+@onready var combatBuildingHud = $combatBuildingHud
 
 #Resource building menu
 @onready var resourceBuildingMenu = $resourceBuildingHud/ScrollContainer
 @onready var resourceBuildingMenuButton = $buildingHud/resourceBuildingButton
 @onready var closeResourceBuilding = $resourceBuildingHud/ScrollContainer/VBoxContainer/closeResourceMenu
 @onready var resourceBuildingLabel = $buildingHud/resourceBuildingLabel
-
+@onready var resourceBuildingHud = $resourceBuildingHud
 
 #IDK why this is here
 @onready var selection_box = $ColorRect
@@ -52,6 +66,7 @@ extends Node2D
 @onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
 
 @export var nexus_prefab: PackedScene
+@export var nexus_prefabEnemy: PackedScene
 var nexusSpawn = null
 #Players Money
 var food = 10000
@@ -74,64 +89,85 @@ var playerID = null
 var buildingIDTracker = 0
 var caravanIDTracker = 1
 
+#Multiplayer order queueing
+var queued_orders_recieved_in_control = []
+var queued_orders_to_send_in_control = []
+const ORDERS = [0,1,2,3,4,5,6] #
+
 
 func _ready(): #Runs on start, connects buttons
-	
-	farmButton.button_down.connect(_on_farm_button_pressed)
-	farmButton.button_up.connect(_on_farm_button_released)
-	
-	lumberJackButton.button_down.connect(_on_lumberJack_button_pressed)
-	lumberJackButton.button_up.connect(_on_lumberJack_button_released)
-	
-	stoneMineButton.button_down.connect(_on_stoneMine_button_pressed)
-	stoneMineButton.button_up.connect(_on_stoneMine_button_released)
-	
-	resourceHubButton.button_down.connect(_on_resourceHub_button_pressed)
-	resourceHubButton.button_up.connect(_on_resourceHub_button_released)
-	
-	barracksButton.button_down.connect(_on_barracks_button_pressed)
-	barracksButton.button_up.connect(_on_barracks_button_released)
-	
-	manageCaravansButton.button_down.connect(_on_manageCaravans_button_pressed)
-	manageCaravansButton.button_up.connect(_on_manageCaravans_button_released)
-	
-	resourceBuildingMenuButton.button_down.connect(_on_resourceBuildingMenu_button_pressed)
-	resourceBuildingMenuButton.button_up.connect(_on_resourceBuildingMenu_button_released)
-	
-	closeResourceBuilding.button_down.connect(_on_closeResourceMenu_button_pressed)
-	closeResourceBuilding.button_up.connect(_on_closeResourceMenu_button_released)
-	
-	combatBuildingMenuButton.button_down.connect(_on_combatBuildingMenu_button_pressed)
-	combatBuildingMenuButton.button_up.connect(_on_combatBuildingMenu_button_released)
-	
-	closeCombatBuilding.button_down.connect(_on_closeCombatMenu_button_pressed)
-	closeCombatBuilding.button_up.connect(_on_closeCombatMenu_button_released)
-	
-	wallCornerButton.button_down.connect(_on_wallCorner_button_pressed)
-	wallCornerButton.button_up.connect(_on_wallCorner_button_released)
+	print("")
+	print("ON: " + str(multiplayer.get_unique_id()))
+	print("In control of: " + str(playerID))
+	print("")
+	if playerID == multiplayer.get_unique_id():
+		hud.visible = true
+		resourceBuildingHud.visible = true
+		combatBuildingHud.visible = true
+		farmButton.button_down.connect(_on_farm_button_pressed)
+		farmButton.button_up.connect(_on_farm_button_released)
+		
+		lumberJackButton.button_down.connect(_on_lumberJack_button_pressed)
+		lumberJackButton.button_up.connect(_on_lumberJack_button_released)
+		
+		stoneMineButton.button_down.connect(_on_stoneMine_button_pressed)
+		stoneMineButton.button_up.connect(_on_stoneMine_button_released)
+		
+		resourceHubButton.button_down.connect(_on_resourceHub_button_pressed)
+		resourceHubButton.button_up.connect(_on_resourceHub_button_released)
+		
+		barracksButton.button_down.connect(_on_barracks_button_pressed)
+		barracksButton.button_up.connect(_on_barracks_button_released)
+		
+		manageCaravansButton.button_down.connect(_on_manageCaravans_button_pressed)
+		manageCaravansButton.button_up.connect(_on_manageCaravans_button_released)
+		
+		resourceBuildingMenuButton.button_down.connect(_on_resourceBuildingMenu_button_pressed)
+		resourceBuildingMenuButton.button_up.connect(_on_resourceBuildingMenu_button_released)
+		
+		closeResourceBuilding.button_down.connect(_on_closeResourceMenu_button_pressed)
+		closeResourceBuilding.button_up.connect(_on_closeResourceMenu_button_released)
+		
+		combatBuildingMenuButton.button_down.connect(_on_combatBuildingMenu_button_pressed)
+		combatBuildingMenuButton.button_up.connect(_on_combatBuildingMenu_button_released)
+		
+		closeCombatBuilding.button_down.connect(_on_closeCombatMenu_button_pressed)
+		closeCombatBuilding.button_up.connect(_on_closeCombatMenu_button_released)
+		
+		wallCornerButton.button_down.connect(_on_wallCorner_button_pressed)
+		wallCornerButton.button_up.connect(_on_wallCorner_button_released)
 
-	turretButton.button_down.connect(_on_turret_button_pressed)
-	turretButton.button_up.connect(_on_turret_button_released)
+		turretButton.button_down.connect(_on_turret_button_pressed)
+		turretButton.button_up.connect(_on_turret_button_released)
+		
+		farmLabel.visible = false
+		stoneMineLabel.visible = false
+		lumberJackLabel.visible = false
+		resourceHubLabel.visible = false
+		resourceBuildingMenu.visible = false
+		wallCornerLabel.visible = false
+		combatBuildingMenu.visible = false
+		
+		resourceButtons.append([stoneMineButton, stoneMineLabel])
+		resourceButtons.append([farmButton, farmLabel])
+		resourceButtons.append([lumberJackButton, lumberJackLabel])
+		resourceButtons.append([resourceHubButton, resourceHubLabel])
+		
+		combatButtons.append([barracksButton, barracksLabel])
+		combatButtons.append([wallCornerButton, wallCornerLabel])
+		combatButtons.append([turretButton, turretLabel])
+		RCLICK_ResourceHub.visible = false
 	
-	farmLabel.visible = false
-	stoneMineLabel.visible = false
-	lumberJackLabel.visible = false
-	resourceHubLabel.visible = false
-	resourceBuildingMenu.visible = false
-	wallCornerLabel.visible = false
-	combatBuildingMenu.visible = false
-	
-	resourceButtons.append([stoneMineButton, stoneMineLabel])
-	resourceButtons.append([farmButton, farmLabel])
-	resourceButtons.append([lumberJackButton, lumberJackLabel])
-	resourceButtons.append([resourceHubButton, resourceHubLabel])
-	
-	combatButtons.append([barracksButton, barracksLabel])
-	combatButtons.append([wallCornerButton, wallCornerLabel])
-	combatButtons.append([turretButton, turretLabel])
-	RCLICK_ResourceHub.visible = false
-	
-	
+	else:
+		farm_prefab = farm_prefabEnemy
+		stoneMine_prefab = stoneMine_prefabEnemy
+		lumberJack_prefab = lumberJack_prefabEnemy
+		nexus_prefab = nexus_prefabEnemy
+		wallSegment_prefab = wallSegment_prefabEnemy
+		wallCorner_prefab = wallCorner_prefabEnemy
+		barracks_prefab = barracks_prefabEnemy
+		turret_prefab = turret_prefabEnemy
+		resourceHub_prefab = resourceHub_prefabEnemy
 	#print(playerID)
 	
 
@@ -340,38 +376,44 @@ func _on_barracks_button_released():
 
 
 func _process(delta): #runs every tick
+	if queued_orders_recieved_in_control.size() > 0:
+		if FLAG_VERBOSE_MULTI: print(queued_orders_recieved_in_control)
+	if queued_orders_to_send_in_control.size() > 0:
+		if FLAG_VERBOSE_MULTI: print(queued_orders_to_send_in_control)
 	cleanBuildings()
-	hoveringText()
-	#Opens up the right click menu
-	if Input.is_action_just_pressed("right_click_menu"):
-		var probing_hex = grid.probe(get_global_mouse_position())
-		if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub":
-			RCLICK_ResourceHub.set_global_position(get_global_mouse_position())
-			RCLICK_ResourceHub.visible = true
-		else:
-			RCLICK_ResourceHub.visible = false
-	for b in buildings:
-		b.updateHPBar()
-	if buildingDraggin != null: #Code actually dragging the building around
-		buildings[buildings.size() - 1].global_position = get_global_mouse_position()
-		if !is_placeable(buildings[buildings.size() - 1]):
-			buildings[buildings.size() - 1].shapey.modulate = Color(250, 0, 4) #RED
-		else:
-			buildings[buildings.size() - 1].shapey.modulate = Color(1, 1, 1)  # Reset to white
-	for m in buildings: #Doing tick stuff for each building
-		if m.type == "Farm" and !m.fake:
-			m.generateFood(self, delta)
-		elif m.type == "Barracks" and !m.fake:
-			m.spawn(self.teammates[0],delta,m.pos, grid)
-		elif m.type == "LumberJack" and !m.fake:
-			m.generateWood(self, delta)
-		elif m.type == "StoneMine" and !m.fake:
-			m.generateStone(self, delta)
-		elif m.type == "Turret" and !m.fake:
-			if m.target == null:
-				m.getTarget(grid)
+	process_orders()
+	if multiplayer.get_unique_id() == playerID:
+		hoveringText()
+		#Opens up the right click menu
+		if Input.is_action_just_pressed("right_click_menu"):
+			var probing_hex = grid.probe(get_global_mouse_position())
+			if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub":
+				RCLICK_ResourceHub.set_global_position(get_global_mouse_position())
+				RCLICK_ResourceHub.visible = true
 			else:
-				m.attack(delta)
+				RCLICK_ResourceHub.visible = false
+		for b in buildings:
+			b.updateHPBar()
+		if buildingDraggin != null: #Code actually dragging the building around
+			buildings[buildings.size() - 1].global_position = get_global_mouse_position()
+			if !is_placeable(buildings[buildings.size() - 1]):
+				buildings[buildings.size() - 1].shapey.modulate = Color(250, 0, 4) #RED
+			else:
+				buildings[buildings.size() - 1].shapey.modulate = Color(1, 1, 1)  # Reset to white
+		for m in buildings: #Doing tick stuff for each building
+			if m.type == "Farm" and !m.fake:
+				m.generateFood(self, delta)
+			elif m.type == "Barracks" and !m.fake:
+				m.spawn(self.teammates[0],delta,m.pos, grid)
+			elif m.type == "LumberJack" and !m.fake:
+				m.generateWood(self, delta)
+			elif m.type == "StoneMine" and !m.fake:
+				m.generateStone(self, delta)
+			elif m.type == "Turret" and !m.fake:
+				if m.target == null:
+					m.getTarget(grid)
+				else:
+					m.attack(delta)
 	sendCaravans()
 	hud.updateFood(food) 
 	hud.updateWood(wood) 
@@ -457,7 +499,8 @@ func hoveringText():
 func freeBuilding(ID):
 	for i in range(buildings.size()):
 		if buildings[i].BUILDING_UNIQUE_ID == ID:
-			grid.update_grid(buildings[i].pos, 0, [])
+			if !buildings[i].fake:
+				grid.update_grid(grid.coord_to_axial_hex(buildings[i].get_global_position()), 0, [])
 			var object = buildings.pop_at(i)
 			if object.type == "WallCorner":
 				while object.segments.size() > 0:
@@ -511,33 +554,59 @@ func finishDragging(buildingName):
 	if !is_placeable(buildings[buildings.size() - 1]):
 		buildings.pop_back().queue_free()
 		return false
-	buildings[buildings.size() - 1].fake = false
-	buildings[buildings.size() - 1].global_position = grid.hex_center(get_global_mouse_position())
-	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(get_global_mouse_position())
 	
-	
-	
-	grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()), 2, [buildings[buildings.size() - 1]])
-	for h in buildings[buildings.size() - 1].HEX_SHAPE:
-		grid.update_grid(grid.coord_to_axial_hex(get_global_mouse_position()) + h, 2, [buildings[buildings.size() - 1]])
-	if buildingName == "ResourceHub":
-		buildings[buildings.size() - 1].meepleDocPos = grid.coord_to_axial_hex(get_global_mouse_position()) + Vector2i(1,0)
-	
+
+	queued_orders_to_send_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
+	freeBuilding(buildings[buildings.size() - 1].BUILDING_UNIQUE_ID)
 	return true
 
+func process_orders(): #Change this to basically process as many as possible. Idk how, like funny logic
+	#In addition, add logic for in the server to confirm orders are A-OK
+	if queued_orders_recieved_in_control.size() > 0:
+		var order = queued_orders_recieved_in_control.pop_at(0)
+		
+		#If statements for orders based on order - update later 
+		if order[0] == 0:
+			spawn_building_order(order[1])
+		
+			
 
-""" Old Code -> Updated to right above
-	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsShapeQueryParameters2D.new()
+func spawn_building_order(args):
+	var buildingName = args[1]
+	var buildingPos = args[0]
+	var instance = null
 	
-	query.shape = $RigidBody2D/CollisionShape2D.shape
-	query.transform = $RigidBody2D/CollisionShape2D.global_transform
-	query.collide_with_areas = true
-	query.collide_with_bodies = true
-	query.exclude = [$RigidBody2D.get_rid()]
-	var result = space_state.intersect_shape(query)
-	return result.is_empty()  # True = no collision, so placeable
-"""
+	if buildingName == "Farm":
+		instance = farm_prefab.instantiate()
+	elif buildingName == "ResourceHub":
+		instance = resourceHub_prefab.instantiate()
+	elif buildingName == "StoneMine":
+		instance = stoneMine_prefab.instantiate()
+	elif buildingName == "LumberJack":
+		instance = lumberJack_prefab.instantiate()
+	elif buildingName == "Barracks":
+		instance = barracks_prefab.instantiate()
+	elif buildingName == "WallCorner":
+		instance = wallCorner_prefab.instantiate()
+	elif buildingName == "Turret":
+		instance = turret_prefab.instantiate()
+	 #New FAKE money farm
+	
+	instance.fake = false
+	instance.type = buildingName
+	instance.BUILDING_UNIQUE_ID = buildingIDTracker
+	buildingIDTracker += 1
+	
+	instance.pos = grid.coord_to_axial_hex(buildingPos)
+	instance.controller = self
+	instance.global_position = buildingPos
+	add_child(instance) #Adding the instance
+	buildings.push_back(instance)
+	for h in buildings[buildings.size() - 1].HEX_SHAPE:
+		grid.update_grid(grid.coord_to_axial_hex(buildingPos) + h, 2, [buildings[buildings.size() - 1]])
+	if buildingName == "ResourceHub":
+		buildings[buildings.size() - 1].meepleDocPos = grid.coord_to_axial_hex(buildingPos) + Vector2i(1,0)
+
 
 func spawnNexus():
 	nexusSpawn = grid.biomeGen.nexusSpawn

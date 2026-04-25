@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://6clds1ci2jfq"]
+
+[ext_resource type="Script" uid="uid://chbijajm03s6s" path="res://scripts/buildings/combat_buildings/turret.gd" id="1_stv84"]
+[ext_resource type="Texture2D" uid="uid://bcqb01pit0y1s" path="res://assets/buildings/turrentEnemy.png" id="2_stv84"]
+
+[node name="turret" type="Node2D" unique_id=2129524693]
+script = ExtResource("1_stv84")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1807959290]
+position = Vector2(0, -1.1920929e-07)
+scale = Vector2(0.4, 0.3572674)
+texture = ExtResource("2_stv84")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=776780238]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

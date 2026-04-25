@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://dx7fd1820pgiy"]
+
+[ext_resource type="Script" uid="uid://djfaga3hrwnut" path="res://scripts/buildings/resource_buildings/lumber_jacks.gd" id="1_5iv5b"]
+[ext_resource type="Texture2D" uid="uid://dyabwtqc8hjwc" path="res://assets/buildings/lumberJacksEnemy.png" id="2_5iv5b"]
+
+[node name="LumberJack" type="Node2D" unique_id=1057711618]
+script = ExtResource("1_5iv5b")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_5iv5b")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=991196017]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

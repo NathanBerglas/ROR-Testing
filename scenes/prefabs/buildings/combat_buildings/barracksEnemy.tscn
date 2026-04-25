@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://b3efqc86if06o"]
+
+[ext_resource type="Script" uid="uid://b8tva5qsfa7ah" path="res://scripts/buildings/combat_buildings/barracks.gd" id="1_vlgco"]
+[ext_resource type="Texture2D" uid="uid://cswxfvr8nst2" path="res://assets/buildings/barracksEnemy.png" id="2_vlgco"]
+
+[node name="Barracks" type="Node2D" unique_id=1447086411]
+script = ExtResource("1_vlgco")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=877286676]
+freeze = true
+
+[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D" unique_id=1515904999]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_vlgco")
+
+[node name="HP_BAR" type="ProgressBar" parent="." unique_id=1459608685]
+offset_left = -82.0
+offset_top = -89.0
+offset_right = 82.0
+offset_bottom = -65.0
+show_percentage = false

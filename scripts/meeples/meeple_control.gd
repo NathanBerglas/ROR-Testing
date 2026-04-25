@@ -293,19 +293,6 @@ func removeEmptyGroups(): #Gets rid of all groups with no meeples
 """
 
 
-#unc colourNotIn(): #Returns a colour for a group
-#	#print("looking for one")
-#	var found = false
-#	for c in permGroupColour:
-#		for nc in groupColours:
-#			found = false
-#			if c == nc:
-#				found = true
-#				break
-#		if found == false:
-#			#print("Found One")
-#			return c
-#	return null
 
 
 func set_id(node):

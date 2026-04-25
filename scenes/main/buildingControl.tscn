@@ -3,12 +3,15 @@
 [ext_resource type="Script" uid="uid://bgv44hfc0ifr3" path="res://scripts/main/building_control.gd" id="1_kvhp6"]
 [ext_resource type="PackedScene" uid="uid://crdqwkqqtjfod" path="res://scenes/prefabs/buildings/resource_buildings/Farm.tscn" id="2_fbp8a"]
 [ext_resource type="Script" uid="uid://c4jvo5hivmdi5" path="res://scripts/menus/hud.gd" id="2_oj14w"]
+[ext_resource type="PackedScene" uid="uid://cs6i2coypq4eb" path="res://scenes/prefabs/buildings/resource_buildings/FarmEnemy.tscn" id="3_5k6ad"]
 [ext_resource type="PackedScene" uid="uid://b6t8bbcr80x3s" path="res://scenes/prefabs/buildings/resource_buildings/LumberJacks.tscn" id="3_bfbke"]
 [ext_resource type="PackedScene" uid="uid://vr7ll0w6bfdx" path="res://scenes/prefabs/buildings/combat_buildings/barracks.tscn" id="3_fbp8a"]
 [ext_resource type="PackedScene" uid="uid://dxr3aaa3ro1mf" path="res://scenes/prefabs/buildings/resource_buildings/StoneMine.tscn" id="4_cq801"]
+[ext_resource type="PackedScene" uid="uid://c8ows5wed4evw" path="res://scenes/prefabs/buildings/resource_buildings/StoneMineEnemy.tscn" id="5_d2nx4"]
 [ext_resource type="Texture2D" uid="uid://chvsahw5yjflm" path="res://assets/buildings/farm.png" id="5_fbp8a"]
 [ext_resource type="PackedScene" uid="uid://bvicor1lw62ay" path="res://scenes/prefabs/buildings/resource_buildings/resourceHub.tscn" id="5_u7xp7"]
 [ext_resource type="Texture2D" uid="uid://dmme2pmdcs6we" path="res://assets/buildings/barracks.png" id="5_vw06n"]
+[ext_resource type="PackedScene" uid="uid://dx7fd1820pgiy" path="res://scenes/prefabs/buildings/resource_buildings/LumberJacksEnemy.tscn" id="7_f0tnn"]
 [ext_resource type="Texture2D" uid="uid://bmdh3cno6m74l" path="res://assets/buildings/stoneMine.png" id="7_gftes"]
 [ext_resource type="PackedScene" uid="uid://btb83rswug0t1" path="res://scenes/prefabs/buildings/combat_buildings/wallCorner.tscn" id="7_t6ejh"]
 [ext_resource type="Texture2D" uid="uid://cnamqjcjw6sa1" path="res://assets/menus/resourceBuildingMenuButton.png" id="8_3co7m"]
@@ -16,10 +19,16 @@
 [ext_resource type="Texture2D" uid="uid://b2jmavmsncpfu" path="res://assets/menus/combatBuildingMenuButton.png" id="8_rj1gy"]
 [ext_resource type="Texture2D" uid="uid://bmjqv3d2068k3" path="res://assets/buildings/lumberJacks.png" id="8_w1qyp"]
 [ext_resource type="PackedScene" uid="uid://dh3llecy2aj26" path="res://scenes/prefabs/buildings/combat_buildings/turret.tscn" id="9_k0c8h"]
+[ext_resource type="PackedScene" uid="uid://w6d4wnbyeqy3" path="res://scenes/prefabs/buildings/resource_buildings/resourceHubEnemy.tscn" id="9_mdj8m"]
 [ext_resource type="PackedScene" uid="uid://dqjl8bsde3lkv" path="res://scenes/prefabs/buildings/Nexus.tscn" id="10_v74i5"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="11_cq801"]
+[ext_resource type="PackedScene" uid="uid://b3efqc86if06o" path="res://scenes/prefabs/buildings/combat_buildings/barracksEnemy.tscn" id="11_e0bfq"]
+[ext_resource type="PackedScene" uid="uid://b68p435fysnhc" path="res://scenes/prefabs/buildings/combat_buildings/wallCornerEnemy.tscn" id="13_1soro"]
+[ext_resource type="PackedScene" uid="uid://bsxe1atoj1q53" path="res://scenes/prefabs/buildings/combat_buildings/wallSegmentEnemy.tscn" id="15_gvj3m"]
 [ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/buildings/WallCorner.png" id="16_t6ejh"]
+[ext_resource type="PackedScene" uid="uid://6clds1ci2jfq" path="res://scenes/prefabs/buildings/combat_buildings/turretEnemy.tscn" id="17_ekw31"]
 [ext_resource type="Texture2D" uid="uid://duhlw8ydi84fg" path="res://assets/buildings/turrent.png" id="19_2hoj7"]
+[ext_resource type="PackedScene" uid="uid://bqax1ba3jxi2e" path="res://scenes/prefabs/buildings/NexusEnemy.tscn" id="19_abdoh"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
 
@@ -30,16 +39,26 @@
 [node name="BuildingControl" type="Node2D" unique_id=390504468]
 script = ExtResource("1_kvhp6")
 farm_prefab = ExtResource("2_fbp8a")
+farm_prefabEnemy = ExtResource("3_5k6ad")
 stoneMine_prefab = ExtResource("4_cq801")
+stoneMine_prefabEnemy = ExtResource("5_d2nx4")
 lumberJack_prefab = ExtResource("3_bfbke")
+lumberJack_prefabEnemy = ExtResource("7_f0tnn")
 resourceHub_prefab = ExtResource("5_u7xp7")
+resourceHub_prefabEnemy = ExtResource("9_mdj8m")
 barracks_prefab = ExtResource("3_fbp8a")
+barracks_prefabEnemy = ExtResource("11_e0bfq")
 wallCorner_prefab = ExtResource("7_t6ejh")
+wallCorner_prefabEnemy = ExtResource("13_1soro")
 wallSegment_prefab = ExtResource("8_hlxnr")
+wallSegment_prefabEnemy = ExtResource("15_gvj3m")
 turret_prefab = ExtResource("9_k0c8h")
+turret_prefabEnemy = ExtResource("17_ekw31")
 nexus_prefab = ExtResource("10_v74i5")
+nexus_prefabEnemy = ExtResource("19_abdoh")
 
 [node name="buildingHud" type="CanvasLayer" parent="." unique_id=815674145]
+visible = false
 script = ExtResource("2_oj14w")
 
 [node name="Food" type="Label" parent="buildingHud" unique_id=2073406]
@@ -112,6 +131,7 @@ expand_icon = true
 metadata/_edit_use_anchors_ = true
 
 [node name="resourceBuildingHud" type="CanvasLayer" parent="." unique_id=1220890351]
+visible = false
 
 [node name="ScrollContainer" type="ScrollContainer" parent="resourceBuildingHud" unique_id=246695275]
 visible = false
@@ -224,6 +244,7 @@ text = "Resource Hub - 5000F
 metadata/_edit_use_anchors_ = true
 
 [node name="combatBuildingHud" type="CanvasLayer" parent="." unique_id=485597457]
+visible = false
 
 [node name="ScrollContainer" type="ScrollContainer" parent="combatBuildingHud" unique_id=662035960]
 offset_left = 17.0
@@ -305,11 +326,13 @@ text = "Turret - 500F
 metadata/_edit_use_anchors_ = true
 
 [node name="RclickMenuResourceHub" type="VBoxContainer" parent="." unique_id=890369603]
+visible = false
 z_index = 2
 offset_right = 199.0
 offset_bottom = 66.0
 
 [node name="manageCaravansButton" type="Button" parent="RclickMenuResourceHub" unique_id=1297992487]
+visible = false
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_cq801")
 text = "1- Manage Caravans"
