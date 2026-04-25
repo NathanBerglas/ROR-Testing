@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://8s5fbc42yax2"]
 
-[ext_resource type="Script" uid="uid://5sxahsim667x" path="res://scripts/Meeples/meeple_control.gd" id="1_py3r1"]
+[ext_resource type="Script" uid="uid://5sxahsim667x" path="res://scripts/meeples/meeple_control.gd" id="1_py3r1"]
 [ext_resource type="PackedScene" uid="uid://c3bfvpwmvjpgd" path="res://scenes/prefabs/meeples/combat_meeples/infantry.tscn" id="2_jurxu"]
 [ext_resource type="Texture2D" uid="uid://dl1syupmh08d0" path="res://assets/meeples/meeple.png" id="3_hkl3t"]
 
@@ -33,9 +33,23 @@ offset_bottom = 66.0
 [node name="Merge" type="Button" parent="VBoxContainer" unique_id=906744191]
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_mbxmy")
-text = "1- Merge Troops Here"
+text = " 1- Merge Troops Here"
+alignment = 0
 
 [node name="Group" type="Button" parent="VBoxContainer" unique_id=188560484]
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_jurxu")
-text = "2 - Create/Merge Groups"
+text = " 2 - Create/Merge Groups"
+alignment = 0
+
+[node name="Split1" type="Button" parent="VBoxContainer" unique_id=800541140]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_jurxu")
+text = " 3 - Split One Meeple"
+alignment = 0
+
+[node name="SplitHalf" type="Button" parent="VBoxContainer" unique_id=141701819]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_jurxu")
+text = " 4 - Split Into Two"
+alignment = 0

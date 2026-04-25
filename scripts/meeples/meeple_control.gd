@@ -5,7 +5,8 @@ extends Node2D
 @onready var selection_box = $ColorRect
 @onready var RCLICKORDER = $VBoxContainer/Merge
 @onready var RCLICKGROUP = $VBoxContainer/Group
-@onready var RCLICKATTACK= $VBoxContainer/Attack
+@onready var RCLICKSPLIT1 = $VBoxContainer/Split1
+@onready var RCLICKSPLITHALF = $VBoxContainer/SplitHalf
 @onready var RCLICKMENU = $VBoxContainer
 
 const MEEPLE_TICKS_PER_SECOND = 60
@@ -34,6 +35,10 @@ var grid
 var selecting = Vector2(0,0)
 #var selectingTime = 0
 
+var placing_split_meeple: int = 0
+var global_split_amount: int = 0
+var split_from_hex: Vector2i
+
 var MEEPLE_ID_COUNTER = 1
  
 const FLAG_VERBOSE = true
@@ -47,11 +52,13 @@ func _ready() -> void:
 	
 	#Connecting the buttons to their respective functions
 	RCLICKGROUP.button_down.connect(_on_group_button_pressed)
-	RCLICKGROUP.button_up.connect(_on_group_button_released)
+	RCLICKGROUP.button_up.connect(_on_button_released)
 	RCLICKORDER.button_down.connect(_on_order_button_pressed)
-	RCLICKORDER.button_up.connect(_on_order_button_released)
-	#RCLICKATTACK.button_down.connect(_on_attack_button_pressed)
-	#RCLICKATTACK.button_up.connect(_on_attack_button_released)
+	RCLICKORDER.button_up.connect(_on_button_released)
+	RCLICKSPLIT1.button_down.connect(_on_split_1_button_pressed)
+	RCLICKSPLIT1.button_up.connect(_on_button_released)
+	RCLICKSPLITHALF.button_down.connect(_on_split_half_button_pressed)
+	RCLICKSPLITHALF.button_up.connect(_on_button_released)
 
 
 func _process(delta): #Runs every tick
@@ -61,7 +68,43 @@ func _process(delta): #Runs every tick
 		time_since_last_meeple_tick = 0
 		meeple_process()
 	
-	if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
+	process_inputs()
+
+
+func process_inputs():
+	if placing_split_meeple:
+		if Input.is_action_just_released("place_meeple"):
+			placing_split_meeple -= 1
+			if !placing_split_meeple:
+				var destination_tile = grid.probe(get_global_mouse_position())
+				var split_from_tile = grid.axial_probe(split_from_hex)
+				var splitting_meeple: meeple = null
+				if split_from_tile.objectsInside.size() > 0:
+					splitting_meeple = split_from_tile.objectsInside[0]
+				else:
+					if FLAG_DEBUG: print("SPLITTING EMPTY HEX"); breakpoint; return;
+				if global_split_amount < 0:
+					global_split_amount = max(splitting_meeple.HP / (-global_split_amount), 1)
+				if splitting_meeple.HP <= global_split_amount:
+					if FLAG_VERBOSE: print("Cannot split meeple with ", splitting_meeple.HP, " health by ", global_split_amount)
+					return
+				var adjacent = []
+				for dir in grid.HEX_DIRS:
+					adjacent.append(dir + split_from_hex)
+				if grid.coord_to_axial_hex(get_global_mouse_position()) in adjacent \
+				and destination_tile.traversable:
+					if destination_tile.classification == 3:
+						destination_tile.objectsInside[0].update_hp(global_split_amount)
+					elif destination_tile.classification == 0:
+						spawn_meeple(get_global_mouse_position())
+						destination_tile.objectsInside[0].update_hp(global_split_amount - 1)
+					else:
+						return
+					if FLAG_VERBOSE: print("Splitting meeple: ", destination_tile.objectsInside[0].UNIQUEID, " into ", destination_tile.hex, " into ", splitting_meeple.HP - global_split_amount, "HP and ", global_split_amount, "HP")
+					grid.axial_probe(split_from_hex).objectsInside[0].update_hp(-global_split_amount)
+		return
+		
+	elif Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
 		if grid.probe(get_global_mouse_position()).classification == 3:
 			grid.probe(get_global_mouse_position()).objectsInside[0].update_hp(1)
 			return
@@ -170,16 +213,6 @@ func _process(delta): #Runs every tick
 					
 					#m.dest = grid.hex_center(attackLoc)
 				m.is_unselected()
-	"""
-	else:
-		var MEEPLE_CONTROL_INDEX = 0
-		var BUILDING_CONTROL_INDEX = 1
-		for p in GameManager.Players:
-			#print(playerID)
-			if p == playerID:
-				if GameManager.controllersSet == true:
-					equalize(GameManager.Players[p].meepleInfo)
-	"""
 
 
 # Moves Meeples and checks if they've arrived at their destination
@@ -252,10 +285,6 @@ func _on_order_button_pressed():
 	order_meeple(RCLICKMENU.get_global_position())
 
 
-func _on_order_button_released(): #Menu gone :(
-	RCLICKMENU.visible = false
-
-
 #Absolutly BROKEN logic for creating groups
 #For real tho, it kinda fire
 func _on_group_button_pressed():	
@@ -272,11 +301,28 @@ func _on_group_button_pressed():
 		if FLAG_VERBOSE: print("Meeple ID: " + str(m.UNIQUEID) + ", Group Number: " + str(m.groupNum))
 
 
-func _on_group_button_released():
-	RCLICKMENU.visible = false
+func _on_split_1_button_pressed():
+	split_meeple(RCLICKMENU.get_global_position(), 1)
+
+func _on_split_half_button_pressed():
+	split_meeple(RCLICKMENU.get_global_position(), -2) # -X means 1/x, so -2 is 1 / 2
+
+	
+func split_meeple(coord: Vector2, split_amount: int):
+	var clicked_tile = grid.probe(coord)
+	if clicked_tile.classification != 3:
+		return
+	if clicked_tile.objectsInside[0].HP <= 1:
+		return
+	placing_split_meeple = 2
+	global_split_amount = split_amount
+	split_from_hex = clicked_tile.hex
+	# wait for left click on adjacent hex
+	# place meeple in that spot
+	# remove health from this meeple
 
 
-func _on_attack_button_released(): #Menu gone :(
+func _on_button_released():
 	RCLICKMENU.visible = false
 
 
