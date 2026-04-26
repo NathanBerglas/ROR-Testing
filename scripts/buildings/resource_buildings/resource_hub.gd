@@ -66,21 +66,23 @@ func _process(delta):
 	if time_since_last_caravan_tick > (1.0 / CARAVAN_TICKS_PER_SECOND):
 		caravan_process(time_since_last_caravan_tick)
 		time_since_last_caravan_tick = 0
-	if Input.is_action_just_pressed("right_click_menu"):
-		if managingCaravanMenu.visible == true:
-			_on_finishManaging_button_released()
-		manageCaravanMenu.visible = false
-		managingCaravanMenu.visible = false
-	if Input.is_action_just_pressed("select"): #Managing a route -> Make a new target
-		if routeManaging != 0 and controller.grid.coord_to_axial_hex(get_global_mouse_position()) != controller.grid.coord_to_axial_hex(self.get_global_position()):
-			if tempRoute.size() < 3 and controller.grid.hex_center(get_global_mouse_position()) not in tempRoute:
-				
-				tempRoute.append(controller.grid.hex_center(get_global_mouse_position()))
-				var instance = caravanTarget.instantiate()
-				add_child(instance)
-				instance.label.text = str(tempRoute.size())
-				instance.set_global_position(controller.grid.hex_center(get_global_mouse_position()))
-				tempTargets.append(instance)
+	
+	if playerID == multiplayer.get_unique_id():
+		if Input.is_action_just_pressed("right_click_menu"):
+			if managingCaravanMenu.visible == true:
+				_on_finishManaging_button_released()
+			manageCaravanMenu.visible = false
+			managingCaravanMenu.visible = false
+		if Input.is_action_just_pressed("select"): #Managing a route -> Make a new target
+			if routeManaging != 0 and controller.grid.coord_to_axial_hex(get_global_mouse_position()) != controller.grid.coord_to_axial_hex(self.get_global_position()):
+				if tempRoute.size() < 3 and controller.grid.hex_center(get_global_mouse_position()) not in tempRoute:
+					
+					tempRoute.append(controller.grid.hex_center(get_global_mouse_position()))
+					var instance = caravanTarget.instantiate()
+					add_child(instance)
+					instance.label.text = str(tempRoute.size())
+					instance.set_global_position(controller.grid.hex_center(get_global_mouse_position()))
+					tempTargets.append(instance)
 				
 	
 	for r in managedRoutes: #Timing to send caravans out

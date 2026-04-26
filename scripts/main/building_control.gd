@@ -382,6 +382,9 @@ func _process(delta): #runs every tick
 		if FLAG_VERBOSE_MULTI: print(queued_orders_to_send_in_control)
 	cleanBuildings()
 	process_orders()
+	sendCaravans()
+	for b in buildings:
+		b.updateHPBar()
 	if multiplayer.get_unique_id() == playerID:
 		hoveringText()
 		#Opens up the right click menu
@@ -392,8 +395,7 @@ func _process(delta): #runs every tick
 				RCLICK_ResourceHub.visible = true
 			else:
 				RCLICK_ResourceHub.visible = false
-		for b in buildings:
-			b.updateHPBar()
+		
 		if buildingDraggin != null: #Code actually dragging the building around
 			buildings[buildings.size() - 1].global_position = get_global_mouse_position()
 			if !is_placeable(buildings[buildings.size() - 1]):
@@ -414,7 +416,7 @@ func _process(delta): #runs every tick
 					m.getTarget(grid)
 				else:
 					m.attack(delta)
-	sendCaravans()
+	
 	hud.updateFood(food) 
 	hud.updateWood(wood) 
 	hud.updateStone(stone) 
@@ -568,8 +570,7 @@ func process_orders(): #Change this to basically process as many as possible. Id
 		#If statements for orders based on order - update later 
 		if order[0] == 0:
 			spawn_building_order(order[1])
-		
-			
+
 
 func spawn_building_order(args):
 	var buildingName = args[1]
@@ -596,7 +597,7 @@ func spawn_building_order(args):
 	instance.type = buildingName
 	instance.BUILDING_UNIQUE_ID = buildingIDTracker
 	buildingIDTracker += 1
-	
+	instance.playerID = playerID
 	instance.pos = grid.coord_to_axial_hex(buildingPos)
 	instance.controller = self
 	instance.global_position = buildingPos

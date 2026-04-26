@@ -153,6 +153,10 @@ func _process(delta): #Runs every tick
 					tempMeepleArray.append(m.UNIQUEID)
 					m.is_unselected()
 			if grid.axial_probe(attackLoc).objectsInside.size() > 0 and grid.axial_probe(attackLoc).objectsInside[0].playerID != playerID:
+				if FLAG_VERBOSE_MULTI: print("")
+				if FLAG_VERBOSE_MULTI:print("Meeple of: " + str(playerID))
+				if FLAG_VERBOSE_MULTI:print("Attacking: " + str(grid.axial_probe(attackLoc).objectsInside[0].playerID))
+				if FLAG_VERBOSE_MULTI:print("")
 				queued_orders_to_send_in_control.append([3,[attackLoc, tempMeepleArray]])
 	
 	"""
