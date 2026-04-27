@@ -157,6 +157,7 @@ func _ready(): #Runs on start, connects buttons
 		combatButtons.append([wallCornerButton, wallCornerLabel])
 		combatButtons.append([turretButton, turretLabel])
 		RCLICK_ResourceHub.visible = false
+		
 	
 	else:
 		farm_prefab = farm_prefabEnemy
@@ -269,6 +270,7 @@ func _on_manageCaravans_button_released():
 	resourceHubAtLocation.manageCaravanMenu.visible = true
 	resourceHubAtLocation.manageCaravanMenu.set_global_position(RCLICK_ResourceHub.get_global_position())
 	RCLICK_ResourceHub.visible = false
+	
 
 
 #Start dragging the farm if has enough money
@@ -389,12 +391,16 @@ func _process(delta): #runs every tick
 		hoveringText()
 		#Opens up the right click menu
 		if Input.is_action_just_pressed("right_click_menu"):
+			
 			var probing_hex = grid.probe(get_global_mouse_position())
-			if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub":
+			if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub" and probing_hex.objectsInside[0].playerID == playerID:
+				
 				RCLICK_ResourceHub.set_global_position(get_global_mouse_position())
 				RCLICK_ResourceHub.visible = true
+				
 			else:
 				RCLICK_ResourceHub.visible = false
+				
 		
 		if buildingDraggin != null: #Code actually dragging the building around
 			buildings[buildings.size() - 1].global_position = get_global_mouse_position()

@@ -2,7 +2,7 @@ extends Node
 
 const ONLINE = false
 @export var Address = null
-@export var port = 9999
+@export var port = 10999
 
 
 @export var playerScene: PackedScene

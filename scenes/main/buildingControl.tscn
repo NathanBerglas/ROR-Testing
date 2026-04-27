@@ -327,12 +327,11 @@ metadata/_edit_use_anchors_ = true
 
 [node name="RclickMenuResourceHub" type="VBoxContainer" parent="." unique_id=890369603]
 visible = false
-z_index = 2
+z_index = 30
 offset_right = 199.0
 offset_bottom = 66.0
 
 [node name="manageCaravansButton" type="Button" parent="RclickMenuResourceHub" unique_id=1297992487]
-visible = false
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_cq801")
 text = "1- Manage Caravans"
