@@ -1,7 +1,8 @@
 extends Node2D
 
-@export var targetMarker: Sprite2D
 @export var infantry_prefab: PackedScene
+@onready var targetMarker = $TargetMarker
+@onready var HexMarker = $HexMarker
 @onready var selection_box = $ColorRect
 @onready var RCLICKORDER = $VBoxContainer/Merge
 @onready var RCLICKGROUP = $VBoxContainer/Group
@@ -45,7 +46,7 @@ const FLAG_VERBOSE = true
 const FLAG_DEBUG = true
 
 func _ready() -> void:
-	
+	HexMarker.visible = true
 	#Setting base states for the selection box and the right click menu
 	selection_box.visible = false
 	RCLICKMENU.visible = false
@@ -67,15 +68,20 @@ func _process(delta): #Runs every tick
 	if time_since_last_meeple_tick > (1.0 / MEEPLE_TICKS_PER_SECOND):
 		time_since_last_meeple_tick = 0
 		meeple_process()
-	
 	process_inputs()
 
 
 func process_inputs():
 	if placing_split_meeple:
+		if grid.coord_to_axial_hex(get_global_mouse_position()) - split_from_hex in grid.HEX_DIRS + [Vector2i(0, 0)]:
+			HexMarker.global_position = grid.hex_center(get_global_mouse_position())
+			HexMarker.visible = true
+		else:
+			HexMarker.visible = false
 		if Input.is_action_just_released("place_meeple"):
 			placing_split_meeple -= 1
 			if !placing_split_meeple:
+				HexMarker.visible = false
 				var destination_tile = grid.probe(get_global_mouse_position())
 				var split_from_tile = grid.axial_probe(split_from_hex)
 				var splitting_meeple: meeple = null
@@ -88,16 +94,30 @@ func process_inputs():
 				if splitting_meeple.HP <= global_split_amount:
 					if FLAG_VERBOSE: print("Cannot split meeple with ", splitting_meeple.HP, " health by ", global_split_amount)
 					return
-				var adjacent = []
-				for dir in grid.HEX_DIRS:
-					adjacent.append(dir + split_from_hex)
-				if grid.coord_to_axial_hex(get_global_mouse_position()) in adjacent \
+				for m in unorderedMeeples: # unselect all meeples
+						m.is_unselected()
+				if grid.coord_to_axial_hex(get_global_mouse_position()) - split_from_hex in grid.HEX_DIRS + [Vector2i(0, 0)] \
 				and destination_tile.traversable:
 					if destination_tile.classification == 3:
 						destination_tile.objectsInside[0].update_hp(global_split_amount)
+						destination_tile.objectsInside[0].is_selected()
 					elif destination_tile.classification == 0:
-						spawn_meeple(get_global_mouse_position())
+						#spawn_meeple(get_global_mouse_position())
+						var instance = infantry_prefab.instantiate()
+						# Set instance's data
+						instance.set_id(MEEPLE_ID_COUNTER)
+						MEEPLE_ID_COUNTER += 1
+						instance.global_position = grid.axial_hex_to_coord(split_from_hex) # Spawns meeple on top of splitting origin
+						grid.update_grid(destination_tile.hex, 4, [instance])
+						instance.path = [split_from_hex, destination_tile.hex]
+						instance.should_be_moving = true
+						# Create instance
+						add_child(instance)
+						set_id(instance)
+						unorderedMeeples.push_back(instance)
+						if FLAG_VERBOSE: print("Spawned meeple ", instance.UNIQUEID)
 						destination_tile.objectsInside[0].update_hp(global_split_amount - 1)
+						destination_tile.objectsInside[0].is_selected()
 					else:
 						return
 					if FLAG_VERBOSE: print("Splitting meeple: ", destination_tile.objectsInside[0].UNIQUEID, " into ", destination_tile.hex, " into ", splitting_meeple.HP - global_split_amount, "HP and ", global_split_amount, "HP")
@@ -218,7 +238,7 @@ func process_inputs():
 # Moves Meeples and checks if they've arrived at their destination
 func _physics_process(delta: float) -> void:
 	for m in unorderedMeeples:
-		if !m.shouldBeMoving:
+		if !m.should_be_moving:
 			continue
 		var next_hex: Vector2 = grid.axial_hex_to_coord(m.path[1])
 		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
@@ -242,7 +262,7 @@ func _physics_process(delta: float) -> void:
 				grid.update_grid(m.path[1], 3, [m])
 				m.path.pop_front()
 				#if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has stopped moving at position ", m.global_position, " in hex: ", next_hex)
-				m.shouldBeMoving = false
+				m.should_be_moving = false
 
 
 #Updates the selction box to where the mouse is
@@ -315,11 +335,9 @@ func split_meeple(coord: Vector2, split_amount: int):
 	if clicked_tile.objectsInside[0].HP <= 1:
 		return
 	placing_split_meeple = 2
+	#HexMarker.visible = true
 	global_split_amount = split_amount
 	split_from_hex = clicked_tile.hex
-	# wait for left click on adjacent hex
-	# place meeple in that spot
-	# remove health from this meeple
 
 
 func _on_button_released():
@@ -371,7 +389,7 @@ func freeMeeple(id):
 	if FLAG_VERBOSE: print("Deleting meeple ", id)
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
-			if !unorderedMeeples[i].shouldBeMoving:
+			if !unorderedMeeples[i].should_be_moving:
 				grid.update_grid(unorderedMeeples[i].path[0], 0, [])
 			else:
 				if !grid.axial_probe(unorderedMeeples[i].path[1]).classification == 3: # no other meeple inside
@@ -410,7 +428,7 @@ func meeple_end_merge(incoming_meeple, target_meeple):
 func egress_granted(waiting_meeple):
 	if FLAG_VERBOSE and waiting_meeple.waiting: print("Meeple ", waiting_meeple.UNIQUEID, " set to stop waiting in egress_granted.")
 	waiting_meeple.waiting = false
-	waiting_meeple.shouldBeMoving = true
+	waiting_meeple.should_be_moving = true
 
 
 func meeple_process():
@@ -418,7 +436,7 @@ func meeple_process():
 		if m.pause_a_tick:
 			m.pause_a_tick = false
 			continue
-		if (m.shouldBeMoving || m.waiting):
+		if (m.should_be_moving || m.waiting):
 			continue
 		if (m.attackTarget != null):
 			var pos = null
@@ -440,7 +458,7 @@ func meeple_process():
 				m.redirected_from = []
 				if (ingress_result == "APPROVED"):
 					grid.hex_egress(m.path[0])
-					m.shouldBeMoving = true
+					m.should_be_moving = true
 					continue
 				elif (ingress_result == "PENDING"):
 					m.redirected_from = []
@@ -539,14 +557,14 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
 	#It then sets all vectors seen to have a meeple in them in the grid
 	for m in unorderedMeeples:
-		#m.shouldBeMoving = true
+		#m.should_be_moving = true
 		if m.path:
 			for i in range (m.path.size()):
 			
 				if (grid.probe(m.path[i]).classification == 2  or (grid.probe(m.path[i]).classification == 3 and i != m.path.size() - 1)):
 					#if grid.probe(m.path[i]).classification == 3 and i == 0:
 					#	if grid.probe(m.path[i]).objectsInside[0].path:
-						#	m.shouldBeMoving = false
+						#	m.should_be_moving = false
 						#	break
 					var tempPath = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false, false)
 					m.path = []

@@ -30,7 +30,7 @@ func _process(delta): #runs on each meeple every tick
 	
 	
 	
-	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
+	#if (path != null and should_be_moving): #if a meeple has somewhere to go, goes to it
 		#_go_to_target(delta)
 	
 	#if dest != null and closeEnough(): #meeple reaches destination
