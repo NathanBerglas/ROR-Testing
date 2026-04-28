@@ -165,26 +165,39 @@ func start_game(biomeGenInfo): # [BMAP_RESOLUTIONx, BPIXELS_PER_TILE, BMAP_RESOL
 		biomeGen.terrainOffset = player.get_node("Grid").terrainOffset
 		biomeGen.grid = player.get_node("Grid")
 		add_child(biomeGen)
+		
+		var ID1 = multiplayer.get_peers()[0]
+		var ID2 = multiplayer.get_peers()[1]
+		
+		biomeGen.nexusSpawn[0].append(ID1)
+		biomeGen.nexusSpawn[1].append(ID2)
+		
 		var biomeGenInfoToSend = []
 		biomeGenInfoToSend.append(biomeGen.MAP_RESOLUTION.x)
 		biomeGenInfoToSend.append(biomeGen.PIXELS_PER_TILE)
 		biomeGenInfoToSend.append(biomeGen.MAP_RESOLUTION.y)
 		biomeGenInfoToSend.append(biomeGen.debuggingGrid)
 		biomeGenInfoToSend.append(biomeGen.map)
+		biomeGenInfoToSend.append(biomeGen.nexusSpawn)
 		
 		start_game.rpc(biomeGenInfoToSend) # [BMAP_RESOLUTIONx, BPIXELS_PER_TILE, BMAP_RESOLUTIONy, Bdebugging_grid, Bmap]
 		
+	
 		player.get_node("Grid").BMAP_RESOLUTIONx = biomeGenInfoToSend[0]
 		player.get_node("Grid").BPIXELS_PER_TILE = biomeGenInfoToSend[1]
 		player.get_node("Grid").BMAP_RESOLUTIONy = biomeGenInfoToSend[2]
 		player.get_node("Grid").Bdebugging_grid = biomeGenInfoToSend[3]
 		player.get_node("Grid").Bmap = biomeGenInfoToSend[4]
+		player.get_node("Grid").nexusSpawn = biomeGenInfoToSend[5]
+		
+		
 	else:
 		player.get_node("Grid").BMAP_RESOLUTIONx = biomeGenInfo[0]
 		player.get_node("Grid").BPIXELS_PER_TILE = biomeGenInfo[1]
 		player.get_node("Grid").BMAP_RESOLUTIONy = biomeGenInfo[2]
 		player.get_node("Grid").Bdebugging_grid = biomeGenInfo[3]
 		player.get_node("Grid").Bmap = biomeGenInfo[4]
+		player.get_node("Grid").nexusSpawn = biomeGenInfo[5]
 	player.playerID = multiplayer.get_unique_id()
 	add_child(player)
 	

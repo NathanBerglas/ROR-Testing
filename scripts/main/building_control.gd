@@ -100,6 +100,7 @@ func _ready(): #Runs on start, connects buttons
 	print("ON: " + str(multiplayer.get_unique_id()))
 	print("In control of: " + str(playerID))
 	print("")
+	spawnNexus()
 	if playerID == multiplayer.get_unique_id():
 		hud.visible = true
 		resourceBuildingHud.visible = true
@@ -620,10 +621,17 @@ func spawn_building_order(args):
 
 
 func spawnNexus():
-	nexusSpawn = grid.biomeGen.nexusSpawn
-	var instance = nexus_prefab.instantiate()
+	nexusSpawn = grid.nexusSpawn
 	
-	var vectorNexusSpawn = Vector2(nexusSpawn[0], nexusSpawn[1])
+	var instance = null
+	if playerID == multiplayer.get_unique_id():
+		instance = nexus_prefab.instantiate()
+	else:
+		instance = nexus_prefabEnemy.instantiate()
+	var vectorNexusSpawn = null
+	for spawn in nexusSpawn:
+		if spawn[2] == playerID:
+			vectorNexusSpawn = Vector2(spawn[0], spawn[1])
 	
 	instance.fake = true
 	instance.type = "Nexus"

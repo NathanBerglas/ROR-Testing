@@ -12,7 +12,7 @@ const debuggingGrid = false
 @export var BEACH_RESOLUTION: int = 10
 @export var PIXELS_PER_TILE: int = 10
 var MAP_RESOLUTION: Vector2i = Vector2i(1080, 580)
-var nexusSpawn = [(((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) / 5) + BORDER_RESOLUTION) * PIXELS_PER_TILE, ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) / 2 + BORDER_RESOLUTION) * PIXELS_PER_TILE]
+var nexusSpawn = [[(((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) / 5) + BORDER_RESOLUTION) * PIXELS_PER_TILE, ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) / 2 + BORDER_RESOLUTION) * PIXELS_PER_TILE], [(((MAP_RESOLUTION.x - BORDER_RESOLUTION * 2) / 5 * 4) + BORDER_RESOLUTION) * PIXELS_PER_TILE, ((MAP_RESOLUTION.y - BORDER_RESOLUTION * 2) / 2 + BORDER_RESOLUTION) * PIXELS_PER_TILE]]
 
 # Gen Data
 @export var gen_data: JSON
@@ -77,7 +77,8 @@ func _ready() -> void:
 	#Data returned: min_distance, feature name, spawn area, occurences, layer, roughness, radius, number of points, neighbour counts, point min Distance
 		
 	var data = get_data()
-	nexusSpawn[0] += terrainOffset
+	nexusSpawn[0][0] += terrainOffset
+	nexusSpawn[1][0] += terrainOffset
 	ellapsed = Time.get_ticks_msec() - previous_time
 	previous_time = Time.get_ticks_msec()
 	GLOBAL_chunk_length = data[0] * 0.70711 # min_distance / sqrt(2)

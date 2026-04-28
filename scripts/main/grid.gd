@@ -5,7 +5,7 @@ const FLAG_VERBOSE = true
 # Grid constants
 @export var HEX_SIZE: float = 64
 @export var GRID_COUNT: Vector2i = Vector2i(466,214)
-
+var nexusSpawn = null
 
 var meeple_controls = []
 @export var debug_hex_prefab: PackedScene
