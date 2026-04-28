@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://dh3llecy2aj26" path="res://scenes/prefabs/buildings/combat_buildings/turret.tscn" id="9_k0c8h"]
 [ext_resource type="PackedScene" uid="uid://dqjl8bsde3lkv" path="res://scenes/prefabs/buildings/Nexus.tscn" id="10_v74i5"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="11_cq801"]
+[ext_resource type="Texture2D" uid="uid://wndwdy07kcoq" path="res://assets/menus/marketMenuButton.png" id="14_vy5db"]
 [ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/buildings/WallCorner.png" id="16_t6ejh"]
 [ext_resource type="Texture2D" uid="uid://duhlw8ydi84fg" path="res://assets/buildings/turrent.png" id="19_2hoj7"]
 
@@ -109,6 +110,27 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
 icon = ExtResource("8_rj1gy")
 flat = true
 expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="marketButton" type="Button" parent="buildingHud" unique_id=964848453]
+offset_left = 1239.0
+offset_right = 1374.0
+offset_bottom = 135.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fbp8a")
+icon = ExtResource("14_vy5db")
+flat = true
+expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="marketLabel" type="Label" parent="buildingHud" unique_id=1184703483]
+offset_left = 1159.0
+offset_top = 139.0
+offset_right = 1471.0
+offset_bottom = 253.66666
+theme_override_font_sizes/font_size = 40
+text = "Opens Market
+Menu"
+horizontal_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="resourceBuildingHud" type="CanvasLayer" parent="." unique_id=1220890351]
@@ -226,6 +248,7 @@ metadata/_edit_use_anchors_ = true
 [node name="combatBuildingHud" type="CanvasLayer" parent="." unique_id=485597457]
 
 [node name="ScrollContainer" type="ScrollContainer" parent="combatBuildingHud" unique_id=662035960]
+visible = false
 offset_left = 17.0
 offset_top = 177.0
 offset_right = 322.0
@@ -313,3 +336,20 @@ offset_bottom = 66.0
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_cq801")
 text = "1- Manage Caravans"
+
+[node name="market" type="CanvasLayer" parent="." unique_id=709845480]
+
+[node name="ScrollContainer" type="ScrollContainer" parent="market" unique_id=621036869]
+visible = false
+offset_left = 17.0
+offset_top = 177.0
+offset_right = 322.0
+offset_bottom = 896.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="market/ScrollContainer" unique_id=366606308]
+layout_mode = 2
+alignment = 1
+
+[node name="closeMarketMenu" type="Button" parent="market/ScrollContainer/VBoxContainer" unique_id=1356767448]
+layout_mode = 2
+text = "Close"

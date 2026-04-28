@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x4y46wuqmrfo"
-path="res://.godot/imported/ROR Icon.png-e4c56b1b89dc0aa3c2d69eec71a15452.ctex"
+uid="uid://dwjtc5otikwnm"
+path="res://.godot/imported/stone_icon.png-df1d44270245362c6fa541786822940e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/menus/ROR Icon.png"
-dest_files=["res://.godot/imported/ROR Icon.png-e4c56b1b89dc0aa3c2d69eec71a15452.ctex"]
+source_file="res://assets/menus/stone_icon.png"
+dest_files=["res://.godot/imported/stone_icon.png-df1d44270245362c6fa541786822940e.ctex"]
 
 [params]
 

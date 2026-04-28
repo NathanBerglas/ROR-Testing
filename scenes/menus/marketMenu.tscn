@@ -1,0 +1,362 @@
+[gd_scene format=3 uid="uid://dkhccswoxn7m8"]
+
+[ext_resource type="Texture2D" uid="uid://b85f8vuyspkxt" path="res://assets/menus/marketBackground.png" id="1_uqlmk"]
+[ext_resource type="Texture2D" uid="uid://gywy5m0hvtd4" path="res://assets/menus/wood_icon.png" id="2_dcwrt"]
+[ext_resource type="Texture2D" uid="uid://dyuci5fayskyh" path="res://assets/menus/food_icon.png" id="2_u8fbg"]
+[ext_resource type="Texture2D" uid="uid://dwjtc5otikwnm" path="res://assets/menus/stone_icon.png" id="3_u8fbg"]
+[ext_resource type="Texture2D" uid="uid://ctfclimiysewa" path="res://assets/menus/iron_icon.png" id="4_ba5s5"]
+[ext_resource type="Texture2D" uid="uid://drkd3ahrgn2va" path="res://assets/menus/ruby_icon.png" id="5_w8ros"]
+[ext_resource type="Texture2D" uid="uid://xjxwuwbbur3t" path="res://assets/menus/diamond_icon.png" id="6_61u7f"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_uqlmk"]
+font_size = 40
+
+[sub_resource type="LabelSettings" id="LabelSettings_sxv5f"]
+font_size = 40
+
+[sub_resource type="LabelSettings" id="LabelSettings_knj74"]
+font_size = 32
+
+[sub_resource type="Theme" id="Theme_uqlmk"]
+default_font_size = 32
+
+[node name="MarketMenu" type="Control" unique_id=1235774572]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="Background" type="TextureRect" parent="." unique_id=1107415775]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_uqlmk")
+
+[node name="Close" type="Button" parent="Background" unique_id=1328317259]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -273.0
+offset_top = -80.0
+offset_right = 273.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 40
+text = "Close"
+
+[node name="Market" type="VBoxContainer" parent="Background" unique_id=361563554]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 1895.0
+offset_bottom = 982.0
+
+[node name="Treasury2" type="Label" parent="Background/Market" unique_id=1457574592]
+layout_mode = 2
+theme_override_font_sizes/font_size = 60
+text = "The Market"
+horizontal_alignment = 1
+
+[node name="Treasury" type="Label" parent="Background/Market" unique_id=221523464]
+layout_mode = 2
+theme_override_font_sizes/font_size = 35
+text = "Treasury Amount: $XX"
+horizontal_alignment = 1
+
+[node name="Essential Resources" type="Label" parent="Background/Market" unique_id=231207329]
+layout_mode = 2
+text = "Essential Resources"
+label_settings = SubResource("LabelSettings_uqlmk")
+
+[node name="h_separator" type="HSeparator" parent="Background/Market" unique_id=1605941555]
+layout_mode = 2
+
+[node name="EssentialGrid" type="GridContainer" parent="Background/Market" unique_id=626101689]
+layout_mode = 2
+theme_override_constants/h_separation = 30
+columns = 8
+
+[node name="FoodIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=1585282762]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("2_u8fbg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FoodLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=945988357]
+layout_mode = 2
+text = "Food: XX"
+label_settings = SubResource("LabelSettings_sxv5f")
+
+[node name="FoodBuy" type="Button" parent="Background/Market/EssentialGrid" unique_id=6545610]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Buy"
+
+[node name="FoodSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=417261638]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Sell
+"
+
+[node name="FoodAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=144219937]
+layout_mode = 2
+text = "Amount to trade:  "
+label_settings = SubResource("LabelSettings_knj74")
+
+[node name="FoodAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=634911994]
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
+theme = SubResource("Theme_uqlmk")
+
+[node name="FoodPrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1402034823]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price: $XX"
+
+[node name="FoodPricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=1297002493]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price per Unit: $XX"
+
+[node name="WoodIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=2041583595]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("2_dcwrt")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WoodLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=2023348622]
+layout_mode = 2
+text = "Wood: XX"
+label_settings = SubResource("LabelSettings_sxv5f")
+
+[node name="WoodBuy" type="Button" parent="Background/Market/EssentialGrid" unique_id=1434607363]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Buy"
+
+[node name="WoodSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=2066668202]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Sell
+"
+
+[node name="WoodAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=1247247374]
+layout_mode = 2
+text = "Amount to trade:  "
+label_settings = SubResource("LabelSettings_knj74")
+
+[node name="WoodAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=663371797]
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
+theme = SubResource("Theme_uqlmk")
+
+[node name="WouldPrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1525871454]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price: $XX"
+
+[node name="WouldPricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=864942028]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price per Unit: $XX"
+
+[node name="StoneIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=597020915]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("3_u8fbg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StoneLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=639664425]
+layout_mode = 2
+text = "Stone: XX"
+label_settings = SubResource("LabelSettings_sxv5f")
+
+[node name="StoneBuy" type="Button" parent="Background/Market/EssentialGrid" unique_id=108381859]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Buy"
+
+[node name="StoneSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=312213929]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Sell
+"
+
+[node name="StoneAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=942910911]
+layout_mode = 2
+text = "Amount to trade:  "
+label_settings = SubResource("LabelSettings_knj74")
+
+[node name="StoneAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=715004951]
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
+theme = SubResource("Theme_uqlmk")
+
+[node name="StonePrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1054167336]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price: $XX"
+
+[node name="StonePricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=466969515]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price per Unit: $XX"
+
+[node name="IronIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=1190420600]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("4_ba5s5")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IronLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=1164927330]
+layout_mode = 2
+text = "Iron: XX"
+label_settings = SubResource("LabelSettings_sxv5f")
+
+[node name="IronBuy" type="Button" parent="Background/Market/EssentialGrid" unique_id=642478481]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Buy"
+
+[node name="IronSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=2130776808]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Sell
+"
+
+[node name="IronAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=729812391]
+layout_mode = 2
+text = "Amount to trade:  "
+label_settings = SubResource("LabelSettings_knj74")
+
+[node name="IronAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=1067915561]
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
+theme = SubResource("Theme_uqlmk")
+
+[node name="IronPrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1074368814]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price: $XX"
+
+[node name="IronPricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=988380566]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price per Unit: $XX"
+
+[node name="Luxury Resources" type="Label" parent="Background/Market" unique_id=1549675271]
+layout_mode = 2
+text = "Luxury Resources"
+label_settings = SubResource("LabelSettings_uqlmk")
+
+[node name="h_separator2" type="HSeparator" parent="Background/Market" unique_id=53040320]
+layout_mode = 2
+
+[node name="LuxuryGrid" type="GridContainer" parent="Background/Market" unique_id=2025611105]
+layout_mode = 2
+theme_override_constants/h_separation = 30
+columns = 8
+
+[node name="RubyIcon" type="TextureRect" parent="Background/Market/LuxuryGrid" unique_id=180797391]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("5_w8ros")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RubyLabel" type="Label" parent="Background/Market/LuxuryGrid" unique_id=2044750607]
+layout_mode = 2
+text = "Ruby: XX"
+label_settings = SubResource("LabelSettings_sxv5f")
+
+[node name="RubyBuy" type="Button" parent="Background/Market/LuxuryGrid" unique_id=1954969739]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Buy"
+
+[node name="RubySell" type="Button" parent="Background/Market/LuxuryGrid" unique_id=1324388706]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Sell
+"
+
+[node name="RubyAmountLabel" type="Label" parent="Background/Market/LuxuryGrid" unique_id=606950906]
+layout_mode = 2
+text = "Amount to trade:  "
+label_settings = SubResource("LabelSettings_knj74")
+
+[node name="RubyAmount" type="SpinBox" parent="Background/Market/LuxuryGrid" unique_id=920129919]
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
+theme = SubResource("Theme_uqlmk")
+
+[node name="RubyPrice" type="Label" parent="Background/Market/LuxuryGrid" unique_id=1679500495]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price: $XX"
+
+[node name="RubyPricePerUnit" type="Label" parent="Background/Market/LuxuryGrid" unique_id=1354799103]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price per Unit: $XX"
+
+[node name="DiamondIcon" type="TextureRect" parent="Background/Market/LuxuryGrid" unique_id=540171941]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("6_61u7f")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DiamondLabel" type="Label" parent="Background/Market/LuxuryGrid" unique_id=95791910]
+layout_mode = 2
+text = "Diamond: XX"
+label_settings = SubResource("LabelSettings_sxv5f")
+
+[node name="DiamondBuy" type="Button" parent="Background/Market/LuxuryGrid" unique_id=1510593082]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Buy"
+
+[node name="DiamondSell" type="Button" parent="Background/Market/LuxuryGrid" unique_id=2037837352]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Sell
+"
+
+[node name="DiamondAmountLabel" type="Label" parent="Background/Market/LuxuryGrid" unique_id=10282231]
+layout_mode = 2
+text = "Amount to trade:  "
+label_settings = SubResource("LabelSettings_knj74")
+
+[node name="DiamondAmount" type="SpinBox" parent="Background/Market/LuxuryGrid" unique_id=1074726772]
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
+theme = SubResource("Theme_uqlmk")
+
+[node name="DiamondPrice" type="Label" parent="Background/Market/LuxuryGrid" unique_id=330890536]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price: $XX"
+
+[node name="DiamondPricePerUnit" type="Label" parent="Background/Market/LuxuryGrid" unique_id=349686662]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Price per Unit: $XX"

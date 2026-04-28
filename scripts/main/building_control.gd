@@ -43,6 +43,12 @@ extends Node2D
 @onready var closeResourceBuilding = $resourceBuildingHud/ScrollContainer/VBoxContainer/closeResourceMenu
 @onready var resourceBuildingLabel = $buildingHud/resourceBuildingLabel
 
+#Market menu
+@onready var marketMenu = $market/ScrollContainer
+@onready var marketMenuButton = $buildingHud/marketButton
+@onready var closeMarket = $market/ScrollContainer/VBoxContainer/closeMarketMenu
+@onready var marketLabel = $buildingHud/marketLabel
+
 
 #IDK why this is here
 @onready var selection_box = $ColorRect
@@ -99,7 +105,13 @@ func _ready(): #Runs on start, connects buttons
 	
 	closeResourceBuilding.button_down.connect(_on_closeResourceMenu_button_pressed)
 	closeResourceBuilding.button_up.connect(_on_closeResourceMenu_button_released)
+
+	marketMenuButton.button_down.connect(_on_marketMenu_button_pressed)
+	marketMenuButton.button_up.connect(_on_marketMenu_button_released)
 	
+	closeMarket.button_down.connect(_on_closeMarketMenu_button_pressed)
+	closeMarket.button_up.connect(_on_closeMarketMenu_button_released)
+
 	combatBuildingMenuButton.button_down.connect(_on_combatBuildingMenu_button_pressed)
 	combatBuildingMenuButton.button_up.connect(_on_combatBuildingMenu_button_released)
 	
@@ -189,15 +201,13 @@ func _on_wallCorner_button_released():
 func _on_combatBuildingMenu_button_pressed():
 	return
 
-
 func _on_combatBuildingMenu_button_released():
 	combatBuildingMenu.visible = true
 	resourceBuildingMenu.visible = false
-
+	marketMenu.visible = false
 
 func _on_closeCombatMenu_button_pressed():
 	return
-
 
 func _on_closeCombatMenu_button_released():
 	combatBuildingMenu.visible = false
@@ -206,24 +216,36 @@ func _on_closeCombatMenu_button_released():
 func _on_resourceBuildingMenu_button_pressed():
 	return
 
-
 func _on_resourceBuildingMenu_button_released():
 	resourceBuildingMenu.visible = true
 	combatBuildingMenu.visible = false
-
+	marketMenu.visible = false
 
 func _on_closeResourceMenu_button_pressed():
 	return
-
 
 func _on_closeResourceMenu_button_released():
 	resourceBuildingMenu.visible = false
 
 
+func _on_marketMenu_button_pressed():
+	return
+
+func _on_marketMenu_button_released():
+	marketMenu.visible = true
+	combatBuildingMenu.visible = false
+	resourceBuildingMenu.visible = false
+
+func _on_closeMarketMenu_button_released():
+	marketMenu.visible = false
+
+func _on_closeMarketMenu_button_pressed():
+	return
+
+
 func _on_manageCaravans_button_pressed():
 	if RCLICK_ResourceHub.visible == false:
 		return
-
 
 func _on_manageCaravans_button_released():
 	if RCLICK_ResourceHub.visible == false:
@@ -451,6 +473,11 @@ func hoveringText():
 		resourceBuildingLabel.visible = true
 	else:
 		resourceBuildingLabel.visible = false
+		
+	if marketMenuButton.is_hovered():
+		marketLabel.visible = true
+	else:
+		marketLabel.visible = false
 
 
 func freeBuilding(ID):
