@@ -60,9 +60,18 @@ extends Node2D
 var nexusSpawn = null
 #Players Money
 var food = 10000
+var food_price = 1000
 var wood = 10000
+var wood_price = 5000
 var stone = 10000
-var money = 0
+var stone_price = 25000
+var iron = 0
+var iron_price = 200000
+var ruby = 0
+var ruby_price = 2500
+var diamond = 0
+var diamond_price = 10000
+var money = 100
 
 #All the buttons for resources
 var resourceButtons = []
@@ -392,7 +401,8 @@ func _process(delta): #runs every tick
 	sendCaravans()
 	hud.updateFood(food) 
 	hud.updateWood(wood) 
-	hud.updateStone(stone) 
+	hud.updateStone(stone)
+	hud.updateTreasury(money)
 
 
 func sendCaravans():
