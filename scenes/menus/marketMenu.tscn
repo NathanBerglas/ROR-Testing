@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://dkhccswoxn7m8"]
 
+[ext_resource type="Script" uid="uid://d2nvk2sgawnha" path="res://scripts/menus/market_menu.gd" id="1_ba5s5"]
 [ext_resource type="Texture2D" uid="uid://b85f8vuyspkxt" path="res://assets/menus/marketBackground.png" id="1_uqlmk"]
 [ext_resource type="Texture2D" uid="uid://gywy5m0hvtd4" path="res://assets/menus/wood_icon.png" id="2_dcwrt"]
 [ext_resource type="Texture2D" uid="uid://dyuci5fayskyh" path="res://assets/menus/food_icon.png" id="2_u8fbg"]
 [ext_resource type="Texture2D" uid="uid://dwjtc5otikwnm" path="res://assets/menus/stone_icon.png" id="3_u8fbg"]
+[ext_resource type="Texture2D" uid="uid://dti5y5haogtj8" path="res://assets/menus/money_icon.png" id="3_w8ros"]
 [ext_resource type="Texture2D" uid="uid://ctfclimiysewa" path="res://assets/menus/iron_icon.png" id="4_ba5s5"]
 [ext_resource type="Texture2D" uid="uid://drkd3ahrgn2va" path="res://assets/menus/ruby_icon.png" id="5_w8ros"]
 [ext_resource type="Texture2D" uid="uid://xjxwuwbbur3t" path="res://assets/menus/diamond_icon.png" id="6_61u7f"]
@@ -23,6 +25,7 @@ default_font_size = 32
 [node name="MarketMenu" type="Control" unique_id=1235774572]
 layout_mode = 3
 anchors_preset = 0
+script = ExtResource("1_ba5s5")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1107415775]
 layout_mode = 0
@@ -53,15 +56,39 @@ offset_top = 20.0
 offset_right = 1895.0
 offset_bottom = 982.0
 
-[node name="Treasury2" type="Label" parent="Background/Market" unique_id=1457574592]
+[node name="The Market" type="Label" parent="Background/Market" unique_id=1457574592]
+z_index = 1
 layout_mode = 2
 theme_override_font_sizes/font_size = 60
 text = "The Market"
 horizontal_alignment = 1
 
-[node name="Treasury" type="Label" parent="Background/Market" unique_id=221523464]
+[node name="color_rect" type="ColorRect" parent="Background/Market/The Market" unique_id=372841824]
+z_index = -1
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -345.5
+offset_right = 345.5
+offset_bottom = 84.0
+grow_horizontal = 2
+color = Color(0.38500977, 0.28077376, 0.22379678, 0.6745098)
+
+[node name="Treasury" type="HBoxContainer" parent="Background/Market" unique_id=787127331]
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
+alignment = 1
+
+[node name="TreasuryIcon" type="TextureRect" parent="Background/Market/Treasury" unique_id=2027905391]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+texture = ExtResource("3_w8ros")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TreasuryLabel" type="Label" parent="Background/Market/Treasury" unique_id=221523464]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
 text = "Treasury Amount: $XX"
 horizontal_alignment = 1
 
@@ -71,6 +98,7 @@ text = "Essential Resources"
 label_settings = SubResource("LabelSettings_uqlmk")
 
 [node name="h_separator" type="HSeparator" parent="Background/Market" unique_id=1605941555]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 
 [node name="EssentialGrid" type="GridContainer" parent="Background/Market" unique_id=626101689]
@@ -109,7 +137,7 @@ text = "Amount to trade:  "
 label_settings = SubResource("LabelSettings_knj74")
 
 [node name="FoodAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=634911994]
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 theme = SubResource("Theme_uqlmk")
 
@@ -154,7 +182,7 @@ text = "Amount to trade:  "
 label_settings = SubResource("LabelSettings_knj74")
 
 [node name="WoodAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=663371797]
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 theme = SubResource("Theme_uqlmk")
 
@@ -199,7 +227,7 @@ text = "Amount to trade:  "
 label_settings = SubResource("LabelSettings_knj74")
 
 [node name="StoneAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=715004951]
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 theme = SubResource("Theme_uqlmk")
 
@@ -244,7 +272,7 @@ text = "Amount to trade:  "
 label_settings = SubResource("LabelSettings_knj74")
 
 [node name="IronAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=1067915561]
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 theme = SubResource("Theme_uqlmk")
 
@@ -264,6 +292,7 @@ text = "Luxury Resources"
 label_settings = SubResource("LabelSettings_uqlmk")
 
 [node name="h_separator2" type="HSeparator" parent="Background/Market" unique_id=53040320]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 
 [node name="LuxuryGrid" type="GridContainer" parent="Background/Market" unique_id=2025611105]
@@ -302,7 +331,7 @@ text = "Amount to trade:  "
 label_settings = SubResource("LabelSettings_knj74")
 
 [node name="RubyAmount" type="SpinBox" parent="Background/Market/LuxuryGrid" unique_id=920129919]
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 theme = SubResource("Theme_uqlmk")
 
@@ -347,7 +376,7 @@ text = "Amount to trade:  "
 label_settings = SubResource("LabelSettings_knj74")
 
 [node name="DiamondAmount" type="SpinBox" parent="Background/Market/LuxuryGrid" unique_id=1074726772]
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 theme = SubResource("Theme_uqlmk")
 

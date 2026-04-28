@@ -18,9 +18,14 @@
 [ext_resource type="PackedScene" uid="uid://dh3llecy2aj26" path="res://scenes/prefabs/buildings/combat_buildings/turret.tscn" id="9_k0c8h"]
 [ext_resource type="PackedScene" uid="uid://dqjl8bsde3lkv" path="res://scenes/prefabs/buildings/Nexus.tscn" id="10_v74i5"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="11_cq801"]
+[ext_resource type="Texture2D" uid="uid://dyuci5fayskyh" path="res://assets/menus/food_icon.png" id="12_88gta"]
+[ext_resource type="Texture2D" uid="uid://dwjtc5otikwnm" path="res://assets/menus/stone_icon.png" id="13_jj6us"]
+[ext_resource type="Texture2D" uid="uid://gywy5m0hvtd4" path="res://assets/menus/wood_icon.png" id="14_jj6us"]
 [ext_resource type="Texture2D" uid="uid://wndwdy07kcoq" path="res://assets/menus/marketMenuButton.png" id="14_vy5db"]
+[ext_resource type="Texture2D" uid="uid://dti5y5haogtj8" path="res://assets/menus/money_icon.png" id="15_yc8is"]
 [ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/buildings/WallCorner.png" id="16_t6ejh"]
 [ext_resource type="Texture2D" uid="uid://duhlw8ydi84fg" path="res://assets/buildings/turrent.png" id="19_2hoj7"]
+[ext_resource type="PackedScene" uid="uid://dkhccswoxn7m8" path="res://scenes/menus/marketMenu.tscn" id="25_4obvr"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
 
@@ -44,20 +49,56 @@ nexus_prefab = ExtResource("10_v74i5")
 script = ExtResource("2_oj14w")
 
 [node name="Food" type="Label" parent="buildingHud" unique_id=2073406]
-offset_left = 8.0
-offset_right = 282.0
-offset_bottom = 55.0
+offset_left = 67.0
+offset_right = 341.0
+offset_bottom = 55.833332
 theme_override_font_sizes/font_size = 40
 text = "Food: 1000"
-metadata/_edit_use_anchors_ = true
+
+[node name="FoodIcon" type="TextureRect" parent="buildingHud" unique_id=967490944]
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 55.0
+offset_bottom = 54.0
+texture = ExtResource("12_88gta")
+expand_mode = 1
+
+[node name="StoneIcon" type="TextureRect" parent="buildingHud" unique_id=1273971968]
+offset_left = 5.0
+offset_top = 110.0
+offset_right = 55.0
+offset_bottom = 159.0
+texture = ExtResource("13_jj6us")
+expand_mode = 1
 
 [node name="Stone" type="Label" parent="buildingHud" unique_id=351734712]
-offset_left = 8.0
-offset_top = 113.0
-offset_right = 282.0
-offset_bottom = 168.0
+offset_left = 67.0
+offset_top = 112.0
+offset_right = 341.0
+offset_bottom = 167.83333
 theme_override_font_sizes/font_size = 40
 text = "Stone: 1000"
+metadata/_edit_use_anchors_ = true
+
+[node name="WoodIcon" type="TextureRect" parent="buildingHud" unique_id=1352569140]
+offset_left = 5.0
+offset_top = 60.0
+offset_right = 55.0
+offset_bottom = 109.0
+texture = ExtResource("14_jj6us")
+expand_mode = 1
+
+[node name="Lumber" type="Label" parent="buildingHud" unique_id=1233910810]
+anchors_preset = -1
+anchor_left = 0.0052083335
+anchor_right = 0.0052083335
+anchor_bottom = 0.00077160023
+offset_left = 57.0
+offset_top = 56.0
+offset_right = 331.0
+offset_bottom = 111.0
+theme_override_font_sizes/font_size = 40
+text = "Lumber: 1000"
 metadata/_edit_use_anchors_ = true
 
 [node name="combatBuildingsLabel" type="Label" parent="buildingHud" unique_id=983631813]
@@ -81,14 +122,21 @@ Building Menu"
 horizontal_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Lumber" type="Label" parent="buildingHud" unique_id=1233910810]
-offset_left = 8.0
-offset_top = 56.0
-offset_right = 282.0
-offset_bottom = 111.0
+[node name="MoneyIcon" type="TextureRect" parent="buildingHud" unique_id=1079048617]
+offset_left = 5.0
+offset_top = 165.0
+offset_right = 55.0
+offset_bottom = 214.0
+texture = ExtResource("15_yc8is")
+expand_mode = 1
+
+[node name="Treasury" type="Label" parent="buildingHud" unique_id=196090001]
+offset_left = 67.0
+offset_top = 165.0
+offset_right = 341.0
+offset_bottom = 220.83333
 theme_override_font_sizes/font_size = 40
-text = "Lumber: 1000"
-metadata/_edit_use_anchors_ = true
+text = "Treasury: XX"
 
 [node name="resourceBuildingButton" type="Button" parent="buildingHud" unique_id=1378047722]
 offset_left = 870.0
@@ -138,9 +186,9 @@ metadata/_edit_use_anchors_ = true
 [node name="ScrollContainer" type="ScrollContainer" parent="resourceBuildingHud" unique_id=246695275]
 visible = false
 offset_left = 17.0
-offset_top = 177.0
+offset_top = 221.0
 offset_right = 322.0
-offset_bottom = 896.0
+offset_bottom = 940.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="resourceBuildingHud/ScrollContainer" unique_id=613882232]
 layout_mode = 2
@@ -199,10 +247,10 @@ text = "Close"
 visible = false
 z_index = 1
 z_as_relative = false
-offset_left = 167.0
-offset_top = 593.0
-offset_right = 343.0
-offset_bottom = 725.0
+offset_left = 166.0
+offset_top = 649.0
+offset_right = 342.0
+offset_bottom = 781.0
 theme_override_font_sizes/font_size = 30
 text = "Farm - 500F
             500W
@@ -211,10 +259,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="StoneMineButtonLabel2" type="Label" parent="resourceBuildingHud" unique_id=185697737]
 visible = false
-offset_left = 159.0
-offset_top = 455.0
-offset_right = 423.0
-offset_bottom = 587.0
+offset_left = 160.0
+offset_top = 499.0
+offset_right = 424.0
+offset_bottom = 631.0
 theme_override_font_sizes/font_size = 30
 text = "Stone Mine - 500F
                        500W
@@ -223,10 +271,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="LumberJackButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1467269347]
 visible = false
-offset_left = 163.0
-offset_top = 177.0
-offset_right = 435.0
-offset_bottom = 309.0
+offset_left = 160.0
+offset_top = 229.0
+offset_right = 432.0
+offset_bottom = 361.0
 theme_override_font_sizes/font_size = 30
 text = "LumberJack - 500F
                         500W
@@ -236,9 +284,9 @@ metadata/_edit_use_anchors_ = true
 [node name="ResourceHubButtonLabel" type="Label" parent="resourceBuildingHud" unique_id=1235039629]
 visible = false
 offset_left = 160.0
-offset_top = 319.0
+offset_top = 361.0
 offset_right = 481.0
-offset_bottom = 451.0
+offset_bottom = 493.0
 theme_override_font_sizes/font_size = 30
 text = "Resource Hub - 5000F
                         	    5000W
@@ -248,11 +296,10 @@ metadata/_edit_use_anchors_ = true
 [node name="combatBuildingHud" type="CanvasLayer" parent="." unique_id=485597457]
 
 [node name="ScrollContainer" type="ScrollContainer" parent="combatBuildingHud" unique_id=662035960]
-visible = false
 offset_left = 17.0
-offset_top = 177.0
+offset_top = 229.0
 offset_right = 322.0
-offset_bottom = 896.0
+offset_bottom = 948.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="combatBuildingHud/ScrollContainer" unique_id=770048414]
 layout_mode = 2
@@ -294,9 +341,9 @@ text = "Close"
 [node name="BarracksButtonLabel" type="Label" parent="combatBuildingHud" unique_id=1610006482]
 visible = false
 offset_left = 160.0
-offset_top = 182.0
+offset_top = 237.0
 offset_right = 409.0
-offset_bottom = 314.0
+offset_bottom = 369.0
 theme_override_font_sizes/font_size = 30
 text = "Barracks - 1000F
                    1000W
@@ -306,9 +353,9 @@ metadata/_edit_use_anchors_ = true
 [node name="wallCornerButtonLabel" type="Label" parent="combatBuildingHud" unique_id=1721244334]
 visible = false
 offset_left = 170.0
-offset_top = 317.0
+offset_top = 368.0
 offset_right = 419.0
-offset_bottom = 449.0
+offset_bottom = 500.0
 theme_override_font_sizes/font_size = 30
 text = "Wall - 	50F
            50W
@@ -317,10 +364,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="turretButtonLabel" type="Label" parent="combatBuildingHud" unique_id=986655145]
 visible = false
-offset_left = 166.0
-offset_top = 455.0
-offset_right = 415.0
-offset_bottom = 587.0
+offset_left = 170.0
+offset_top = 507.0
+offset_right = 419.0
+offset_bottom = 639.0
 theme_override_font_sizes/font_size = 30
 text = "Turret - 500F
               500W
@@ -337,19 +384,7 @@ layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_cq801")
 text = "1- Manage Caravans"
 
-[node name="market" type="CanvasLayer" parent="." unique_id=709845480]
+[node name="MarketHud" type="CanvasLayer" parent="." unique_id=2078018954]
 
-[node name="ScrollContainer" type="ScrollContainer" parent="market" unique_id=621036869]
+[node name="MarketMenu" parent="MarketHud" unique_id=1235774572 instance=ExtResource("25_4obvr")]
 visible = false
-offset_left = 17.0
-offset_top = 177.0
-offset_right = 322.0
-offset_bottom = 896.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="market/ScrollContainer" unique_id=366606308]
-layout_mode = 2
-alignment = 1
-
-[node name="closeMarketMenu" type="Button" parent="market/ScrollContainer/VBoxContainer" unique_id=1356767448]
-layout_mode = 2
-text = "Close"

@@ -44,9 +44,8 @@ extends Node2D
 @onready var resourceBuildingLabel = $buildingHud/resourceBuildingLabel
 
 #Market menu
-@onready var marketMenu = $market/ScrollContainer
+@onready var marketMenu = $MarketHud/MarketMenu
 @onready var marketMenuButton = $buildingHud/marketButton
-@onready var closeMarket = $market/ScrollContainer/VBoxContainer/closeMarketMenu
 @onready var marketLabel = $buildingHud/marketLabel
 
 
@@ -63,6 +62,7 @@ var nexusSpawn = null
 var food = 10000
 var wood = 10000
 var stone = 10000
+var money = 0
 
 #All the buttons for resources
 var resourceButtons = []
@@ -108,9 +108,6 @@ func _ready(): #Runs on start, connects buttons
 
 	marketMenuButton.button_down.connect(_on_marketMenu_button_pressed)
 	marketMenuButton.button_up.connect(_on_marketMenu_button_released)
-	
-	closeMarket.button_down.connect(_on_closeMarketMenu_button_pressed)
-	closeMarket.button_up.connect(_on_closeMarketMenu_button_released)
 
 	combatBuildingMenuButton.button_down.connect(_on_combatBuildingMenu_button_pressed)
 	combatBuildingMenuButton.button_up.connect(_on_combatBuildingMenu_button_released)
@@ -123,15 +120,7 @@ func _ready(): #Runs on start, connects buttons
 
 	turretButton.button_down.connect(_on_turret_button_pressed)
 	turretButton.button_up.connect(_on_turret_button_released)
-	
-	farmLabel.visible = false
-	stoneMineLabel.visible = false
-	lumberJackLabel.visible = false
-	resourceHubLabel.visible = false
-	resourceBuildingMenu.visible = false
-	wallCornerLabel.visible = false
-	combatBuildingMenu.visible = false
-	
+		
 	resourceButtons.append([stoneMineButton, stoneMineLabel])
 	resourceButtons.append([farmButton, farmLabel])
 	resourceButtons.append([lumberJackButton, lumberJackLabel])
@@ -142,9 +131,18 @@ func _ready(): #Runs on start, connects buttons
 	combatButtons.append([turretButton, turretLabel])
 	RCLICK_ResourceHub.visible = false
 	
-	
-	#print(playerID)
-	
+	_hide_all()
+
+func _hide_all():
+	farmLabel.visible = false
+	stoneMineLabel.visible = false
+	lumberJackLabel.visible = false
+	resourceHubLabel.visible = false
+	resourceBuildingMenu.visible = false
+	wallCornerLabel.visible = false
+	combatBuildingMenu.visible = false
+	marketMenu.visible = false
+
 
 func _on_turret_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
@@ -202,9 +200,8 @@ func _on_combatBuildingMenu_button_pressed():
 	return
 
 func _on_combatBuildingMenu_button_released():
+	_hide_all()
 	combatBuildingMenu.visible = true
-	resourceBuildingMenu.visible = false
-	marketMenu.visible = false
 
 func _on_closeCombatMenu_button_pressed():
 	return
@@ -217,9 +214,8 @@ func _on_resourceBuildingMenu_button_pressed():
 	return
 
 func _on_resourceBuildingMenu_button_released():
+	_hide_all()
 	resourceBuildingMenu.visible = true
-	combatBuildingMenu.visible = false
-	marketMenu.visible = false
 
 func _on_closeResourceMenu_button_pressed():
 	return
@@ -232,9 +228,9 @@ func _on_marketMenu_button_pressed():
 	return
 
 func _on_marketMenu_button_released():
-	marketMenu.visible = true
-	combatBuildingMenu.visible = false
-	resourceBuildingMenu.visible = false
+	_hide_all()
+	hud.visible = false
+	marketMenu.open()
 
 func _on_closeMarketMenu_button_released():
 	marketMenu.visible = false
