@@ -16,6 +16,7 @@ const FLAG_VERBOSE = false
 @export var manageCaravanButton: PackedScene
 @export var caravanTarget: PackedScene
 @export var caravan: PackedScene
+@export var caravanEnemy: PackedScene
 
 const CARAVAN_WAIT_TIMER = 2
 const MAX_CARAVAN_STOPS = 3
@@ -58,6 +59,8 @@ func _ready():
 
 	manageCaravanMenu.visible = false
 	managingCaravanMenu.visible = false
+	
+	
 	set_size(size)
 
 func _process(delta):
@@ -165,28 +168,9 @@ func _on_finishManaging_button_released():
 		return
 	
 	managingCaravanMenu.visible = false
-	var tempArray = []
-	if routeManaging > managedRoutes.size():
-		tempArray.append([0, routeManaging])
-	else:
-		for r in managedRoutes:
-			if r[0][1] == routeManaging:
-				tempArray.append([r[0][0], routeManaging])
 	
-	var tempTempArray = []
-	for v in tempRoute:
-		tempTempArray.append(v)
-		
-		
-	tempArray.append(tempTempArray)
-	
-	
-	if routeManaging > managedRoutes.size():
-		managedRoutes.append(tempArray)
-	else:
-		for r in managedRoutes:
-			if r.id == routeManaging:
-				r = tempArray 
+	print(tempRoute)
+	controller.queued_orders_to_send_in_control.append([1, [self.get_global_position(), tempRoute, routeManaging]])
 	tempRoute = []
 	var i = 0
 	while i < tempTargets.size():
@@ -200,10 +184,9 @@ func _on_removeRoute_button_pressed():
 func _on_removeRoute_button_released():
 	if managingCaravanMenu.visible == false:
 		return
-	removeRoute(routeManaging)
-	for c in managedCaravans:
-		if c.UNIQUEID == routeManaging:
-			c.routeRemoved = true
+	
+	controller.queued_orders_to_send_in_control.append([2, [self.get_global_position(), routeManaging]])
+
 	routeManaging = 0
 	managingCaravanMenu.visible = false
 	
@@ -246,9 +229,48 @@ func manageCaravan(id):
 	managingCaravanMenu.set_global_position(tempVectorYay)
 
 
+func manage_caravan_order(args):
+	var route = args[1]
+	var rID = args[2]
 	
+	var tempArray = []
+	if rID > managedRoutes.size():
+		tempArray.append([0, rID])
+	else:
+		for r in managedRoutes:
+			if r[0][1] == rID:
+				tempArray.append([r[0][0], rID])
+	
+	var tempTempArray = []
+	for v in route:
+		tempTempArray.append(v)
+		
+		
+	tempArray.append(tempTempArray)
+	
+	
+	if rID > managedRoutes.size():
+		managedRoutes.append(tempArray)
+	else:
+		for r in managedRoutes:
+			if r[0][1] == rID:
+				r = tempArray 
+
+
+func remove_route_order(args):
+	var rID = args[1]
+	removeRoute(rID)
+	for c in managedCaravans:
+		if c.UNIQUEID == rID:
+			c.routeRemoved = true
+
 func sendCaravan(route, routeID):
-	var instance = caravan.instantiate()
+	var instance = null
+	if playerID == multiplayer.get_unique_id():
+		
+		instance = caravan.instantiate()
+	else:
+		instance = caravanEnemy.instantiate()
 	
 	var meepleDocPos = controller.grid.coord_to_axial_hex(self.get_global_position()) + Vector2i(1,0)
 	

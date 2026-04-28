@@ -92,7 +92,7 @@ var caravanIDTracker = 1
 #Multiplayer order queueing
 var queued_orders_recieved_in_control = []
 var queued_orders_to_send_in_control = []
-const ORDERS = [0,1,2,3,4,5,6] #
+const ORDERS = [0,1,2,3,4,5,6] #0: Place a building, #1: Create new caravan route, #2: Remove caravan route
 
 
 func _ready(): #Runs on start, connects buttons
@@ -576,6 +576,10 @@ func process_orders(): #Change this to basically process as many as possible. Id
 		#If statements for orders based on order - update later 
 		if order[0] == 0:
 			spawn_building_order(order[1])
+		if order[0] == 1:
+			grid.probe(order[1][0]).objectsInside[0].manage_caravan_order(order[1])
+		if order[0] == 2:
+			grid.probe(order[1][0]).objectsInside[0].manage_caravan_order(order[1])
 
 
 func spawn_building_order(args):

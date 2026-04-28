@@ -7,7 +7,7 @@ const FLAG_VERBOSE = true
 @export var GRID_COUNT: Vector2i = Vector2i(466,214)
 
 
-@export var meeple_control: Node2D
+var meeple_controls = []
 @export var debug_hex_prefab: PackedScene
 const SQRT_3 = (111.0 / 128.0) * 2
 
@@ -216,7 +216,9 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 		and meeple_requesting.type == "Infantry" \
 		and meeple_in_ingressing_hex.playerID == meeple_requesting.playerID:
 			
-			meeple_control.meeple_start_merge(meeple_in_ingressing_hex)
+			for MC in meeple_controls:
+				if MC.playerID == meeple_requesting.playerID:
+					MC.meeple_start_merge(meeple_in_ingressing_hex)
 			#update_grid(ingressing_hex, 3, [meeple_requesting] + ingressing_tile.objectsInside)
 			decision = "APPROVED"
 		if !meeple_in_ingressing_hex.waiting:
@@ -240,7 +242,10 @@ func hex_egress(egressing_hex):
 		collected_meeple.inqueue = false
 		if FLAG_VERBOSE: print("Collecting meeple, ", collected_meeple.UNIQUEID, " from queue on hex ", egressing_hex)
 		update_grid(egressing_hex, 4, [collected_meeple])
-		meeple_control.egress_granted(collected_meeple)
+		for MC in meeple_controls:
+				if MC.playerID == collected_meeple.playerID:
+					MC.egress_granted(collected_meeple)
+		
 		hex_egress(collected_meeple.path[0])
 
 

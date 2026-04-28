@@ -1,8 +1,8 @@
 extends Node
 
-const ONLINE = true
+const ONLINE = false
 @export var Address = null
-@export var port = 8999
+@export var port = 7999
 
 
 @export var playerScene: PackedScene
@@ -53,24 +53,7 @@ func _ready():
 
 func _process(delta): #runs every
 	pass
-	#time += delta
-	#if time >= (1/60):
-		#if !multiplayer.is_server():
-			#for p in GameManager.Players:
-				#if p == multiplayer.get_unique_id():
-					#if GameManager.ownControllersSet == true and ableToSend == true:
-						##print("Order " + str(orderNum) + "? DONT WORRY BOSS, I BE SENDIN INFO OF " + str(GameManager.Players[p].meepleInfo.size()) + " MEEPLES FROM " + str(p))
-						#UpdatePlayerInfo.rpc_id(1, playerName, multiplayer.get_unique_id(), GameManager.Players[p].meepleInfo, orderNum)
-						#ableToSend = false
-						#orderNum += 1
-		#if GameManager.controllersSet == false:
-			#var allSet = true
-			#for p in GameManager.Players:
-				#if GameManager.Players[p].meepleInfo != null:
-					#allSet = false
-			#if allSet:
-				#GameManager.controllersSet = true
-		#time = 0
+	
 
 
 #If its a client, it sends its info to the server
@@ -207,21 +190,24 @@ func start_game(biomeGenInfo): # [BMAP_RESOLUTIONx, BPIXELS_PER_TILE, BMAP_RESOL
 	
 	
 func upnp_setup():
-	
 	var upnp = UPNP.new()
-
 	var discover_result = upnp.discover()
 	assert(discover_result == UPNP.UPNP_RESULT_SUCCESS, \
-	"UPNP Discover Failed! Error %s" % discover_result)
+		"UPNP Discover Failed! Error %s" % discover_result)
 	assert(upnp.get_gateway() and upnp.get_gateway().is_valid_gateway(), \
-	"UPNP Invalid Gateway!")
+		"UPNP Invalid Gateway!")
 
-	var map_result_udp = upnp.add_port_mapping(port, port, "", "UDP", 0)
+	# Delete any existing mappings first to avoid conflicts
+
+
+	var map_result_udp = upnp.add_port_mapping(port, port, "MyGame", "UDP", 3600)
+	print("UDP map result: ", map_result_udp)
+	
 	assert(map_result_udp == UPNP.UPNP_RESULT_SUCCESS, \
-	"UPNP UDP Port Mapping Failed! Error %s" % map_result_udp)
-
-	var map_result_tcp = upnp.add_port_mapping(port, port, "", "TCP", 0)
+		"UPNP UDP Port Mapping Failed! Error %s" % map_result_udp)
+		
+	var map_result_tcp = upnp.add_port_mapping(port, port, "MyGame", "TCP", 3600)
+	print("TCP map result: ", map_result_tcp)
 	assert(map_result_tcp == UPNP.UPNP_RESULT_SUCCESS, \
-	"UPNP TCP Port Mapping Failed! Error %s" % map_result_tcp)
-
+		"UPNP TCP Port Mapping Failed! Error %s" % map_result_tcp)
 	print("Success! Join Address: %s" % upnp.query_external_address())

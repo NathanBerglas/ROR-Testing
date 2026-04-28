@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://btm6w8crggsau"]
+
+[ext_resource type="Script" uid="uid://cob5ttlt4b0jv" path="res://scripts/meeples/caravan.gd" id="1_km1jy"]
+[ext_resource type="Texture2D" uid="uid://b8us5plsd3ltx" path="res://assets/meeples/caravanEnemy.png" id="2_km1jy"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1sax5"]
+radius = 16.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_sp53s"]
+font_size = 13
+shadow_size = 2
+shadow_color = Color(0, 0, 0, 0.3019608)
+shadow_offset = Vector2(0, 0)
+
+[node name="caravan" type="Node2D" unique_id=2020084538]
+z_index = 4
+script = ExtResource("1_km1jy")
+
+[node name="CharecterBody2D" type="CharacterBody2D" parent="." unique_id=1287425722]
+input_pickable = true
+motion_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharecterBody2D" unique_id=1890662677]
+shape = SubResource("CircleShape2D_1sax5")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=761360600]
+z_index = 4
+texture_filter = 1
+texture_repeat = 1
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_km1jy")
+
+[node name="Label" type="Label" parent="." unique_id=1071380364]
+offset_left = -16.0
+offset_top = -12.0
+offset_right = 16.0
+offset_bottom = 11.0
+label_settings = SubResource("LabelSettings_sp53s")
+horizontal_alignment = 1
+vertical_alignment = 1

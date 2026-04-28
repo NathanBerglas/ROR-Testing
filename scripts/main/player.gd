@@ -98,7 +98,8 @@ func _ready() -> void:
 	
 	add_child(buildingControlE)
 	add_child(meepleControlE)
-	
+	$Grid.meeple_controls.append(meepleControlC)
+	$Grid.meeple_controls.append(meepleControlE)
 	#print(meepleControl.playerID)
 	#print(buildingControl.playerID)
 	#print(meepleControlC.playerID)

@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="2_ptywy"]
 [ext_resource type="PackedScene" uid="uid://ckihem7no8ate" path="res://scenes/legacy/caravanTarget.tscn" id="3_26xkw"]
 [ext_resource type="PackedScene" uid="uid://yaght1yrplnl" path="res://scenes/prefabs/meeples/resource_meeples/caravan.tscn" id="4_ylua4"]
+[ext_resource type="PackedScene" uid="uid://btm6w8crggsau" path="res://scenes/prefabs/meeples/resource_meeples/caravanEnemy.tscn" id="5_pc67q"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ptywy"]
 
@@ -13,6 +14,7 @@ script = ExtResource("1_ptywy")
 manageCaravanButton = ExtResource("2_4a1a5")
 caravanTarget = ExtResource("3_26xkw")
 caravan = ExtResource("4_ylua4")
+caravanEnemy = ExtResource("5_pc67q")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
 scale = Vector2(0.4, 0.4)
