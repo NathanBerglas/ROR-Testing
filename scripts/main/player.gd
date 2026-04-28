@@ -37,13 +37,16 @@ func _ready() -> void:
 	buildingControlC.set_z_index(BUILDING_Z_INDEX)
 	
 	
-	var buildingControlE = buildingControlScene.instantiate()
-	var meepleControlE = meepleControlScene.instantiate()
+	var buildingControlE = null
+	var meepleControlE = null
+	if playerID != 1:
+		buildingControlE = buildingControlScene.instantiate()
+		meepleControlE = meepleControlScene.instantiate()
+		enemies.append(meepleControlE)
+		enemies.append(buildingControlE)
 	
-	enemies.append(meepleControlE)
-	enemies.append(buildingControlE)
 	
-	if multiplayer.get_unique_id() == 1:
+	if multiplayer.get_unique_id() == 1 and playerID != 1:
 		buildingControlC.playerID = multiplayer.get_peers()[0]
 		meepleControlC.playerID = multiplayer.get_peers()[0]
 		queued_orders_to_send_meeple[0][0] = multiplayer.get_peers()[0]
@@ -62,44 +65,49 @@ func _ready() -> void:
 	else:
 		buildingControlC.playerID = multiplayer.get_unique_id()
 		meepleControlC.playerID = multiplayer.get_unique_id()
-		
-		queued_orders_to_send_meeple[0][0] = multiplayer.get_unique_id() 
-		queued_orders_recieved_meeple[0][0] = multiplayer.get_unique_id()
-		
-		queued_orders_to_send_building[0][0] = multiplayer.get_unique_id() 
-		queued_orders_recieved_building[0][0] = multiplayer.get_unique_id()
-		var opID = 0
-		if multiplayer.get_peers()[0] == 1:
-			opID = multiplayer.get_peers()[1]
+		if playerID != 1:
 			
-		else:
-			opID = multiplayer.get_peers()[0]
-		
-		queued_orders_to_send_meeple[1][0] = opID
-		queued_orders_recieved_meeple[1][0] = opID
-		
-		queued_orders_to_send_building[1][0] = opID
-		queued_orders_recieved_building[1][0] = opID
-		for e in enemies:
-			e.playerID = opID
+			
+			queued_orders_to_send_meeple[0][0] = multiplayer.get_unique_id() 
+			queued_orders_recieved_meeple[0][0] = multiplayer.get_unique_id()
+			
+			queued_orders_to_send_building[0][0] = multiplayer.get_unique_id() 
+			queued_orders_recieved_building[0][0] = multiplayer.get_unique_id()
+			var opID = 0
+			if multiplayer.get_peers()[0] == 1:
+				opID = multiplayer.get_peers()[1]
+				
+			else:
+				opID = multiplayer.get_peers()[0]
+			
+			queued_orders_to_send_meeple[1][0] = opID
+			queued_orders_recieved_meeple[1][0] = opID
+			
+			queued_orders_to_send_building[1][0] = opID
+			queued_orders_recieved_building[1][0] = opID
+			for e in enemies:
+				e.playerID = opID
 			
 	
 	
-	buildingControlE.teammates.append(meepleControlE)
-	meepleControlE.teammates.append(buildingControlE)
-
-	meepleControlE.grid = $Grid
-	buildingControlE.grid = $Grid
 	
 	c.append(meepleControlC)
 	c.append(buildingControlC)
 	add_child(buildingControlC)
 	add_child(meepleControlC)
 	
-	add_child(buildingControlE)
-	add_child(meepleControlE)
+	if playerID != 1:
+		buildingControlE.teammates.append(meepleControlE)
+		meepleControlE.teammates.append(buildingControlE)
+
+		meepleControlE.grid = $Grid
+		buildingControlE.grid = $Grid
+		add_child(buildingControlE)
+		add_child(meepleControlE)
+		$Grid.meeple_controls.append(meepleControlE)
+	
 	$Grid.meeple_controls.append(meepleControlC)
-	$Grid.meeple_controls.append(meepleControlE)
+	
 	#print(meepleControl.playerID)
 	#print(buildingControl.playerID)
 	#print(meepleControlC.playerID)
@@ -169,32 +177,33 @@ func transfer_orders(ordersMeeple, ordersBuilding, idFrom):
 
 func _process(_delta): #Runs every tick
 	#Meeple Orders
-	for idArray in queued_orders_to_send_meeple:
-		if idArray[0] == playerID:
-			idArray[1].append_array(c[0].queued_orders_to_send_in_control)
-			c[0].queued_orders_to_send_in_control = []
-	for idArray in queued_orders_recieved_meeple:
-		if idArray[0] == c[0].playerID:
-			c[0].queued_orders_recieved_in_control.append_array(idArray[1])
-			idArray[1] = []
-		if idArray[0] == enemies[0].playerID:
-			enemies[0].queued_orders_recieved_in_control.append_array(idArray[1])
-			idArray[1] = []
-	
-	#Building Orders
-	for idArray in queued_orders_to_send_building:
-		if idArray[0] == playerID:
-			idArray[1].append_array(c[1].queued_orders_to_send_in_control)
-			c[1].queued_orders_to_send_in_control = []
-	for idArray in queued_orders_recieved_building:
-		if idArray[0] == c[1].playerID:
-			c[1].queued_orders_recieved_in_control.append_array(idArray[1])
-			idArray[1] = []
-		if idArray[0] == enemies[1].playerID:
-			enemies[1].queued_orders_recieved_in_control.append_array(idArray[1])
-			idArray[1] = []
-			
+	if playerID != 1:
+		for idArray in queued_orders_to_send_meeple:
+			if idArray[0] == playerID:
+				idArray[1].append_array(c[0].queued_orders_to_send_in_control)
+				c[0].queued_orders_to_send_in_control = []
+		for idArray in queued_orders_recieved_meeple:
+			if idArray[0] == c[0].playerID:
+				c[0].queued_orders_recieved_in_control.append_array(idArray[1])
+				idArray[1] = []
+			if idArray[0] == enemies[0].playerID:
+				enemies[0].queued_orders_recieved_in_control.append_array(idArray[1])
+				idArray[1] = []
+		
+		#Building Orders
+		for idArray in queued_orders_to_send_building:
+			if idArray[0] == playerID:
+				idArray[1].append_array(c[1].queued_orders_to_send_in_control)
+				c[1].queued_orders_to_send_in_control = []
+		for idArray in queued_orders_recieved_building:
+			if idArray[0] == c[1].playerID:
+				c[1].queued_orders_recieved_in_control.append_array(idArray[1])
+				idArray[1] = []
+			if idArray[0] == enemies[1].playerID:
+				enemies[1].queued_orders_recieved_in_control.append_array(idArray[1])
+				idArray[1] = []
+				
 
-	if multiplayer.is_server():
-		transfer_orders(queued_orders_to_send_meeple, queued_orders_to_send_building, multiplayer.get_unique_id())
+		if multiplayer.is_server():
+			transfer_orders(queued_orders_to_send_meeple, queued_orders_to_send_building, multiplayer.get_unique_id())
 	

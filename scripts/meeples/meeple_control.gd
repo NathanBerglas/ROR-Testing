@@ -85,11 +85,18 @@ func _process(delta): #Runs every tick
 	
 	if multiplayer.get_unique_id() == playerID: 
 		if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-			queued_orders_to_send_in_control.append([0,[get_global_mouse_position()]])
+			if playerID != 1:
+				queued_orders_to_send_in_control.append([0,[get_global_mouse_position()]])
+			else:
+				queued_orders_recieved_in_control.append([0,[get_global_mouse_position()]])
 
 		#Orders all meeples to a location
 		elif Input.is_action_just_pressed("super_order"):
-			queued_orders_to_send_in_control.append([1,[get_global_mouse_position()]])
+			
+			if playerID != 1:
+				queued_orders_to_send_in_control.append([1,[get_global_mouse_position()]])
+			else:
+				queued_orders_recieved_in_control.append([1,[get_global_mouse_position()]])
 			
 		
 		#Opens up the right click menu
@@ -104,7 +111,10 @@ func _process(delta): #Runs every tick
 					if m.selected:
 						#m.is_unselected()
 						selectedMeepleId.append(m.UNIQUEID)
-				queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
+				if playerID != 1:
+					queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
+				else:
+					queued_orders_recieved_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
 
 		elif Input.is_action_just_pressed("order"):
 			var selectedMeepleId = []
@@ -112,8 +122,10 @@ func _process(delta): #Runs every tick
 				if m.selected:
 					#m.is_unselected()
 					selectedMeepleId.append(m.UNIQUEID)
-			queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
-			
+			if playerID != 1:
+				queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
+			else:
+				queued_orders_recieved_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
 		
 		#Starts the selction process
 		elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
@@ -157,7 +169,10 @@ func _process(delta): #Runs every tick
 				if FLAG_VERBOSE_MULTI:print("Meeple of: " + str(playerID))
 				if FLAG_VERBOSE_MULTI:print("Attacking: " + str(grid.axial_probe(attackLoc).objectsInside[0].playerID))
 				if FLAG_VERBOSE_MULTI:print("")
-				queued_orders_to_send_in_control.append([3,[attackLoc, tempMeepleArray]])
+				if playerID != 1:
+					queued_orders_to_send_in_control.append([3,[attackLoc, tempMeepleArray]])
+				else:
+					queued_orders_recieved_in_control.append([3,[attackLoc, tempMeepleArray]])
 	
 	"""
 	else:
@@ -251,7 +266,10 @@ func _on_order_button_pressed():
 		if m.selected:
 			#m.is_unselected()
 			selectedMeepleId.append(m.UNIQUEID)
-	queued_orders_to_send_in_control.append([2,[RCLICKMENU.get_global_position(), selectedMeepleId]])
+	if playerID != 1:
+		queued_orders_to_send_in_control.append([2,[RCLICKMENU.get_global_position(), selectedMeepleId]])
+	else:
+		queued_orders_recieved_in_control.append([2,[RCLICKMENU.get_global_position(), selectedMeepleId]])
 
 
 func _on_order_button_released(): #Menu gone :(

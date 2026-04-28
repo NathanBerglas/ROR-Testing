@@ -630,7 +630,7 @@ func spawnNexus():
 		instance = nexus_prefabEnemy.instantiate()
 	var vectorNexusSpawn = null
 	for spawn in nexusSpawn:
-		if spawn[2] == playerID:
+		if spawn.size() > 2 and spawn[2] == playerID:
 			vectorNexusSpawn = Vector2(spawn[0], spawn[1])
 	
 	instance.fake = true
