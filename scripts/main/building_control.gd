@@ -597,8 +597,11 @@ func finishDragging(buildingName):
 		buildings.pop_back().queue_free()
 		return false
 	
-
-	queued_orders_to_send_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
+	if playerID != 1:
+		queued_orders_to_send_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
+	else:
+		queued_orders_recieved_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
+	
 	freeBuilding(buildings[buildings.size() - 1].BUILDING_UNIQUE_ID)
 	return true
 
@@ -657,12 +660,16 @@ func spawnNexus():
 	nexusSpawn = grid.nexusSpawn
 	
 	var instance = null
+	
 	if playerID == multiplayer.get_unique_id():
 		instance = nexus_prefab.instantiate()
 	else:
 		instance = nexus_prefabEnemy.instantiate()
+		
 	var vectorNexusSpawn = null
 	for spawn in nexusSpawn:
+		print(spawn)
+		print(playerID)
 		if spawn.size() > 2 and spawn[2] == playerID:
 			vectorNexusSpawn = Vector2(spawn[0], spawn[1])
 	

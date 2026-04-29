@@ -170,7 +170,12 @@ func _on_finishManaging_button_released():
 	managingCaravanMenu.visible = false
 	
 	print(tempRoute)
-	controller.queued_orders_to_send_in_control.append([1, [self.get_global_position(), tempRoute, routeManaging]])
+	if playerID != 1:
+		controller.queued_orders_to_send_in_control.append([1, [self.get_global_position(), tempRoute, routeManaging]])
+	else:
+		controller.queued_orders_recieved_in_control.append([1, [self.get_global_position(), tempRoute, routeManaging]])
+
+	
 	tempRoute = []
 	var i = 0
 	while i < tempTargets.size():
@@ -184,8 +189,12 @@ func _on_removeRoute_button_pressed():
 func _on_removeRoute_button_released():
 	if managingCaravanMenu.visible == false:
 		return
+	if playerID != 1:
+		controller.queued_orders_to_send_in_control.append([2, [self.get_global_position(), routeManaging]])
+	else:
+		controller.queued_orders_recieved_in_control.append([2, [self.get_global_position(), routeManaging]])
+
 	
-	controller.queued_orders_to_send_in_control.append([2, [self.get_global_position(), routeManaging]])
 
 	routeManaging = 0
 	managingCaravanMenu.visible = false

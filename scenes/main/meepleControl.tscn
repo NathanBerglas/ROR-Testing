@@ -12,8 +12,7 @@
 
 [node name="MeepleControl" type="Node2D" unique_id=1638019337]
 script = ExtResource("1_py3r1")
-targetMarker = NodePath("TargetMarker")
-infantry_prefab_team = ExtResource("2_jurxu")
+infantry_prefab = ExtResource("2_jurxu")
 infantry_prefab_enemy = ExtResource("3_ogcjo")
 
 [node name="TargetMarker" type="Sprite2D" parent="." unique_id=373247193]

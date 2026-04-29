@@ -40,6 +40,7 @@ func _ready():
 	
 	else:
 		player = playerScene.instantiate()
+		player.SINGLE = SINGLE_TESTING
 		biomeGen = biomeGenScene.instantiate()
 		biomeGen.terrainOffset = player.get_node("Grid").terrainOffset
 		biomeGen.grid = player.get_node("Grid")
@@ -222,6 +223,8 @@ func start_game(biomeGenInfo): # [BMAP_RESOLUTIONx, BPIXELS_PER_TILE, BMAP_RESOL
 		player.get_node("Grid").Bmap = biomeGenInfo[4]
 		player.get_node("Grid").nexusSpawn = biomeGenInfo[5]
 	player.playerID = multiplayer.get_unique_id()
+	
+	player.SINGLE = SINGLE_TESTING
 	add_child(player)
 	
 	

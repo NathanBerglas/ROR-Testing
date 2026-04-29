@@ -1,5 +1,6 @@
 extends Node2D
 
+var SINGLE = false
 var playerID = 0
 
 var queued_orders_to_send_meeple: Array = [[0, []],[0, []]]
@@ -39,14 +40,16 @@ func _ready() -> void:
 	
 	var buildingControlE = null
 	var meepleControlE = null
-	if playerID != 1:
+	print("HI, I am a playerID")
+	print(playerID)
+	if !SINGLE:
 		buildingControlE = buildingControlScene.instantiate()
 		meepleControlE = meepleControlScene.instantiate()
 		enemies.append(meepleControlE)
 		enemies.append(buildingControlE)
 	
 	
-	if multiplayer.get_unique_id() == 1 and playerID != 1:
+	if multiplayer.get_unique_id() == 1 and !SINGLE:
 		buildingControlC.playerID = multiplayer.get_peers()[0]
 		meepleControlC.playerID = multiplayer.get_peers()[0]
 		queued_orders_to_send_meeple[0][0] = multiplayer.get_peers()[0]
@@ -65,7 +68,7 @@ func _ready() -> void:
 	else:
 		buildingControlC.playerID = multiplayer.get_unique_id()
 		meepleControlC.playerID = multiplayer.get_unique_id()
-		if playerID != 1:
+		if !SINGLE:
 			
 			
 			queued_orders_to_send_meeple[0][0] = multiplayer.get_unique_id() 
@@ -96,7 +99,7 @@ func _ready() -> void:
 	add_child(buildingControlC)
 	add_child(meepleControlC)
 	
-	if playerID != 1:
+	if !SINGLE:
 		buildingControlE.teammates.append(meepleControlE)
 		meepleControlE.teammates.append(buildingControlE)
 
@@ -177,7 +180,7 @@ func transfer_orders(ordersMeeple, ordersBuilding, idFrom):
 
 func _process(_delta): #Runs every tick
 	#Meeple Orders
-	if playerID != 1:
+	if !SINGLE:
 		for idArray in queued_orders_to_send_meeple:
 			if idArray[0] == playerID:
 				idArray[1].append_array(c[0].queued_orders_to_send_in_control)

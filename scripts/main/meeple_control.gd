@@ -8,7 +8,7 @@ const FLAG_VERBOSE_MULTI = false
 
 @export var targetMarker: Sprite2D
 @onready var HexMarker = $HexMarker
-@export var infantry_prefab_team: PackedScene
+@export var infantry_prefab: PackedScene
 @export var infantry_prefab_enemy: PackedScene
 
 
@@ -59,25 +59,30 @@ var split_from_hex: Vector2i
 var MEEPLE_ID_COUNTER = 1
 
 
-
 func _ready() -> void:
-	HexMarker.visible = true
-	#Setting base states for the selection box and the right click menu
-	selection_box.visible = false
-	RCLICKMENU.visible = false
 	
-	#Connecting the buttons to their respective functions
-	RCLICKGROUP.button_down.connect(_on_group_button_pressed)
-	RCLICKGROUP.button_up.connect(_on_button_released)
-	RCLICKORDER.button_down.connect(_on_order_button_pressed)
-	RCLICKORDER.button_up.connect(_on_button_released)
-	RCLICKSPLIT1.button_down.connect(_on_split_1_button_pressed)
-	RCLICKSPLIT1.button_up.connect(_on_button_released)
-	RCLICKSPLITHALF.button_down.connect(_on_split_half_button_pressed)
-	RCLICKSPLITHALF.button_up.connect(_on_button_released)
+	if multiplayer.get_unique_id() == playerID:
+		HexMarker.visible = true
+		#Setting base states for the selection box and the right click menu
+		selection_box.visible = false
+		RCLICKMENU.visible = false
+		
+		
+		#Connecting the buttons to their respective functions
+		RCLICKGROUP.button_down.connect(_on_group_button_pressed)
+		RCLICKGROUP.button_up.connect(_on_button_released)
+		RCLICKORDER.button_down.connect(_on_order_button_pressed)
+		RCLICKORDER.button_up.connect(_on_button_released)
+		RCLICKSPLIT1.button_down.connect(_on_split_1_button_pressed)
+		RCLICKSPLIT1.button_up.connect(_on_button_released)
+		RCLICKSPLITHALF.button_down.connect(_on_split_half_button_pressed)
+		RCLICKSPLITHALF.button_up.connect(_on_button_released)
+	else:
+		infantry_prefab = infantry_prefab_enemy
 
 
 func _process(delta): #Runs every tick
+	
 	if queued_orders_recieved_in_control.size() > 0:
 		if FLAG_VERBOSE_MULTI: print(queued_orders_recieved_in_control)
 	if queued_orders_to_send_in_control.size() > 0:
@@ -145,44 +150,30 @@ func process_inputs():
 						return
 					if FLAG_VERBOSE: print("Splitting meeple: ", destination_tile.objectsInside[0].UNIQUEID, " into ", destination_tile.hex, " into ", splitting_meeple.HP - global_split_amount, "HP and ", global_split_amount, "HP")
 					grid.axial_probe(split_from_hex).objectsInside[0].update_hp(-global_split_amount)
-		return
+		
 		
 	elif Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-		if grid.probe(get_global_mouse_position()).classification == 3:
-			grid.probe(get_global_mouse_position()).objectsInside[0].update_hp(1)
-			return
-		elif grid.probe(get_global_mouse_position()).classification != 0:
-			if FLAG_VERBOSE: print("Failed to place meeple. Hex obstructed")
-			return
-		spawn_meeple(get_global_mouse_position())
+		if playerID != 1:
+			queued_orders_to_send_in_control.append([0,[get_global_mouse_position()]])
+		else:
+			queued_orders_recieved_in_control.append([0,[get_global_mouse_position()]])
 
-		#Orders all meeples to a location
-		elif Input.is_action_just_pressed("super_order"):
-			
-			if playerID != 1:
-				queued_orders_to_send_in_control.append([1,[get_global_mouse_position()]])
-			else:
-				queued_orders_recieved_in_control.append([1,[get_global_mouse_position()]])
-			
+	#Orders all meeples to a location
+	elif Input.is_action_just_pressed("super_order"):
 		
-		#Opens up the right click menu
-		elif Input.is_action_just_pressed("right_click_menu"):
-			if grid.probe(get_global_mouse_position()).classification == 3:
-				RCLICKMENU.set_global_position(get_global_mouse_position())
-				RCLICKMENU.visible = true
-			elif Input.is_action_just_pressed("order"):
-				RCLICKMENU.visible = false
-				var selectedMeepleId = []
-				for m in unorderedMeeples:
-					if m.selected:
-						#m.is_unselected()
-						selectedMeepleId.append(m.UNIQUEID)
-				if playerID != 1:
-					queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
-				else:
-					queued_orders_recieved_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
-
+		if playerID != 1:
+			queued_orders_to_send_in_control.append([1,[get_global_mouse_position()]])
+		else:
+			queued_orders_recieved_in_control.append([1,[get_global_mouse_position()]])
+		
+	
+	#Opens up the right click menu
+	elif Input.is_action_just_pressed("right_click_menu"):
+		if grid.probe(get_global_mouse_position()).classification == 3:
+			RCLICKMENU.set_global_position(get_global_mouse_position())
+			RCLICKMENU.visible = true
 		elif Input.is_action_just_pressed("order"):
+			RCLICKMENU.visible = false
 			var selectedMeepleId = []
 			for m in unorderedMeeples:
 				if m.selected:
@@ -192,52 +183,63 @@ func process_inputs():
 				queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
 			else:
 				queued_orders_recieved_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
-		
-		#Starts the selction process
-		elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
-			RCLICKMENU.visible = false
-			selecting = get_global_mouse_position()
-			if !Input.is_action_pressed("preserve_selection"):
-				var clicked_meeple_hex = grid.probe(get_global_mouse_position()).hex
-				for m in unorderedMeeples:
-					if m.path[0] != clicked_meeple_hex:
-							m.is_unselected()
-				
-		#Used to build the selection box if
-		elif Input.is_action_pressed("select") and teammates[0].buildingDraggin == null:
-			#selectingTime += delta
-			#if selectingTime > 0.25:
-			if InputEventMouseMotion:
-				selection_box.visible = true
-				update_selection_box()
-				
-		#Logic for when the select button is released
-		elif Input.is_action_just_released("select"):
-			
-			#Same thing but for all meeples in the rectangle
-			var rect = Rect2(selection_box.global_position, selection_box.size)
-			for m in unorderedMeeples:
-				if rect.has_point(m.get_global_position()):
-					m.is_selected()
-		
-			selecting = Vector2(0, 0) #No more selecting :(
-			selection_box.visible = false
-			
-		if Input.is_action_just_pressed("attack"):
-			var attackLoc = grid.coord_to_axial_hex(get_global_mouse_position())
-			var tempMeepleArray = []
-			for m in unorderedMeeples:
-				if m.selected:
-					tempMeepleArray.append(m.UNIQUEID)
-					m.is_unselected()
-			if grid.axial_probe(attackLoc).objectsInside.size() > 0 and grid.axial_probe(attackLoc).objectsInside[0].playerID != playerID:
-				if FLAG_VERBOSE_MULTI: print("")
-				if FLAG_VERBOSE_MULTI:print("Meeple of: " + str(playerID))
-				if FLAG_VERBOSE_MULTI:print("Attacking: " + str(grid.axial_probe(attackLoc).objectsInside[0].playerID))
-				if FLAG_VERBOSE_MULTI:print("")
-				queued_orders_to_send_in_control.append([3,[attackLoc, tempMeepleArray]])
+
+	elif Input.is_action_just_pressed("order"):
+		var selectedMeepleId = []
+		for m in unorderedMeeples:
+			if m.selected:
+				#m.is_unselected()
+				selectedMeepleId.append(m.UNIQUEID)
+		if playerID != 1:
+			queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
+		else:
+			queued_orders_recieved_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
 	
+	#Starts the selction process
+	elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:
+		RCLICKMENU.visible = false
+		selecting = get_global_mouse_position()
+		if !Input.is_action_pressed("preserve_selection"):
+			var clicked_meeple_hex = grid.probe(get_global_mouse_position()).hex
+			for m in unorderedMeeples:
+				if m.path[0] != clicked_meeple_hex:
+						m.is_unselected()
+			
+	#Used to build the selection box if
+	elif Input.is_action_pressed("select") and teammates[0].buildingDraggin == null:
+		#selectingTime += delta
+		#if selectingTime > 0.25:
+		if InputEventMouseMotion:
+			selection_box.visible = true
+			update_selection_box()
+			
+	#Logic for when the select button is released
+	elif Input.is_action_just_released("select"):
+		
+		#Same thing but for all meeples in the rectangle
+		var rect = Rect2(selection_box.global_position, selection_box.size)
+		for m in unorderedMeeples:
+			if rect.has_point(m.get_global_position()):
+				m.is_selected()
 	
+		selecting = Vector2(0, 0) #No more selecting :(
+		selection_box.visible = false
+		
+	if Input.is_action_just_pressed("attack"):
+		var attackLoc = grid.coord_to_axial_hex(get_global_mouse_position())
+		var tempMeepleArray = []
+		for m in unorderedMeeples:
+			if m.selected:
+				tempMeepleArray.append(m.UNIQUEID)
+				m.is_unselected()
+		if grid.axial_probe(attackLoc).objectsInside.size() > 0 and grid.axial_probe(attackLoc).objectsInside[0].playerID != playerID:
+			if FLAG_VERBOSE_MULTI: print("")
+			if FLAG_VERBOSE_MULTI:print("Meeple of: " + str(playerID))
+			if FLAG_VERBOSE_MULTI:print("Attacking: " + str(grid.axial_probe(attackLoc).objectsInside[0].playerID))
+			if FLAG_VERBOSE_MULTI:print("")
+			queued_orders_to_send_in_control.append([3,[attackLoc, tempMeepleArray]])
+
+
 # Moves Meeples and checks if they've arrived at their destination
 func _physics_process(delta: float) -> void:
 	for m in unorderedMeeples:
@@ -289,11 +291,7 @@ func spawn_meeple(pos):
 	if grid.grid[meeple_hex.x][meeple_hex.y].classification == 3:
 		grid.grid[meeple_hex.x][meeple_hex.y].objectsInside[0].update_hp(1)
 		return
-	var instance
-	if playerID == multiplayer.get_unique_id():
-		instance = infantry_prefab_team.instantiate()
-	else:
-		instance = infantry_prefab_enemy.instantiate()
+	var instance = infantry_prefab.instantiate()
 	# Set instance's data
 	instance.set_id(MEEPLE_ID_COUNTER)
 	instance.playerID = playerID
@@ -358,22 +356,6 @@ func split_meeple(coord: Vector2, split_amount: int):
 
 func _on_button_released():
 	RCLICKMENU.visible = false
-
-
-"""
-func removeEmptyGroups(): #Gets rid of all groups with no meeples
-	var cap = group.size()
-	var i = 0
-	
-	while i < cap:
-		if i > 0 and group[i].size() <= 0:
-			group.pop_at(i)
-			groupColours.pop_at(i)
-			i -= 1
-			cap -= 1
-		i += 1tempPath
-"""
-
 
 
 
@@ -726,6 +708,8 @@ func process_orders(): #Change this to basically process as many as possible. Id
 			order_order(order[1])
 		if order[0] == 3:
 			attack_order(order[1])
+			
+			
 func spawn_meeple_order(position):
 	var pixel_position = position[0]
 	if grid.probe(pixel_position).classification == 3:

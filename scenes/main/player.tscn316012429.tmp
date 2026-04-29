@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://dhecsdio6ymnp"]
+
+[ext_resource type="Script" uid="uid://c5g8gaakh6ukg" path="res://scripts/main/player.gd" id="1_qlg0r"]
+[ext_resource type="PackedScene" uid="uid://dl2hwpslhw3xd" path="res://scenes/main/grid.tscn" id="2_tuyoq"]
+[ext_resource type="PackedScene" uid="uid://bujhjvi3667ko" path="res://scenes/main/buildingControl.tscn" id="3_fjrip"]
+[ext_resource type="PackedScene" uid="uid://bbjr8sh5hxnjt" path="res://scenes/main/camera.tscn" id="4_smehm"]
+[ext_resource type="PackedScene" uid="uid://8s5fbc42yax2" path="res://scenes/main/meepleControl.tscn" id="5_ur7pv"]
+
+[sub_resource type="Environment" id="Environment_2hlsy"]
+background_mode = 3
+glow_enabled = true
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_riacy"]
+
+[sub_resource type="Compositor" id="Compositor_q2ck2"]
+
+[node name="Player" type="Node2D" unique_id=1618287504]
+script = ExtResource("1_qlg0r")
+buildingControlScene = ExtResource("3_fjrip")
+meepleControlScene = ExtResource("5_ur7pv")
+
+[node name="Camera" parent="." unique_id=732688784 instance=ExtResource("4_smehm")]
+position = Vector2(11877, 0)
+
+[node name="Grid" parent="." unique_id=1852769152 instance=ExtResource("2_tuyoq")]
+
+[node name="world_environment" type="WorldEnvironment" parent="." unique_id=1882085299]
+environment = SubResource("Environment_2hlsy")
+camera_attributes = SubResource("CameraAttributesPractical_riacy")
+compositor = SubResource("Compositor_q2ck2")
