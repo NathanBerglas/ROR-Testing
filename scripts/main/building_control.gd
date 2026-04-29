@@ -436,21 +436,21 @@ func _process(delta): #runs every tick
 				buildings[buildings.size() - 1].shapey.modulate = Color(250, 0, 4) #RED
 			else:
 				buildings[buildings.size() - 1].shapey.modulate = Color(1, 1, 1)  # Reset to white
-		for m in buildings: #Doing tick stuff for each building
-			if m.type == "Farm" and !m.fake:
-				m.generateFood(self, delta)
-			elif m.type == "Barracks" and !m.fake:
-				m.spawn(self.teammates[0],delta,m.pos, grid)
-			elif m.type == "LumberJack" and !m.fake:
-				m.generateWood(self, delta)
-			elif m.type == "StoneMine" and !m.fake:
-				m.generateStone(self, delta)
-			elif m.type == "Turret" and !m.fake:
-				if m.target == null:
-					m.getTarget(grid)
-				else:
-					m.attack(delta)
-	
+		
+	for m in buildings: #Doing tick stuff for each building
+		if m.type == "Farm" and !m.fake:
+			m.generateFood(self, delta)
+		elif m.type == "Barracks" and !m.fake:
+			m.spawn(self.teammates[0],delta,m.pos, grid)
+		elif m.type == "LumberJack" and !m.fake:
+			m.generateWood(self, delta)
+		elif m.type == "StoneMine" and !m.fake:
+			m.generateStone(self, delta)
+		elif m.type == "Turret" and !m.fake:
+			if m.target == null:
+				m.getTarget(grid)
+			else:
+				m.attack(delta)
 	hud.updateFood(food) 
 	hud.updateWood(wood) 
 	hud.updateStone(stone)

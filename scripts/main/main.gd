@@ -1,7 +1,7 @@
 extends Node
 
-const ONLINE = false
-const SINGLE_TESTING = true
+const ONLINE = true
+const SINGLE_TESTING = false
 @export var Address = null
 @export var port = 7999
 
