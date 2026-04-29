@@ -158,7 +158,11 @@ func process_inputs():
 
 		#Orders all meeples to a location
 		elif Input.is_action_just_pressed("super_order"):
-			queued_orders_to_send_in_control.append([1,[get_global_mouse_position()]])
+			
+			if playerID != 1:
+				queued_orders_to_send_in_control.append([1,[get_global_mouse_position()]])
+			else:
+				queued_orders_recieved_in_control.append([1,[get_global_mouse_position()]])
 			
 		
 		#Opens up the right click menu
@@ -173,7 +177,10 @@ func process_inputs():
 					if m.selected:
 						#m.is_unselected()
 						selectedMeepleId.append(m.UNIQUEID)
-				queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
+				if playerID != 1:
+					queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
+				else:
+					queued_orders_recieved_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
 
 		elif Input.is_action_just_pressed("order"):
 			var selectedMeepleId = []
@@ -181,8 +188,10 @@ func process_inputs():
 				if m.selected:
 					#m.is_unselected()
 					selectedMeepleId.append(m.UNIQUEID)
-			queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
-			
+			if playerID != 1:
+				queued_orders_to_send_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
+			else:
+				queued_orders_recieved_in_control.append([2,[get_global_mouse_position(), selectedMeepleId]])
 		
 		#Starts the selction process
 		elif Input.is_action_just_pressed("select") and teammates[0].buildingDraggin == null:

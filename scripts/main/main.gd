@@ -1,9 +1,9 @@
 extends Node
 
 const ONLINE = false
+const SINGLE_TESTING = true
 @export var Address = null
 @export var port = 7999
-
 
 @export var playerScene: PackedScene
 var player = null
@@ -29,27 +29,50 @@ var MAX_PLAYERS_AND_SERVER = 2
 var peer
 
 func _ready():
-	multiplayer.peer_connected.connect(peer_connected)
-	multiplayer.peer_disconnected.connect(peer_disconnected)
-	multiplayer.connected_to_server.connect(connected_to_server)
-	multiplayer.connection_failed.connect(connection_failed)
-	hostButton.button_down.connect(_on_host_button_pressed)
-	joinButton.button_down.connect(_on_join_button_pressed)
-	startButton.button_down.connect(_on_start_button_pressed)
+	if !SINGLE_TESTING:
+		multiplayer.peer_connected.connect(peer_connected)
+		multiplayer.peer_disconnected.connect(peer_disconnected)
+		multiplayer.connected_to_server.connect(connected_to_server)
+		multiplayer.connection_failed.connect(connection_failed)
+		hostButton.button_down.connect(_on_host_button_pressed)
+		joinButton.button_down.connect(_on_join_button_pressed)
+		startButton.button_down.connect(_on_start_button_pressed)
 	
-	#multiplayer.allow_object_decoding = true
-	#var index = 0
-	#for i in GameManager.Players:
-		#var currentPlayer = playerScene.instantiate()
-		#add_child(currentPlayer)
-		#currentPlayer.name = str(GameManager.Players[i].id)
-		#currentPlayer.playerID = GameManager.Players[i].id
-		#for spawn in get_tree().get_nodes_in_group("PlayerSpawnPoints"):
-			#if spawn.name == str(index):
-				#currentPlayer.global_position = spawn.global_position
-		#index += 1
-	pass
-
+	else:
+		player = playerScene.instantiate()
+		biomeGen = biomeGenScene.instantiate()
+		biomeGen.terrainOffset = player.get_node("Grid").terrainOffset
+		biomeGen.grid = player.get_node("Grid")
+		hostButton.queue_free()
+		joinButton.queue_free()
+		startButton.queue_free()
+		labelEdit.queue_free()
+		nameLabel.queue_free()
+		waitingLabel.queue_free()
+		var ID1 = 1
+		add_child(biomeGen)
+		biomeGen.nexusSpawn[0].append(ID1)
+		
+		
+		var instance = biomeGenScene.instantiate()
+		var biomeGenInfoToSend = []
+		biomeGenInfoToSend.append(biomeGen.MAP_RESOLUTION.x)
+		biomeGenInfoToSend.append(biomeGen.PIXELS_PER_TILE)
+		biomeGenInfoToSend.append(biomeGen.MAP_RESOLUTION.y)
+		biomeGenInfoToSend.append(biomeGen.debuggingGrid)
+		biomeGenInfoToSend.append(biomeGen.map)
+		biomeGenInfoToSend.append(biomeGen.nexusSpawn)
+		
+		
+		player.get_node("Grid").BMAP_RESOLUTIONx = biomeGenInfoToSend[0]
+		player.get_node("Grid").BPIXELS_PER_TILE = biomeGenInfoToSend[1]
+		player.get_node("Grid").BMAP_RESOLUTIONy = biomeGenInfoToSend[2]
+		player.get_node("Grid").Bdebugging_grid = biomeGenInfoToSend[3]
+		player.get_node("Grid").Bmap = biomeGenInfoToSend[4]
+		player.get_node("Grid").nexusSpawn = biomeGenInfoToSend[5]
+		
+		player.playerID = multiplayer.get_unique_id()
+		add_child(player)
 
 func _process(delta): #runs every
 	pass
