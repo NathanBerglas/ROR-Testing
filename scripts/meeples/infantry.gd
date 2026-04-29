@@ -27,7 +27,7 @@ func _process(delta): #runs on each meeple every tick
 			else:
 				if inAttackRange(attackTarget.pos):
 					attack(attackTarget, delta)
-	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
+	#if (path != null and should_be_moving): #if a meeple has somewhere to go, goes to it
 		#_go_to_target(delta)
 	
 	#if dest != null and closeEnough(): #meeple reaches destination
@@ -43,14 +43,14 @@ func attack(target, delta):
 	if attackTimer >= 1:
 		attackTimer = 0
 		if target.type == "Infantry":
-			if shouldBeMoving:
+			if should_be_moving:
 				target.update_hp(-HP * 2)
 			else:
 				target.update_hp(-HP)
 			if target.HP <= 0:
 				attackTarget = null		
 		else:
-			if shouldBeMoving:
+			if should_be_moving:
 				target.hp -= HP * 10
 				print('attacked for ', -HP * 10, " damage")
 			else:

@@ -113,7 +113,7 @@ func _process(delta):
 			
 func _physics_process(delta: float) -> void:
 	for c in managedCaravans:
-		if !c.shouldBeMoving:
+		if !c.should_be_moving:
 			continue
 		var next_hex: Vector2 = controller.grid.axial_hex_to_coord(c.path[1])
 		var dir_to_next_hex = (next_hex - c.global_position) / (next_hex - c.global_position).length()
@@ -128,7 +128,7 @@ func _physics_process(delta: float) -> void:
 			controller.grid.update_grid(c.path[1], 3, [c])
 			c.path.pop_front()
 			#if FLAG_VERBOSE: print("Meeple ", c.UNIQUEID, " has stopped moving at position ", c.global_position, " in hex: ", next_hex)
-			c.shouldBeMoving = false
+			c.should_be_moving = false
 
 
 func _on_newCaravan_button_pressed():
@@ -329,7 +329,7 @@ func caravan_process(delta):
 			c.pause_a_tick = false
 			
 			continue
-		if (c.shouldBeMoving || c.waiting):
+		if (c.should_be_moving || c.waiting):
 			
 			continue
 		if not c.queued_path.is_empty():
@@ -347,7 +347,7 @@ func caravan_process(delta):
 				c.redirected_from = []
 				if (ingress_result == "APPROVED"):
 					controller.grid.hex_egress(c.path[0])
-					c.shouldBeMoving = true
+					c.should_be_moving = true
 					continue
 				elif (ingress_result == "PENDING"):
 					c.redirected_from = []

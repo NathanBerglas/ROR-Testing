@@ -23,7 +23,7 @@ var redirected_from: Array = []
 var selected = false #Determines if a meeple is selected
 var path: Array = [] #destination of a meeple
 var queued_path: Array = [] #destination of a meeple
-var shouldBeMoving = false
+var should_be_moving = false
 var waiting = false
 var inqueue = false; # british behaviour, french sounding word
 var pause_a_tick = false; # When arriving to prevent merge skipping
@@ -43,7 +43,7 @@ func _ready():
 #func _process(delta): #runs on each meeple every tick
 	#label.text = str(HP)
 	
-	#if (path != null and shouldBeMoving): #if a meeple has somewhere to go, goes to it
+	#if (path != null and should_be_moving): #if a meeple has somewhere to go, goes to it
 	#	_go_to_target(delta)
 	
 	#if dest != null and closeEnough(): #meeple reaches destination
@@ -70,7 +70,7 @@ func update_hp(hp: int):
 
 func is_selected():
 	selected = true
-	sprite.modulate = Color(2.5, 3, 3)
+	sprite.modulate = Color(2 , 2.4, 2.4)
 
 
 func is_unselected():

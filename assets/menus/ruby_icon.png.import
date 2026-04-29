@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x4y46wuqmrfo"
-path="res://.godot/imported/ROR Icon.png-e4c56b1b89dc0aa3c2d69eec71a15452.ctex"
+uid="uid://drkd3ahrgn2va"
+path="res://.godot/imported/ruby_icon.png-18e4f201a41ee29e3d376548a1921c69.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/menus/ROR Icon.png"
-dest_files=["res://.godot/imported/ROR Icon.png-e4c56b1b89dc0aa3c2d69eec71a15452.ctex"]
+source_file="res://assets/menus/ruby_icon.png"
+dest_files=["res://.godot/imported/ruby_icon.png-18e4f201a41ee29e3d376548a1921c69.ctex"]
 
 [params]
 

@@ -7,6 +7,7 @@ const FLAG_VERBOSE_MULTI = false
 #Example Order:          [0, (2029, 19281)]
 
 @export var targetMarker: Sprite2D
+@onready var HexMarker = $HexMarker
 @export var infantry_prefab_team: PackedScene
 @export var infantry_prefab_enemy: PackedScene
 
@@ -14,7 +15,8 @@ const FLAG_VERBOSE_MULTI = false
 @onready var selection_box = $ColorRect
 @onready var RCLICKORDER = $VBoxContainer/Merge
 @onready var RCLICKGROUP = $VBoxContainer/Group
-@onready var RCLICKATTACK= $VBoxContainer/Attack
+@onready var RCLICKSPLIT1 = $VBoxContainer/Split1
+@onready var RCLICKSPLITHALF = $VBoxContainer/SplitHalf
 @onready var RCLICKMENU = $VBoxContainer
 
 #Multiplayer Variables
@@ -50,23 +52,29 @@ var grid
 var selecting = Vector2(0,0)
 #var selectingTime = 0
 
+var placing_split_meeple: int = 0
+var global_split_amount: int = 0
+var split_from_hex: Vector2i
+
 var MEEPLE_ID_COUNTER = 1
 
 
 
 func _ready() -> void:
-	
+	HexMarker.visible = true
 	#Setting base states for the selection box and the right click menu
 	selection_box.visible = false
 	RCLICKMENU.visible = false
 	
 	#Connecting the buttons to their respective functions
 	RCLICKGROUP.button_down.connect(_on_group_button_pressed)
-	RCLICKGROUP.button_up.connect(_on_group_button_released)
+	RCLICKGROUP.button_up.connect(_on_button_released)
 	RCLICKORDER.button_down.connect(_on_order_button_pressed)
-	RCLICKORDER.button_up.connect(_on_order_button_released)
-	#RCLICKATTACK.button_down.connect(_on_attack_button_pressed)
-	#RCLICKATTACK.button_up.connect(_on_attack_button_released)
+	RCLICKORDER.button_up.connect(_on_button_released)
+	RCLICKSPLIT1.button_down.connect(_on_split_1_button_pressed)
+	RCLICKSPLIT1.button_up.connect(_on_button_released)
+	RCLICKSPLITHALF.button_down.connect(_on_split_half_button_pressed)
+	RCLICKSPLITHALF.button_up.connect(_on_button_released)
 
 
 func _process(delta): #Runs every tick
@@ -82,10 +90,71 @@ func _process(delta): #Runs every tick
 	if time_since_last_meeple_tick > (1.0 / MEEPLE_TICKS_PER_SECOND):
 		time_since_last_meeple_tick = 0
 		meeple_process()
-	
 	if multiplayer.get_unique_id() == playerID: 
-		if Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
-			queued_orders_to_send_in_control.append([0,[get_global_mouse_position()]])
+		process_inputs()
+
+
+func process_inputs():
+	if placing_split_meeple:
+		if grid.coord_to_axial_hex(get_global_mouse_position()) - split_from_hex in grid.HEX_DIRS + [Vector2i(0, 0)]:
+			HexMarker.global_position = grid.hex_center(get_global_mouse_position())
+			HexMarker.visible = true
+		else:
+			HexMarker.visible = false
+		if Input.is_action_just_released("place_meeple"):
+			placing_split_meeple -= 1
+			if !placing_split_meeple:
+				HexMarker.visible = false
+				var destination_tile = grid.probe(get_global_mouse_position())
+				var split_from_tile = grid.axial_probe(split_from_hex)
+				var splitting_meeple: meeple = null
+				if split_from_tile.objectsInside.size() > 0:
+					splitting_meeple = split_from_tile.objectsInside[0]
+				else:
+					if FLAG_DEBUG: print("SPLITTING EMPTY HEX"); breakpoint; return;
+				if global_split_amount < 0:
+					global_split_amount = max(splitting_meeple.HP / (-global_split_amount), 1)
+				if splitting_meeple.HP <= global_split_amount:
+					if FLAG_VERBOSE: print("Cannot split meeple with ", splitting_meeple.HP, " health by ", global_split_amount)
+					return
+				for m in unorderedMeeples: # unselect all meeples
+						m.is_unselected()
+				if grid.coord_to_axial_hex(get_global_mouse_position()) - split_from_hex in grid.HEX_DIRS + [Vector2i(0, 0)] \
+				and destination_tile.traversable:
+					if destination_tile.classification == 3:
+						destination_tile.objectsInside[0].update_hp(global_split_amount)
+						destination_tile.objectsInside[0].is_selected()
+					elif destination_tile.classification == 0:
+						#spawn_meeple(get_global_mouse_position())
+						var instance = infantry_prefab.instantiate()
+						# Set instance's data
+						instance.set_id(MEEPLE_ID_COUNTER)
+						MEEPLE_ID_COUNTER += 1
+						instance.global_position = grid.axial_hex_to_coord(split_from_hex) # Spawns meeple on top of splitting origin
+						grid.update_grid(destination_tile.hex, 4, [instance])
+						instance.path = [split_from_hex, destination_tile.hex]
+						instance.should_be_moving = true
+						# Create instance
+						add_child(instance)
+						set_id(instance)
+						unorderedMeeples.push_back(instance)
+						if FLAG_VERBOSE: print("Spawned meeple ", instance.UNIQUEID)
+						destination_tile.objectsInside[0].update_hp(global_split_amount - 1)
+						destination_tile.objectsInside[0].is_selected()
+					else:
+						return
+					if FLAG_VERBOSE: print("Splitting meeple: ", destination_tile.objectsInside[0].UNIQUEID, " into ", destination_tile.hex, " into ", splitting_meeple.HP - global_split_amount, "HP and ", global_split_amount, "HP")
+					grid.axial_probe(split_from_hex).objectsInside[0].update_hp(-global_split_amount)
+		return
+		
+	elif Input.is_action_just_pressed("spawn_meeple"): #Testing purposes
+		if grid.probe(get_global_mouse_position()).classification == 3:
+			grid.probe(get_global_mouse_position()).objectsInside[0].update_hp(1)
+			return
+		elif grid.probe(get_global_mouse_position()).classification != 0:
+			if FLAG_VERBOSE: print("Failed to place meeple. Hex obstructed")
+			return
+		spawn_meeple(get_global_mouse_position())
 
 		#Orders all meeples to a location
 		elif Input.is_action_just_pressed("super_order"):
@@ -159,22 +228,11 @@ func _process(delta): #Runs every tick
 				if FLAG_VERBOSE_MULTI:print("")
 				queued_orders_to_send_in_control.append([3,[attackLoc, tempMeepleArray]])
 	
-	"""
-	else:
-		var MEEPLE_CONTROL_INDEX = 0
-		var BUILDING_CONTROL_INDEX = 1
-		for p in GameManager.Players:
-			#print(playerID)
-			if p == playerID:
-				if GameManager.controllersSet == true:
-					equalize(GameManager.Players[p].meepleInfo)
-	"""
-
-
+	
 # Moves Meeples and checks if they've arrived at their destination
 func _physics_process(delta: float) -> void:
 	for m in unorderedMeeples:
-		if !m.shouldBeMoving:
+		if !m.should_be_moving:
 			continue
 		var next_hex: Vector2 = grid.axial_hex_to_coord(m.path[1])
 		var dir_to_next_hex = (next_hex - m.global_position) / (next_hex - m.global_position).length()
@@ -198,7 +256,7 @@ func _physics_process(delta: float) -> void:
 				grid.update_grid(m.path[1], 3, [m])
 				m.path.pop_front()
 				#if FLAG_VERBOSE: print("Meeple ", m.UNIQUEID, " has stopped moving at position ", m.global_position, " in hex: ", next_hex)
-				m.shouldBeMoving = false
+				m.should_be_moving = false
 
 
 #Updates the selction box to where the mouse is
@@ -254,10 +312,6 @@ func _on_order_button_pressed():
 	queued_orders_to_send_in_control.append([2,[RCLICKMENU.get_global_position(), selectedMeepleId]])
 
 
-func _on_order_button_released(): #Menu gone :(
-	RCLICKMENU.visible = false
-
-
 #Absolutly BROKEN logic for creating groups
 #For real tho, it kinda fire
 func _on_group_button_pressed():	
@@ -274,11 +328,26 @@ func _on_group_button_pressed():
 		if FLAG_VERBOSE: print("Meeple ID: " + str(m.UNIQUEID) + ", Group Number: " + str(m.groupNum))
 
 
-func _on_group_button_released():
-	RCLICKMENU.visible = false
+func _on_split_1_button_pressed():
+	split_meeple(RCLICKMENU.get_global_position(), 1)
+
+func _on_split_half_button_pressed():
+	split_meeple(RCLICKMENU.get_global_position(), -2) # -X means 1/x, so -2 is 1 / 2
+
+	
+func split_meeple(coord: Vector2, split_amount: int):
+	var clicked_tile = grid.probe(coord)
+	if clicked_tile.classification != 3:
+		return
+	if clicked_tile.objectsInside[0].HP <= 1:
+		return
+	placing_split_meeple = 2
+	#HexMarker.visible = true
+	global_split_amount = split_amount
+	split_from_hex = clicked_tile.hex
 
 
-func _on_attack_button_released(): #Menu gone :(
+func _on_button_released():
 	RCLICKMENU.visible = false
 
 
@@ -314,7 +383,7 @@ func freeMeeple(id):
 	if FLAG_VERBOSE: print("Deleting meeple ", id)
 	for i in range(unorderedMeeples.size()):
 		if unorderedMeeples[i].UNIQUEID == id:
-			if !unorderedMeeples[i].shouldBeMoving:
+			if !unorderedMeeples[i].should_be_moving:
 				grid.update_grid(unorderedMeeples[i].path[0], 0, [])
 			else:
 				if !grid.axial_probe(unorderedMeeples[i].path[1]).classification == 3: # no other meeple inside
@@ -348,7 +417,7 @@ func meeple_end_merge(incoming_meeple, target_meeple):
 func egress_granted(waiting_meeple):
 	if FLAG_VERBOSE and waiting_meeple.waiting: print("Meeple ", waiting_meeple.UNIQUEID, " set to stop waiting in egress_granted.")
 	waiting_meeple.waiting = false
-	waiting_meeple.shouldBeMoving = true
+	waiting_meeple.should_be_moving = true
 
 
 func meeple_process():
@@ -356,7 +425,7 @@ func meeple_process():
 		if m.pause_a_tick:
 			m.pause_a_tick = false
 			continue
-		if (m.shouldBeMoving || m.waiting):
+		if (m.should_be_moving || m.waiting):
 			continue
 		if (m.attackTarget != null):
 			var pos = null
@@ -378,7 +447,7 @@ func meeple_process():
 				m.redirected_from = []
 				if (ingress_result == "APPROVED"):
 					grid.hex_egress(m.path[0])
-					m.shouldBeMoving = true
+					m.should_be_moving = true
 					continue
 				elif (ingress_result == "PENDING"):
 					m.redirected_from = []
@@ -477,14 +546,14 @@ func cleanMeeples(): #Updates the Grid and merges meeples
 	# This algorithim goes through each meeple, saves the vector they are in, then sets the tile a meeple moved out of to clear
 	#It then sets all vectors seen to have a meeple in them in the grid
 	for m in unorderedMeeples:
-		#m.shouldBeMoving = true
+		#m.should_be_moving = true
 		if m.path:
 			for i in range (m.path.size()):
 			
 				if (grid.probe(m.path[i]).classification == 2  or (grid.probe(m.path[i]).classification == 3 and i != m.path.size() - 1)):
 					#if grid.probe(m.path[i]).classification == 3 and i == 0:
 					#	if grid.probe(m.path[i]).objectsInside[0].path:
-						#	m.shouldBeMoving = false
+						#	m.should_be_moving = false
 						#	break
 					var tempPath = grid.find_path(m.pos, grid.coord_to_axial_hex(m.path[m.path.size() - 1]), false, false)
 					m.path = []

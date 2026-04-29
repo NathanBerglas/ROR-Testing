@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x4y46wuqmrfo"
-path="res://.godot/imported/ROR Icon.png-e4c56b1b89dc0aa3c2d69eec71a15452.ctex"
+uid="uid://dyuci5fayskyh"
+path="res://.godot/imported/food_icon.png-7fb980dd14f54d16338f1b54dccc6abb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/menus/ROR Icon.png"
-dest_files=["res://.godot/imported/ROR Icon.png-e4c56b1b89dc0aa3c2d69eec71a15452.ctex"]
+source_file="res://assets/menus/food_icon.png"
+dest_files=["res://.godot/imported/food_icon.png-7fb980dd14f54d16338f1b54dccc6abb.ctex"]
 
 [params]
 
