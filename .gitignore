@@ -17,3 +17,10 @@ addons/
 .mono/
 data_*/
 mono_crash.*.json
+
+# Executables
+executable/
+.exe
+.pck
+.x86_
+.sh64
