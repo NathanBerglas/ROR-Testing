@@ -1,7 +1,7 @@
 extends Node2D
 
-var FLAG_VERBOSE_MULTI = false
-
+const FLAG_VERBOSE_MULTI = false
+const FLAG_VERBOSE = false
 
 
 #Ensuring all of our prebabs and their buttons are loaded in
@@ -100,7 +100,7 @@ var buildings = []
 
 var teammates = [] #list of teammates
 var grid # the grid controller
-var playerID = null
+var player_id = null
 var buildingIDTracker = 0
 var caravanIDTracker = 1
 
@@ -111,12 +111,9 @@ const ORDERS = [0,1,2,3,4,5,6] #0: Place a building, #1: Create new caravan rout
 
 
 func _ready(): #Runs on start, connects buttons
-	print("")
-	print("ON: " + str(multiplayer.get_unique_id()))
-	print("In control of: " + str(playerID))
-	print("")
+	if FLAG_VERBOSE: print("On: ", multiplayer.get_unique_id(), " in control of: ", player_id)
 	spawnNexus()
-	if playerID == multiplayer.get_unique_id():
+	if player_id == multiplayer.get_unique_id():
 		hud.visible = true
 		resourceBuildingHud.visible = true
 		combatBuildingHud.visible = true
@@ -194,7 +191,7 @@ func _hide_all():
 
 func _on_turret_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		print("Ya Broke")
+		if FLAG_VERBOSE: print("Ya Broke")
 		return
 	beginDragging("Turret")
 
@@ -212,7 +209,7 @@ func _on_turret_button_released():
 
 func _on_wallCorner_button_pressed():
 	if food < 50 or stone < 50 or wood < 50:
-		print("Ya Broke")
+		if FLAG_VERBOSE: print("Ya Broke")
 		return
 	beginDragging("WallCorner")
 
@@ -304,7 +301,7 @@ func _on_manageCaravans_button_released():
 #Start dragging the farm if has enough money
 func _on_farm_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		print("Ya Broke")
+		if FLAG_VERBOSE: print("Ya Broke")
 		return
 	beginDragging("Farm")
 
@@ -325,7 +322,7 @@ func _on_farm_button_released():
 #starts draggin the lumberJack
 func _on_lumberJack_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		print("Ya Broke")
+		if FLAG_VERBOSE: print("Ya Broke")
 		return
 	beginDragging("LumberJack")
 
@@ -345,7 +342,7 @@ func _on_lumberJack_button_released():
 #Starts draggin the Stone mine
 func _on_stoneMine_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		print("Ya Broke")
+		if FLAG_VERBOSE: print("Ya Broke")
 		return
 	beginDragging("StoneMine")
 
@@ -366,7 +363,7 @@ func _on_stoneMine_button_released():
 #Start dragging the resource hub if has enough money
 func _on_resourceHub_button_pressed():
 	if food < 5000 or stone < 5000 or wood < 5000:
-		print("Ya Broke")
+		if FLAG_VERBOSE: print("Ya Broke")
 		return
 	beginDragging("ResourceHub")
 
@@ -378,7 +375,7 @@ func _on_resourceHub_button_released():
 		return
 	if finishDragging("ResourceHub") == false:
 		return
-	print("Added Resource Hub")
+	if FLAG_VERBOSE: print("Added Resource Hub")
 	food -= 5000
 	wood -= 5000
 	stone -= 5000
@@ -386,7 +383,7 @@ func _on_resourceHub_button_released():
 
 func _on_barracks_button_pressed():
 	if food < 1000 or wood < 1000 or stone < 1000:
-		print("Ya Broke")
+		if FLAG_VERBOSE: print("Ya Broke")
 		return
 	beginDragging("Barracks")
 
@@ -415,13 +412,13 @@ func _process(delta): #runs every tick
 	sendCaravans()
 	for b in buildings:
 		b.updateHPBar()
-	if multiplayer.get_unique_id() == playerID:
+	if multiplayer.get_unique_id() == player_id:
 		hoveringText()
 		#Opens up the right click menu
 		if Input.is_action_just_pressed("right_click_menu"):
 			
 			var probing_hex = grid.probe(get_global_mouse_position())
-			if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub" and probing_hex.objectsInside[0].playerID == playerID:
+			if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub" and probing_hex.objectsInside[0].player_id == player_id:
 				
 				RCLICK_ResourceHub.set_global_position(get_global_mouse_position())
 				RCLICK_ResourceHub.visible = true
@@ -597,7 +594,7 @@ func finishDragging(buildingName):
 		buildings.pop_back().queue_free()
 		return false
 	
-	if playerID != 1:
+	if player_id != 1:
 		queued_orders_to_send_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
 	else:
 		queued_orders_recieved_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
@@ -644,7 +641,7 @@ func spawn_building_order(args):
 	instance.type = buildingName
 	instance.BUILDING_UNIQUE_ID = buildingIDTracker
 	buildingIDTracker += 1
-	instance.playerID = playerID
+	instance.player_id = player_id
 	instance.pos = grid.coord_to_axial_hex(buildingPos)
 	instance.controller = self
 	instance.global_position = buildingPos
@@ -661,16 +658,16 @@ func spawnNexus():
 	
 	var instance = null
 	
-	if playerID == multiplayer.get_unique_id():
+	if player_id == multiplayer.get_unique_id():
 		instance = nexus_prefab.instantiate()
 	else:
 		instance = nexus_prefabEnemy.instantiate()
 		
 	var vectorNexusSpawn = null
 	for spawn in nexusSpawn:
-		print(spawn)
-		print(playerID)
-		if spawn.size() > 2 and spawn[2] == playerID:
+		if FLAG_VERBOSE: print(spawn)
+		if FLAG_VERBOSE: print(player_id)
+		if spawn.size() > 2 and spawn[2] == player_id:
 			vectorNexusSpawn = Vector2(spawn[0], spawn[1])
 	
 	instance.fake = true
@@ -683,15 +680,15 @@ func spawnNexus():
 	instance.global_position = vectorNexusSpawn
 	add_child(instance) #Adding the instance
 	buildings.push_back(instance)
-	#print(vectorNexusSpawn)
+	#if FLAG_VERBOSE: print(vectorNexusSpawn)
 	#If not placeable, REMOVED
 	while !is_placeable(buildings[buildings.size() - 1]):
 		var tempPlace = instance.get_global_position()
 		tempPlace.x += grid.HEX_WIDTH
 		tempPlace.y += grid.HEX_HEIGHT
 		instance.set_global_position(tempPlace)
-	#print(instance.get_global_position())
-	#print(grid.coord_to_axial_hex(instance.get_global_position()))
+	#if FLAG_VERBOSE: print(instance.get_global_position())
+	#if FLAG_VERBOSE: print(grid.coord_to_axial_hex(instance.get_global_position()))
 	buildings[buildings.size() - 1].fake = false
 	buildings[buildings.size() - 1].global_position = grid.hex_center(instance.get_global_position())
 	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(instance.get_global_position())

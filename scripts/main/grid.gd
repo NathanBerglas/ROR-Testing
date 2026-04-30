@@ -1,5 +1,5 @@
 extends Node2D
-const FLAG_VERBOSE = true
+const FLAG_VERBOSE = false
 
 
 # Grid constants
@@ -214,10 +214,10 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 		var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
 		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]) \
 		and meeple_requesting.type == "Infantry" \
-		and meeple_in_ingressing_hex.playerID == meeple_requesting.playerID:
+		and meeple_in_ingressing_hex.player_id == meeple_requesting.player_id:
 			
 			for MC in meeple_controls:
-				if MC.playerID == meeple_requesting.playerID:
+				if MC.player_id == meeple_requesting.player_id:
 					MC.meeple_start_merge(meeple_in_ingressing_hex)
 			#update_grid(ingressing_hex, 3, [meeple_requesting] + ingressing_tile.objectsInside)
 			decision = "APPROVED"
@@ -243,7 +243,7 @@ func hex_egress(egressing_hex):
 		if FLAG_VERBOSE: print("Collecting meeple, ", collected_meeple.UNIQUEID, " from queue on hex ", egressing_hex)
 		update_grid(egressing_hex, 4, [collected_meeple])
 		for MC in meeple_controls:
-				if MC.playerID == collected_meeple.playerID:
+				if MC.player_id == collected_meeple.player_id:
 					MC.egress_granted(collected_meeple)
 		
 		hex_egress(collected_meeple.path[0])

@@ -6,7 +6,7 @@ class_name Building
 
 
 var fake = false #Check if this is dragging or NAH
-var playerID = 0
+var player_id = 0
 var hp = 100
 var type = ""
 var pos = null
