@@ -92,88 +92,112 @@ func update_ui():
 	treasure_label.text = "Treasury Amount: $" + str(building_control.money)
 	
 	foodLabel.text = "Food: " + str(building_control.food)
-	foodPricePerUnit.text = "Price per 1k Units: $" + str(building_control.food_price)
+	foodPricePerUnit.text = "Buy 1k: $" + str(building_control.food_buy_price) + ", Sell 1k: $" + str(building_control.food_sell_price)
 	
 	woodLabel.text = "Wood: " + str(building_control.wood)
-	woodPricePerUnit.text = "Price per 1k Units: $" + str(building_control.wood_price)
+	woodPricePerUnit.text = "Buy 1k: $" + str(building_control.wood_buy_price) + ", Sell 1k: $" + str(building_control.wood_sell_price)
 	
 	stoneLabel.text = "Stone: " + str(building_control.stone)
-	stonePricePerUnit.text = "Price per 1k Units: $" + str(building_control.stone_price)
+	stonePricePerUnit.text = "Buy 1k: $" + str(building_control.stone_buy_price) + ", Sell 1k: $" + str(building_control.stone_sell_price)
 	
 	ironLabel.text = "Iron: " + str(building_control.iron)
-	ironPricePerUnit.text = "Price per 1k Units: $" + str(building_control.iron_price)
+	ironPricePerUnit.text = "Buy 1k: $" + str(building_control.iron_buy_price) + ", Sell 1k: $" + str(building_control.iron_sell_price)
 	
 	rubyLabel.text = "Ruby: " + str(building_control.ruby)
-	rubyPricePerUnit.text = "Price per 1k Units: $" + str(building_control.ruby_price)
+	rubyPricePerUnit.text = "Buy 1: $" + str(building_control.ruby_buy_price) + ", Sell 1: $" + str(building_control.ruby_sell_price)
 	
 	diamondLabel.text = "Diamond: " + str(building_control.diamond)
-	diamondPricePerUnit.text = "Price per 1k Units: $" + str(building_control.diamond_price)
+	diamondPricePerUnit.text = "Buy 1: $" + str(building_control.diamond_buy_price) + ", Sell 1: $" + str(building_control.diamond_sell_price)
 
 
-func _trade(resourceID, isBuying):
+func _trade(resource_id, is_buying):
 	var amount_value = 0
-	var price = 1
+	var buy_price = 1
+	var sell_price = 1
 	var units_in_inventory = 0
 	var price_per_X: float = 1.0 # Must also be set in _on_resource_amount_changed
-	if resourceID == 0: # food
+	if resource_id == 0: # diamond
 		amount_value = foodAmount.value
-		price = building_control.food_price
+		buy_price = building_control.food_buy_price
+		sell_price = building_control.food_sell_price
 		units_in_inventory = building_control.food
 		price_per_X = 1000.0
-	elif resourceID == 1: # wood
+	elif resource_id == 1: # wood
 		amount_value = woodAmount.value
-		price = building_control.wood_price
+		buy_price = building_control.wood_buy_price
+		sell_price = building_control.wood_sell_price
 		units_in_inventory = building_control.wood
 		price_per_X = 1000.0
-	elif resourceID == 2: # stone
+	elif resource_id == 2: # stone
 		amount_value = stoneAmount.value
-		price = building_control.stone_price
+		buy_price = building_control.wood_buy_price
+		sell_price = building_control.wood_sell_price
+		units_in_inventory = building_control.wood
+		price_per_X = 1000.0
+	elif resource_id == 2: # stone
+		amount_value = stoneAmount.value
+		buy_price = building_control.stone_buy_price
+		sell_price = building_control.stone_sell_price
 		units_in_inventory = building_control.stone
 		price_per_X = 1000.0
-	elif resourceID == 3: # iron
+	elif resource_id == 3: # iron
 		amount_value = ironAmount.value
-		price = building_control.iron_price
+		buy_price = building_control.iron_buy_price
+		sell_price = building_control.iron_sell_price
 		units_in_inventory = building_control.iron
 		price_per_X = 1000.0
-	elif resourceID == 4: # ruby
+	elif resource_id == 4: # ruby
 		amount_value = rubyAmount.value
-		price = building_control.ruby_price
+		buy_price = building_control.ruby_buy_price
+		sell_price = building_control.ruby_sell_price
 		units_in_inventory = building_control.ruby
 		price_per_X = 1.0
-	elif resourceID == 5: # diamond
+	elif resource_id == 5: # diamond
 		amount_value = diamondAmount.value
-		price = building_control.diamond_price
+		buy_price = building_control.diamond_buy_price
+		sell_price = building_control.diamond_sell_price
 		units_in_inventory = building_control.diamond
 		price_per_X = 1.0
 		
 	var trade_quantity = 0
-	if isBuying == 1: # Buying
-		trade_quantity = clamp(amount_value, 0, int(price_per_X * building_control.money / price)) # What they can afford
-	elif isBuying == -1: # Selling
+	if is_buying == 1: # Buying
+		trade_quantity = clamp(amount_value, 0, int(price_per_X * building_control.money / buy_price)) # What they can afford
+		building_control.money -= int(1. / price_per_X * buy_price * trade_quantity)
+	elif is_buying == -1: # Selling
 		trade_quantity = clamp(amount_value, 0, units_in_inventory) # What they can afford
-		
-	building_control.money -= int(1. / price_per_X * price * trade_quantity) * isBuying
-	if resourceID == 0: #food
-		building_control.food += int(trade_quantity) * isBuying
+		building_control.money += int(1. / price_per_X * sell_price * trade_quantity)
+	if resource_id == 0: #food
+		building_control.food += int(trade_quantity) * is_buying
 		_on_food_amount_changed(0)
-	elif resourceID == 1: #wood
-		building_control.wood += int(trade_quantity) * isBuying
+	elif resource_id == 1: #wood
+		building_control.wood += int(trade_quantity) * is_buying
 		_on_wood_amount_changed(0)
-	elif resourceID == 2: #stone
-		building_control.stone += int(trade_quantity) * isBuying
+	elif resource_id == 2: #stone
+		building_control.stone += int(trade_quantity) * is_buying
 		_on_stone_amount_changed(0)
-	elif resourceID == 3: #iron
-		building_control.iron += int(trade_quantity) * isBuying
+	elif resource_id == 3: #iron
+		building_control.iron += int(trade_quantity) * is_buying
 		_on_iron_amount_changed(0)
-	elif resourceID == 4: #ruby
-		building_control.ruby += int(trade_quantity) * isBuying
+	elif resource_id == 4: #ruby
+		building_control.ruby += int(trade_quantity) * is_buying
 		_on_ruby_amount_changed(0)
-	elif resourceID == 5: #diamond
-		building_control.diamond += int(trade_quantity) * isBuying
+	elif resource_id == 5: #diamond
+		building_control.diamond += int(trade_quantity) * is_buying
 		_on_diamond_amount_changed(0)
 		
 	update_ui()
 	return
+
+
+func _amount_changed(new_amount, buy_price, sell_price, units_in_inventory, price_per_X):
+	var text = "Price: $" + str(int(1. / price_per_X * buy_price * new_amount)) + " / $" + str(int(1. / price_per_X * sell_price * new_amount))
+	var buy_disabled = false
+	var sell_disabled = false
+	if new_amount > int(price_per_X * building_control.money / buy_price) or new_amount == 0:
+		buy_disabled = true
+	if new_amount > units_in_inventory or new_amount == 0:
+		sell_disabled = true
+	return {"text": text, "buy_disabled": buy_disabled, "sell_disabled": sell_disabled}
 
 
 func _on_food_buy():
@@ -183,9 +207,11 @@ func _on_food_sell():
 	_trade(0, -1) # food, selling
 
 func _on_food_amount_changed(new_amount):
+	var output = _amount_changed(new_amount, building_control.food_buy_price, building_control.food_sell_price, building_control.food, 1000.0)
 	foodAmount.value = new_amount
-	foodPrice.text = "Price: $" + str(int(1. / 1000.0 * building_control.food_price * foodAmount.value))
-
+	foodPrice.text = output["text"]
+	foodBuyButton.disabled = output["buy_disabled"]
+	foodSellButton.disabled = output["sell_disabled"]
 
 func _on_wood_buy():
 	_trade(1, 1) # wood, buy
@@ -194,9 +220,11 @@ func _on_wood_sell():
 	_trade(1, -1) # wood, selling
 
 func _on_wood_amount_changed(new_amount):
+	var output = _amount_changed(new_amount, building_control.wood_buy_price,  building_control.wood_sell_price, building_control.wood, 1000.0)
 	woodAmount.value = new_amount
-	woodPrice.text = "Price: $" + str(int(1. / 1000.0 * building_control.wood_price * woodAmount.value))
-
+	woodPrice.text = output["text"]
+	woodBuyButton.disabled = output["buy_disabled"]
+	woodSellButton.disabled = output["sell_disabled"]
 
 func _on_stone_buy():
 	_trade(2, 1) # stone, buy
@@ -205,8 +233,11 @@ func _on_stone_sell():
 	_trade(2, -1) # stone, selling
 
 func _on_stone_amount_changed(new_amount):
+	var output = _amount_changed(new_amount, building_control.stone_buy_price, building_control.stone_sell_price, building_control.stone, 1000.0)
 	stoneAmount.value = new_amount
-	stonePrice.text = "Price: $" + str(int(1. / 1000.0 * building_control.stone_price * stoneAmount.value))
+	stonePrice.text = output["text"]
+	stoneBuyButton.disabled = output["buy_disabled"]
+	stoneSellButton.disabled = output["sell_disabled"]
 
 
 func _on_iron_buy():
@@ -216,8 +247,11 @@ func _on_iron_sell():
 	_trade(3, -1) # iron, selling
 
 func _on_iron_amount_changed(new_amount):
+	var output = _amount_changed(new_amount, building_control.iron_buy_price, building_control.iron_sell_price, building_control.iron, 1000.0)
 	ironAmount.value = new_amount
-	ironPrice.text = "Price: $" + str(int(1. / 1000.0 * building_control.iron_price * ironAmount.value))
+	ironPrice.text = output["text"]
+	ironBuyButton.disabled = output["buy_disabled"]
+	ironSellButton.disabled = output["sell_disabled"]
 
 
 func _on_ruby_buy():
@@ -227,9 +261,12 @@ func _on_ruby_sell():
 	_trade(4, -1) # ruby, selling
 
 func _on_ruby_amount_changed(new_amount):
+	var output = _amount_changed(new_amount, building_control.ruby_buy_price, building_control.ruby_sell_price, building_control.ruby, 1.0)
 	rubyAmount.value = new_amount
-	rubyPrice.text = "Price: $" + str(int(1. / 1.0 * building_control.ruby_price * rubyAmount.value))
-
+	rubyPrice.text = output["text"]
+	rubyBuyButton.disabled = output["buy_disabled"]
+	rubySellButton.disabled = output["sell_disabled"]
+	
 
 func _on_diamond_buy():
 	_trade(5, 1) # diamond, buy
@@ -238,5 +275,8 @@ func _on_diamond_sell():
 	_trade(5, -1) # diamond, selling
 
 func _on_diamond_amount_changed(new_amount):
+	var output = _amount_changed(new_amount, building_control.diamond_buy_price, building_control.diamond_sell_price, building_control.diamond, 1.0)
 	diamondAmount.value = new_amount
-	diamondPrice.text = "Price: $" + str(int(1. / 1.0 * building_control.diamond_price * diamondAmount.value))
+	diamondPrice.text = output["text"]
+	diamondBuyButton.disabled = output["buy_disabled"]
+	diamondSellButton.disabled = output["sell_disabled"]

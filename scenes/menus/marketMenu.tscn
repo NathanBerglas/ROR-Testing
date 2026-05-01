@@ -16,9 +16,6 @@ font_size = 40
 [sub_resource type="LabelSettings" id="LabelSettings_sxv5f"]
 font_size = 40
 
-[sub_resource type="LabelSettings" id="LabelSettings_knj74"]
-font_size = 32
-
 [sub_resource type="Theme" id="Theme_uqlmk"]
 default_font_size = 32
 
@@ -104,7 +101,7 @@ layout_mode = 2
 [node name="EssentialGrid" type="GridContainer" parent="Background/Market" unique_id=626101689]
 layout_mode = 2
 theme_override_constants/h_separation = 30
-columns = 8
+columns = 7
 
 [node name="FoodIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=1585282762]
 custom_minimum_size = Vector2(64, 64)
@@ -122,19 +119,16 @@ label_settings = SubResource("LabelSettings_sxv5f")
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Buy"
 
 [node name="FoodSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=417261638]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Sell
 "
-
-[node name="FoodAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=144219937]
-layout_mode = 2
-text = "Amount to trade:  "
-label_settings = SubResource("LabelSettings_knj74")
 
 [node name="FoodAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=634911994]
 custom_minimum_size = Vector2(150, 50)
@@ -145,12 +139,12 @@ max_value = 99999.0
 [node name="FoodPrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1402034823]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price: $0"
+text = "Price: $0 / $0"
 
 [node name="FoodPricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=1297002493]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price per 1k Units: $XX"
+text = "Buy 1k: $XX, Sell 1k: $XX"
 
 [node name="WoodIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=2041583595]
 custom_minimum_size = Vector2(64, 64)
@@ -168,19 +162,16 @@ label_settings = SubResource("LabelSettings_sxv5f")
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Buy"
 
 [node name="WoodSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=2066668202]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Sell
 "
-
-[node name="WoodAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=1247247374]
-layout_mode = 2
-text = "Amount to trade:  "
-label_settings = SubResource("LabelSettings_knj74")
 
 [node name="WoodAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=663371797]
 custom_minimum_size = Vector2(150, 50)
@@ -191,12 +182,12 @@ max_value = 99999.0
 [node name="WoodPrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1525871454]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price: $0"
+text = "Price: $0 / $0"
 
 [node name="WoodPricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=864942028]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price per 1k Units: $XX"
+text = "Buy 1k: $XX, Sell 1k: $XX"
 
 [node name="StoneIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=597020915]
 custom_minimum_size = Vector2(64, 64)
@@ -214,19 +205,16 @@ label_settings = SubResource("LabelSettings_sxv5f")
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Buy"
 
 [node name="StoneSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=312213929]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Sell
 "
-
-[node name="StoneAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=942910911]
-layout_mode = 2
-text = "Amount to trade:  "
-label_settings = SubResource("LabelSettings_knj74")
 
 [node name="StoneAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=715004951]
 custom_minimum_size = Vector2(150, 50)
@@ -237,12 +225,12 @@ max_value = 99999.0
 [node name="StonePrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1054167336]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price: $0"
+text = "Price: $0 / $0"
 
 [node name="StonePricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=466969515]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price per 1k Units: $XX"
+text = "Buy 1k: $XX, Sell 1k: $XX"
 
 [node name="IronIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=1190420600]
 custom_minimum_size = Vector2(64, 64)
@@ -260,19 +248,16 @@ label_settings = SubResource("LabelSettings_sxv5f")
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Buy"
 
 [node name="IronSell" type="Button" parent="Background/Market/EssentialGrid" unique_id=2130776808]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Sell
 "
-
-[node name="IronAmountLabel" type="Label" parent="Background/Market/EssentialGrid" unique_id=729812391]
-layout_mode = 2
-text = "Amount to trade:  "
-label_settings = SubResource("LabelSettings_knj74")
 
 [node name="IronAmount" type="SpinBox" parent="Background/Market/EssentialGrid" unique_id=1067915561]
 custom_minimum_size = Vector2(150, 50)
@@ -283,12 +268,12 @@ max_value = 99999.0
 [node name="IronPrice" type="Label" parent="Background/Market/EssentialGrid" unique_id=1074368814]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price: $0"
+text = "Price: $0 / $0"
 
 [node name="IronPricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=988380566]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price per 1k Units: $XX"
+text = "Buy 1k: $XX, Sell 1k: $XX"
 
 [node name="Luxury Resources" type="Label" parent="Background/Market" unique_id=1549675271]
 layout_mode = 2
@@ -302,7 +287,7 @@ layout_mode = 2
 [node name="LuxuryGrid" type="GridContainer" parent="Background/Market" unique_id=2025611105]
 layout_mode = 2
 theme_override_constants/h_separation = 30
-columns = 8
+columns = 7
 
 [node name="RubyIcon" type="TextureRect" parent="Background/Market/LuxuryGrid" unique_id=180797391]
 custom_minimum_size = Vector2(64, 64)
@@ -320,19 +305,16 @@ label_settings = SubResource("LabelSettings_sxv5f")
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Buy"
 
 [node name="RubySell" type="Button" parent="Background/Market/LuxuryGrid" unique_id=1324388706]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Sell
 "
-
-[node name="RubyAmountLabel" type="Label" parent="Background/Market/LuxuryGrid" unique_id=606950906]
-layout_mode = 2
-text = "Amount to trade:  "
-label_settings = SubResource("LabelSettings_knj74")
 
 [node name="RubyAmount" type="SpinBox" parent="Background/Market/LuxuryGrid" unique_id=920129919]
 custom_minimum_size = Vector2(150, 50)
@@ -343,12 +325,12 @@ max_value = 999.0
 [node name="RubyPrice" type="Label" parent="Background/Market/LuxuryGrid" unique_id=1679500495]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price: $0"
+text = "Price: $0 / $0"
 
 [node name="RubyPricePerUnit" type="Label" parent="Background/Market/LuxuryGrid" unique_id=1354799103]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price per Unit: $XX"
+text = "Buy 1: $XX, Sell 1: $XX"
 
 [node name="DiamondIcon" type="TextureRect" parent="Background/Market/LuxuryGrid" unique_id=540171941]
 custom_minimum_size = Vector2(64, 64)
@@ -366,19 +348,16 @@ label_settings = SubResource("LabelSettings_sxv5f")
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Buy"
 
 [node name="DiamondSell" type="Button" parent="Background/Market/LuxuryGrid" unique_id=2037837352]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+disabled = true
 text = "Sell
 "
-
-[node name="DiamondAmountLabel" type="Label" parent="Background/Market/LuxuryGrid" unique_id=10282231]
-layout_mode = 2
-text = "Amount to trade:  "
-label_settings = SubResource("LabelSettings_knj74")
 
 [node name="DiamondAmount" type="SpinBox" parent="Background/Market/LuxuryGrid" unique_id=1074726772]
 custom_minimum_size = Vector2(150, 50)
@@ -389,9 +368,9 @@ max_value = 999.0
 [node name="DiamondPrice" type="Label" parent="Background/Market/LuxuryGrid" unique_id=330890536]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price: $0"
+text = "Price: $0 / $0"
 
 [node name="DiamondPricePerUnit" type="Label" parent="Background/Market/LuxuryGrid" unique_id=349686662]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Price per Unit: $XX"
+text = "Buy 1k: $XX, Sell 1k: $XX"

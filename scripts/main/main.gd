@@ -1,7 +1,7 @@
 extends Node
 
 const ONLINE = false
-const SINGLE_TESTING = false
+const SINGLE_TESTING = true
 const FLAG_VERBOSE = true
 
 @export var Address = null

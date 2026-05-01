@@ -2,7 +2,7 @@ extends Node2D
 
 const FLAG_VERBOSE = false
 
-var SINGLE = false
+var SINGLE = true
 var player_id = 0
 
 var queued_orders_to_send_meeple: Array = [[0, []],[0, []]]

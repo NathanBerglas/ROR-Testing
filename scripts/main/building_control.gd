@@ -75,17 +75,23 @@ const FLAG_VERBOSE = false
 var nexusSpawn = null
 #Players Money
 var food = 10000
-var food_price = 1000
+var food_buy_price = 1000
+var food_sell_price = 500
 var wood = 10000
-var wood_price = 5000
+var wood_buy_price = 5000
+var wood_sell_price = 2500
 var stone = 10000
-var stone_price = 25000
+var stone_buy_price = 25000
+var stone_sell_price = 12500
 var iron = 0
-var iron_price = 200000
+var iron_buy_price = 200000
+var iron_sell_price = 100000
 var ruby = 0
-var ruby_price = 2500
+var ruby_buy_price = 2500
+var ruby_sell_price = 1250
 var diamond = 0
-var diamond_price = 10000
+var diamond_buy_price = 10000
+var diamond_sell_price = 5000
 var money = 100
 
 #All the buttons for resources
