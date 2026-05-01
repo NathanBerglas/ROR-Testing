@@ -18,6 +18,7 @@ var nexus = false
 @export var caravanTarget: PackedScene
 @export var caravan: PackedScene
 @export var caravanEnemy: PackedScene
+@export var builder_prefab: PackedScene
 
 @export var nexusTeamSprite: Texture2D
 @export var nexusEnemySprite: Texture2D
@@ -30,12 +31,13 @@ var time_since_last_caravan_tick = 0
 var manageCaravanButtonIDTracker = 1
 var routeNumTracker = 1
 
-var managedCaravans = []
-var managedRoutes = []
-var tempRoute = []
-var tempTargets = []
+var managed_meeples: Array = []
+var managedRoutes: Array = []
+var tempRoute: Array = []
+var tempTargets: Array = []
+var build_orders_queued: Array = []
 
-var managedCaravanButtons = []
+var managedCaravanButtons: Array = []
 
 var routeManaging = 0
 
@@ -50,9 +52,10 @@ const HEX_SHAPE := [ #Vector2i(1, 0) for meeple dock
 ]
 var meepleDocPos = null
 
-
+var meeple_id_tracker = 99
 func _ready():
-	if playerID == 1 or playerID == multiplayer.get_unique_id():
+	meepleDocPos = controller.grid.coord_to_axial_hex(self.get_global_position()) + Vector2i(1,0)
+	if player_id == 1 or player_id == multiplayer.get_unique_id():
 		newCaravanButton.button_down.connect(_on_newCaravan_button_pressed)
 		newCaravanButton.button_up.connect(_on_newCaravan_button_released)
 		
@@ -65,6 +68,12 @@ func _ready():
 	manageCaravanMenu.visible = false
 	managingCaravanMenu.visible = false
 	
+	if nexus:
+		if player_id == 1 or player_id == multiplayer.get_unique_id():
+			$Sprite2D.texture = nexusTeamSprite
+		else:
+			$Sprite2D.texture = nexusEnemySprite
+		
 	set_size(size)
 
 
@@ -72,7 +81,7 @@ func _process(delta):
 	time_since_last_caravan_tick += delta
 	#if player_id == multiplayer.get_unique_id():
 	if time_since_last_caravan_tick > (1.0 / CARAVAN_TICKS_PER_SECOND):
-		caravan_process(time_since_last_caravan_tick)
+		meeple_process(time_since_last_caravan_tick)
 		time_since_last_caravan_tick = 0
 
 
@@ -98,26 +107,27 @@ func _process(delta):
 			
 			r[0][0] += delta
 			#if FLAG_VERBOSE: print(r[0])
-			if r[0][0] > CARAVAN_WAIT_TIMER:
+			if r[0][0] > CARAVAN_WAIT_TIMER and controller.grid.axial_probe(meepleDocPos).objectsInside.size() < 1: 
 				r[0][0] = -1
 				sendCaravan(r, r[0][1])
 	
 	
-	for c in managedCaravans: #When Caravans return home
+	for c in managed_meeples: #When meeples return home
 		if c.returned:
-			if c.routeRemoved == false:
-				for r in managedRoutes:	
-					if r[0][1] == c.UNIQUEID:
-						r[0][0] = 0
-			controller.food += c.foodCarrying
-			controller.wood += c.woodCarrying
-			controller.stone += c.stoneCarrying
-			if FLAG_VERBOSE: print("Food delivered: " + str(c.foodCarrying))
-			freeCaravan(c.UNIQUEID)
+			if c.type == "Caravan":
+				if c.routeRemoved == false:
+					for r in managedRoutes:	
+						if r[0][1] == c.UNIQUEID:
+							r[0][0] = 0
+				controller.food += c.foodCarrying
+				controller.wood += c.woodCarrying
+				controller.stone += c.stoneCarrying
+				if FLAG_VERBOSE: print("Food delivered: " + str(c.foodCarrying))
+			free_meeple(c.UNIQUEID)
 
 
 func _physics_process(delta: float) -> void:
-	for c in managedCaravans:
+	for c in managed_meeples:
 		if !c.should_be_moving:
 			continue
 		var next_hex: Vector2 = controller.grid.axial_hex_to_coord(c.path[1])
@@ -266,7 +276,7 @@ func manage_caravan_order(args):
 func remove_route_order(args):
 	var rID = args[1]
 	removeRoute(rID)
-	for c in managedCaravans:
+	for c in managed_meeples:
 		if c.UNIQUEID == rID:
 			c.routeRemoved = true
 
@@ -289,55 +299,61 @@ func sendCaravan(route, routeID):
 	instance.path = [meepleDocPos]
 	instance.totalStops = route[1].size()
 	instance.stop = 0
-	managedCaravans.append(instance)
+	managed_meeples.append(instance)
 
 
-func freeCaravan(caravanID): 
+func free_meeple(meeple_id): 
 	var i = 0
-	while i < managedCaravans.size():
-		if managedCaravans[i].UNIQUEID == caravanID:
-			controller.grid.update_grid(managedCaravans[i].path[0], 0, [])
-			managedCaravans.pop_at(i).queue_free()
+	while i < managed_meeples.size():
+		if managed_meeples[i].UNIQUEID == meeple_id:
+			controller.grid.update_grid(managed_meeples[i].path[0], 0, [])
+			managed_meeples.pop_at(i).queue_free()
 			return
 		i += 1
 
 
-func caravan_process(delta):
-	for c in managedCaravans:
+func meeple_process(delta):
+	for c in managed_meeples:
 		if c.atStop:
 			
 			c.stopTimer += delta
-			
-			for h in controller.grid.HEX_DIRS:
-				if controller.grid.axial_probe(c.path[0] + h).classification == 2:
+			#Start of if caravan
+			if c.type == "Caravan": 
+				for h in controller.grid.HEX_DIRS:
+					if controller.grid.axial_probe(c.path[0] + h).classification == 2:
+						
+						var objectInside = controller.grid.axial_probe(c.path[0] + h).objectsInside[0]
+						
+						if objectInside.type == "stoneMine":
+							objectInside.saved_stone -= 1
+							c.stoneCarrying += 1
+						if objectInside.type == "farm":
+							objectInside.saved_food -= 1
+							c.foodCarrying += 1
+						if objectInside.type == "lumberjack":
+							objectInside.saved_wood -= 1
+							c.woodCarrying += 1
+				if c.stopTimer >= c.MAX_STOP_TIMER:
 					
-					var objectInside = controller.grid.axial_probe(c.path[0] + h).objectsInside[0]
-					
-					if objectInside.type == "stoneMine":
-						objectInside.saved_stone -= 1
-						c.stoneCarrying += 1
-					if objectInside.type == "farm":
-						objectInside.saved_food -= 1
-						c.foodCarrying += 1
-					if objectInside.type == "lumberjack":
-						objectInside.saved_wood -= 1
-						c.woodCarrying += 1
-			if c.stopTimer >= c.MAX_STOP_TIMER:
-				
-				c.atStop = false
-				c.stopTimer = 0
-				c.stop += 1
-				if c.stop < c.totalStops:
-					c.queued_path = controller.grid.find_path(c.path[0], controller.grid.coord_to_axial_hex(c.route[1][c.stop]), false, false) 
-				else:
-					c.queued_path = controller.grid.find_path(c.path[0], meepleDocPos, false, false) 
+					c.atStop = false
+					c.stopTimer = 0
+					c.stop += 1
+					if c.stop < c.totalStops:
+						c.queued_path = controller.grid.find_path(c.path[0], controller.grid.coord_to_axial_hex(c.route[1][c.stop]), false, false) 
+					else:
+						c.queued_path = controller.grid.find_path(c.path[0], meepleDocPos, false, false) 
+			#End of if caravan
+			else:
+				if c.stopTimer >= c.building_timer:
+					pass
+					# Place the building
+		
 		if c.pause_a_tick:
 			c.pause_a_tick = false
-			
 			continue
 		if (c.should_be_moving || c.waiting):
-			
 			continue
+			
 		if not c.queued_path.is_empty():
 			c.path = controller.grid.find_path(c.path[0], c.queued_path[c.queued_path.size() - 1], false, false)
 			#c.path = c.queued_path#.slice(1) # Remove first hex in queued path
@@ -371,3 +387,31 @@ func updateHPBar():
 	else:
 		HPBar.visible = true
 	HPBar.value = self.hp
+
+
+func process_build_orders():
+	if controller.grid.axial_probe(meepleDocPos).objectsInside.size() > 0: 
+		return
+	else:
+		var order = build_orders_queued.pop_at(0)
+		
+		send_builder(order)
+
+
+func send_builder(args):
+	var build_location = args[0]
+	var building = args[1]
+	var building_time = args[2]
+	var instance = builder_prefab.instantiate()
+	
+	
+	instance.building = building
+	instance.building_time = building_time
+	instance.queued_path = controller.grid.find_path(meepleDocPos, build_location, false, false) #To build location
+	instance.UNIQUEID = meeple_id_tracker
+	meeple_id_tracker += 1
+	controller.grid.update_grid(meepleDocPos, 3, [instance])
+	add_child(instance)
+	instance.set_global_position(controller.grid.axial_hex_to_coord(meepleDocPos))
+	instance.path = [meepleDocPos]
+	managed_meeples.append(instance)

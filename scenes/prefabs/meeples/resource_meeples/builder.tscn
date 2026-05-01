@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://cjigeivur44o6"]
+
+[ext_resource type="Script" uid="uid://cijxcu8ae5kx6" path="res://scripts/meeples/builder.gd" id="1_ys5yh"]
+[ext_resource type="Texture2D" uid="uid://o0x24rpp0umu" path="res://assets/meeples/buildierEnemy.png" id="2_lo7bh"]
+[ext_resource type="Texture2D" uid="uid://025d6wrc05at" path="res://assets/meeples/buildier.png" id="3_wacvn"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1sax5"]
+radius = 16.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_sp53s"]
+font_size = 13
+shadow_size = 2
+shadow_color = Color(0, 0, 0, 0.3019608)
+shadow_offset = Vector2(0, 0)
+
+[node name="builder" type="Node2D" unique_id=2020084538]
+z_index = 4
+script = ExtResource("1_ys5yh")
+enemy_texture = ExtResource("2_lo7bh")
+
+[node name="CharecterBody2D" type="CharacterBody2D" parent="." unique_id=1287425722]
+input_pickable = true
+motion_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharecterBody2D" unique_id=1890662677]
+shape = SubResource("CircleShape2D_1sax5")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=761360600]
+z_index = 4
+texture_filter = 1
+texture_repeat = 1
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_wacvn")
+
+[node name="Label" type="Label" parent="." unique_id=1071380364]
+offset_left = -16.0
+offset_top = -12.0
+offset_right = 16.0
+offset_bottom = 11.0
+label_settings = SubResource("LabelSettings_sp53s")
+horizontal_alignment = 1
+vertical_alignment = 1

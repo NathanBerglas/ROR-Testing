@@ -653,13 +653,8 @@ func spawn_building_order(args):
 func spawnNexus():
 	nexusSpawn = grid.nexusSpawn
 	
-	var instance = null
-	
-	if player_id == multiplayer.get_unique_id():
-		instance = nexus_prefab.instantiate()
-	else:
-		instance = nexus_prefabEnemy.instantiate()
-		
+	var instance = resourceHub_prefab.instantiate()
+	instance.nexus = true
 	var vectorNexusSpawn = null
 	for spawn in nexusSpawn:
 		if FLAG_VERBOSE: print(spawn)
@@ -675,7 +670,7 @@ func spawnNexus():
 	buildingIDTracker += 1
 	instance.controller = self
 	instance.global_position = vectorNexusSpawn
-	instance.playerID = playerID
+	instance.player_id = player_id
 	add_child(instance) #Adding the instance
 	buildings.push_back(instance)
 	#if FLAG_VERBOSE: print(vectorNexusSpawn)
