@@ -1,7 +1,7 @@
 extends Node2D
 class_name meeple
 
-var playerID = null
+var player_id = null
 
 @export var speed: float = 200
 @export var acceleration: float = 300
@@ -112,7 +112,7 @@ func is_unselected():
 
 func _on_rigid_body_2d_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
 	if Input.is_action_just_pressed("select"):
-		if playerID == multiplayer.get_unique_id():
+		if player_id == multiplayer.get_unique_id():
 			if selected:
 				is_unselected()
 			else:

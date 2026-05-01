@@ -40,7 +40,7 @@ func getTarget(grid):
 			if !(tile_pos in visited_hexs):
 				visited_hexs.append(tile_pos)
 				var tile = grid.axial_probe(tile_pos)
-				if len(tile.objectsInside) > 0 and tile.objectsInside[0] is meeple and tile.objectsInside[0].playerID != playerID:
+				if len(tile.objectsInside) > 0 and tile.objectsInside[0] is meeple and tile.objectsInside[0].player_id != player_id:
 						target = tile.objectsInside[0]
 
 
