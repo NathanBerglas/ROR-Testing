@@ -1,7 +1,7 @@
 extends Building
-
-
 const FLAG_VERBOSE = false
+
+var nexus = false
 
 @onready var shapey = $Sprite2D
 @onready var HPBar = $HP_BAR
@@ -17,6 +17,9 @@ const FLAG_VERBOSE = false
 @export var caravanTarget: PackedScene
 @export var caravan: PackedScene
 @export var caravanEnemy: PackedScene
+
+@export var nexusTeamSprite: Texture2D
+@export var nexusEnemySprite: Texture2D
 
 const CARAVAN_WAIT_TIMER = 2
 const MAX_CARAVAN_STOPS = 3
@@ -46,21 +49,27 @@ const HEX_SHAPE := [ #Vector2i(1, 0) for meeple dock
 	Vector2i(0, 1),
 ]
 var meepleDocPos = null
-	
+
+
 func _ready():
-	newCaravanButton.button_down.connect(_on_newCaravan_button_pressed)
-	newCaravanButton.button_up.connect(_on_newCaravan_button_released)
-	
-	finishManagingButton.button_down.connect(_on_finishManaging_button_pressed)
-	finishManagingButton.button_up.connect(_on_finishManaging_button_released)
-	
-	removeRouteButton.button_down.connect(_on_removeRoute_button_pressed)
-	removeRouteButton.button_up.connect(_on_removeRoute_button_released)
+	if playerID == 1 or playerID == multiplayer.get_unique_id():
+		newCaravanButton.button_down.connect(_on_newCaravan_button_pressed)
+		newCaravanButton.button_up.connect(_on_newCaravan_button_released)
+		
+		finishManagingButton.button_down.connect(_on_finishManaging_button_pressed)
+		finishManagingButton.button_up.connect(_on_finishManaging_button_released)
+		
+		removeRouteButton.button_down.connect(_on_removeRoute_button_pressed)
+		removeRouteButton.button_up.connect(_on_removeRoute_button_released)
 
 	manageCaravanMenu.visible = false
 	managingCaravanMenu.visible = false
 	
-	
+	if nexus:
+		if playerID == 1 or playerID == multiplayer.get_unique_id():
+			$Sprite2D.texture = nexusTeamSprite
+		else:
+			$Sprite2D.texture = nexusEnemySprite
 	set_size(size)
 
 func _process(delta):
@@ -110,7 +119,8 @@ func _process(delta):
 			controller.stone += c.stoneCarrying
 			print("Food delivered: " + str(c.foodCarrying))
 			freeCaravan(c.UNIQUEID)
-			
+
+
 func _physics_process(delta: float) -> void:
 	for c in managedCaravans:
 		if !c.should_be_moving:

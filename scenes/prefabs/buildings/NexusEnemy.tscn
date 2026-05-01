@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bqax1ba3jxi2e"]
 
-[ext_resource type="Script" uid="uid://m1ww8sb5uhu8" path="res://scripts/buildings/nexus.gd" id="1_fftpg"]
+[ext_resource type="Script" uid="uid://c2c525006en2n" path="res://scripts/buildings/resource_buildings/resource_hub.gd" id="1_fftpg"]
 [ext_resource type="Texture2D" uid="uid://epvo4xhyq083" path="res://assets/buildings/nexusEnemy.png" id="2_fftpg"]
 
 [node name="nexus" type="Node2D" unique_id=1057711618]

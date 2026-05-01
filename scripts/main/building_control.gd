@@ -70,8 +70,6 @@ var FLAG_VERBOSE_MULTI = false
 @onready var RCLICK_ResourceHub = $RclickMenuResourceHub
 @onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
 
-@export var nexus_prefab: PackedScene
-@export var nexus_prefabEnemy: PackedScene
 var nexusSpawn = null
 #Players Money
 var food = 10000
@@ -174,7 +172,6 @@ func _ready(): #Runs on start, connects buttons
 		farm_prefab = farm_prefabEnemy
 		stoneMine_prefab = stoneMine_prefabEnemy
 		lumberJack_prefab = lumberJack_prefabEnemy
-		nexus_prefab = nexus_prefabEnemy
 		wallSegment_prefab = wallSegment_prefabEnemy
 		wallCorner_prefab = wallCorner_prefabEnemy
 		barracks_prefab = barracks_prefabEnemy
@@ -659,13 +656,8 @@ func spawn_building_order(args):
 func spawnNexus():
 	nexusSpawn = grid.nexusSpawn
 	
-	var instance = null
-	
-	if playerID == multiplayer.get_unique_id():
-		instance = nexus_prefab.instantiate()
-	else:
-		instance = nexus_prefabEnemy.instantiate()
-		
+	var instance = resourceHub_prefab.instantiate()
+	instance.nexus = true
 	var vectorNexusSpawn = null
 	for spawn in nexusSpawn:
 		print(spawn)
@@ -674,13 +666,14 @@ func spawnNexus():
 			vectorNexusSpawn = Vector2(spawn[0], spawn[1])
 	
 	instance.fake = true
-	instance.type = "Nexus"
+	instance.type = "ResourceHub"
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	#var toAdd = ["Farm", get_global_mouse_position(), instance]
 	instance.BUILDING_UNIQUE_ID = buildingIDTracker
 	buildingIDTracker += 1
 	instance.controller = self
 	instance.global_position = vectorNexusSpawn
+	instance.playerID = playerID
 	add_child(instance) #Adding the instance
 	buildings.push_back(instance)
 	#print(vectorNexusSpawn)

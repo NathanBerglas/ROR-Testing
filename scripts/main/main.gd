@@ -1,6 +1,6 @@
 extends Node
 
-const ONLINE = true
+const ONLINE = false
 const SINGLE_TESTING = false
 @export var Address = null
 @export var port = 7999
