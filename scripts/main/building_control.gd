@@ -71,26 +71,58 @@ const FLAG_VERBOSE = false
 @onready var manageCaravansButton = $RclickMenuResourceHub/manageCaravansButton
 
 var nexusSpawn = null
-#Players Money
+
+#Players Money and market
+
 var food = 10000
-var food_buy_price = 1000
-var food_sell_price = 500
+const food_price_baseline = 750
+var food_price = food_price_baseline
+const food_baseline = 1e6
+var food_global_inventory = food_baseline
+const food_spread_baseline = 500
+var food_spread = food_spread_baseline
+
 var wood = 10000
-var wood_buy_price = 5000
-var wood_sell_price = 2500
+const wood_price_baseline = 3750
+var wood_price = wood_price_baseline
+const wood_baseline = 5e5
+var wood_global_inventory = wood_baseline
+const wood_spread_baseline = 2500
+var wood_spread = wood_spread_baseline
+
 var stone = 10000
-var stone_buy_price = 25000
-var stone_sell_price = 12500
+const stone_price_baseline = 18750
+var stone_price = stone_price_baseline
+const stone_baseline = 4e5
+var stone_global_inventory = stone_baseline
+const stone_spread_baseline = 12500
+var stone_spread = stone_spread_baseline
+
 var iron = 0
-var iron_buy_price = 200000
-var iron_sell_price = 100000
+const iron_price_baseline = 150000
+var iron_price = iron_price_baseline
+const iron_baseline = 1e4
+var iron_global_inventory = iron_baseline
+const iron_spread_baseline = 100000
+var iron_spread = iron_spread_baseline
+
 var ruby = 0
-var ruby_buy_price = 2500
-var ruby_sell_price = 1250
+const ruby_price_baseline = 1875
+var ruby_price = ruby_price_baseline
+const ruby_baseline = 1e2
+var ruby_global_inventory = ruby_baseline
+const ruby_spread_baseline = 1250
+var ruby_spread = ruby_spread_baseline
+
 var diamond = 0
-var diamond_buy_price = 10000
-var diamond_sell_price = 5000
-var money = 100
+const diamond_price_baseline = 7500
+var diamond_price = diamond_price_baseline
+const diamond_baseline = 1e2
+var diamond_global_inventory = diamond_baseline
+const diamond_spread_baseline = 5000
+var diamond_spread = diamond_spread_baseline
+
+var money = 1000
 
 #All the buttons for resources
 var resourceButtons = []
