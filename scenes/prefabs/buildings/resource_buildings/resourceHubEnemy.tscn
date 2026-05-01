@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://yaght1yrplnl" path="res://scenes/prefabs/meeples/resource_meeples/caravan.tscn" id="4_f3gxg"]
 [ext_resource type="Texture2D" uid="uid://bcx7lbkpojdd3" path="res://assets/buildings/centralHubEnemy.png" id="5_e6yx1"]
 [ext_resource type="PackedScene" uid="uid://btm6w8crggsau" path="res://scenes/prefabs/meeples/resource_meeples/caravanEnemy.tscn" id="5_hajfo"]
+[ext_resource type="Texture2D" uid="uid://3rmujlbnqpcu" path="res://assets/buildings/nexus.png" id="6_f3gxg"]
+[ext_resource type="PackedScene" uid="uid://cjigeivur44o6" path="res://scenes/prefabs/meeples/resource_meeples/builder.tscn" id="6_m65id"]
+[ext_resource type="Texture2D" uid="uid://epvo4xhyq083" path="res://assets/buildings/nexusEnemy.png" id="7_m65id"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ptywy"]
 
@@ -15,6 +18,9 @@ manageCaravanButton = ExtResource("2_hajfo")
 caravanTarget = ExtResource("3_u2vry")
 caravan = ExtResource("4_f3gxg")
 caravanEnemy = ExtResource("5_hajfo")
+builder_prefab = ExtResource("6_m65id")
+nexusTeamSprite = ExtResource("6_f3gxg")
+nexusEnemySprite = ExtResource("7_m65id")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=706621419]
 scale = Vector2(0.4, 0.4)
