@@ -373,4 +373,4 @@ text = "Price: $0 / $0"
 [node name="DiamondPricePerUnit" type="Label" parent="Background/Market/LuxuryGrid" unique_id=349686662]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Buy 1k: $XX, Sell 1k: $XX"
+text = "Buy 1: $XX, Sell 1: $XX"

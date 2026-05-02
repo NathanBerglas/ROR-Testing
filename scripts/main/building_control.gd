@@ -99,11 +99,11 @@ const stone_spread_baseline = 12500
 var stone_spread = stone_spread_baseline
 
 var iron = 0
-const iron_price_baseline = 150000
+const iron_price_baseline = 15000
 var iron_price = iron_price_baseline
 const iron_baseline = 1e4
 var iron_global_inventory = iron_baseline
-const iron_spread_baseline = 100000
+const iron_spread_baseline = 10000
 var iron_spread = iron_spread_baseline
 
 var ruby = 0
@@ -486,6 +486,7 @@ func _process(delta): #runs every tick
 	hud.updateFood(food) 
 	hud.updateWood(wood) 
 	hud.updateStone(stone)
+	hud.updateIron(iron)
 	hud.updateTreasury(money)
 
 

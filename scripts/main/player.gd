@@ -133,8 +133,7 @@ func transfer_orders(ordersMeeple, ordersBuilding, idFrom):
 	
 	else:
 		if multiplayer.is_server():
-			for idArray in ordersMeeple:
-				
+			for idArray in ordersMeeple: 
 				if idArray[0] == queued_orders_recieved_meeple[0][0]:
 					queued_orders_recieved_meeple[0][1].append_array(idArray[1])
 				elif idArray[0] == queued_orders_recieved_meeple[1][0]:
