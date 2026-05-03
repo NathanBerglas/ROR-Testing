@@ -81,6 +81,7 @@ const food_baseline = 1e6
 var food_global_inventory = food_baseline
 const food_spread_baseline = 500
 var food_spread = food_spread_baseline
+const food_unit_size = 1000.0
 
 var wood = 10000
 const wood_price_baseline = 3750
@@ -89,22 +90,25 @@ const wood_baseline = 5e5
 var wood_global_inventory = wood_baseline
 const wood_spread_baseline = 2500
 var wood_spread = wood_spread_baseline
+const wood_unit_size = 1000.0
 
 var stone = 10000
-const stone_price_baseline = 18750
+const stone_price_baseline = 1875
 var stone_price = stone_price_baseline
 const stone_baseline = 4e5
 var stone_global_inventory = stone_baseline
-const stone_spread_baseline = 12500
+const stone_spread_baseline = 1250
 var stone_spread = stone_spread_baseline
+const stone_unit_size = 100.0
 
 var iron = 0
-const iron_price_baseline = 15000
+const iron_price_baseline = 1500
 var iron_price = iron_price_baseline
 const iron_baseline = 1e4
 var iron_global_inventory = iron_baseline
-const iron_spread_baseline = 10000
+const iron_spread_baseline = 1000
 var iron_spread = iron_spread_baseline
+const iron_unit_size = 10.0
 
 var ruby = 0
 const ruby_price_baseline = 1875
@@ -113,6 +117,7 @@ const ruby_baseline = 1e2
 var ruby_global_inventory = ruby_baseline
 const ruby_spread_baseline = 1250
 var ruby_spread = ruby_spread_baseline
+const ruby_unit_size = 1.0
 
 var diamond = 0
 const diamond_price_baseline = 7500
@@ -121,6 +126,7 @@ const diamond_baseline = 1e2
 var diamond_global_inventory = diamond_baseline
 const diamond_spread_baseline = 5000
 var diamond_spread = diamond_spread_baseline
+const diamond_unit_size = 1.0
 
 var money = 1000
 
@@ -143,7 +149,7 @@ var caravanIDTracker = 1
 #Multiplayer order queueing
 var queued_orders_recieved_in_control = []
 var queued_orders_to_send_in_control = []
-const ORDERS = [0,1,2,3,4,5,6] #0: Place a building, #1: Create new caravan route, #2: Remove caravan route
+const ORDERS = [0,1,2,3,4,5,6] #0: Place a building, #1: Create new caravan route, #2: Remove caravan route, #3: Trade within the market
 
 
 func _ready(): #Runs on start, connects buttons
@@ -650,6 +656,8 @@ func process_orders(): #Change this to basically process as many as possible. Id
 			grid.probe(order[1][0]).objectsInside[0].manage_caravan_order(order[1])
 		if order[0] == 2:
 			grid.probe(order[1][0]).objectsInside[0].manage_caravan_order(order[1])
+		if order[0] == 3:
+			$MarketHud/MarketMenu.trade(order[1][0], order[1][1], order[1][2])
 
 
 func spawn_building_order(args):

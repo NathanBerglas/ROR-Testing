@@ -230,7 +230,7 @@ text = "Price: $0 / $0"
 [node name="StonePricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=466969515]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Buy 1k: $XX, Sell 1k: $XX"
+text = "Buy 100: $XX, Sell 100: $XX"
 
 [node name="IronIcon" type="TextureRect" parent="Background/Market/EssentialGrid" unique_id=1190420600]
 custom_minimum_size = Vector2(64, 64)
@@ -273,7 +273,7 @@ text = "Price: $0 / $0"
 [node name="IronPricePerUnit" type="Label" parent="Background/Market/EssentialGrid" unique_id=988380566]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Buy 1k: $XX, Sell 1k: $XX"
+text = "Buy 10: $XX, Sell 10: $XX"
 
 [node name="Luxury Resources" type="Label" parent="Background/Market" unique_id=1549675271]
 layout_mode = 2

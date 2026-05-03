@@ -261,6 +261,7 @@ func _ready():
 	#BterrainOffset = terrainOffset
 	#Bgrid = self
 	#add_child(biomeGen)
+	assert(BMAP_RESOLUTIONx != null, "Requires Main scene to be run")
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
 		for r in range(GRID_COUNT.y):
