@@ -8,6 +8,8 @@ var connected_players = []
 #yay
 var peer
 var testTime = 0
+
+
 func _ready():
 	multiplayer.peer_connected.connect(peer_connected)
 	multiplayer.peer_disconnected.connect(peer_disconnected)
@@ -43,18 +45,20 @@ func connection_failed():
 func sendPlayerInfo(name, id, meepleInfo, buildingInfo):
 	multiplayer.allow_object_decoding = true
 	if !GameManager.Players.has(id):
-		GameManager.Players[id] ={
-			"name" : name,
-			"id" : id,
-			"meepleInfo" : meepleInfo,
-			"buildingInfo" : buildingInfo
+		GameManager.Players[id] = {
+			"name": name, "id": id, "meepleInfo": meepleInfo, "buildingInfo": buildingInfo
 		}
 	if multiplayer.is_server():
 		for i in GameManager.Players:
-			sendPlayerInfo.rpc(GameManager.Players[i].name, i,GameManager.Players[i].meepleInfo, GameManager.Players[i].buildingInfo)
+			sendPlayerInfo.rpc(
+				GameManager.Players[i].name,
+				i,
+				GameManager.Players[i].meepleInfo,
+				GameManager.Players[i].buildingInfo
+			)
 
 
-@rpc("any_peer","call_local")
+@rpc("any_peer", "call_local")
 func StartGame():
 	GameManager.IdOfCURRENT = multiplayer.get_unique_id()
 	print("Starting Game!")
@@ -68,7 +72,7 @@ func _on_host_button_down() -> void:
 	var MAX_PLAYERS_AND_SERVER = 3
 	peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(port, MAX_PLAYERS_AND_SERVER)
-	
+
 	if error != OK:
 		print("Cannot Host: " + str(error))
 		return
@@ -88,7 +92,6 @@ func _on_join_button_down() -> void:
 
 
 func _on_start_button_down() -> void:
-	
 	return
 	StartGame.rpc()
-	pass # Replace with function body.
+	pass  # Replace with function body.

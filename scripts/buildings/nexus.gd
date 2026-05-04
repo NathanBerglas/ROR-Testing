@@ -2,10 +2,8 @@ extends Building
 @onready var shapey = $Sprite2D
 @onready var HPBar = $HP_BAR
 
-
 #func _ready():
-	#$MultiplayerSynchronizer.set_multiplayer_authority()
-
+#$MultiplayerSynchronizer.set_multiplayer_authority()
 
 var size = 1
 
@@ -19,10 +17,12 @@ const HEX_SHAPE := [
 	Vector2i(0, 1),
 ]
 
+
 func _ready():
 	set_size(size)
 	self.hp = 1000
-	
+
+
 func updateHPBar():
 	if self.fake:
 		HPBar.visible = false

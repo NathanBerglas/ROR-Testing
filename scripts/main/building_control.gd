@@ -3,7 +3,6 @@ extends Node2D
 const FLAG_VERBOSE_MULTI = false
 const FLAG_VERBOSE = false
 
-
 #Ensuring all of our prebabs and their buttons are loaded in
 @onready var hud = $buildingHud
 
@@ -54,14 +53,14 @@ const FLAG_VERBOSE = false
 #Resource building menu
 @onready var resourceBuildingMenu = $resourceBuildingHud/ScrollContainer
 @onready var resourceBuildingMenuButton = $buildingHud/resourceBuildingButton
-@onready var closeResourceBuilding = $resourceBuildingHud/ScrollContainer/VBoxContainer/closeResourceMenu
+@onready
+var closeResourceBuilding = $resourceBuildingHud/ScrollContainer/VBoxContainer/closeResourceMenu
 @onready var resourceBuildingLabel = $buildingHud/resourceBuildingLabel
 @onready var resourceBuildingHud = $resourceBuildingHud
 #Market menu
 @onready var marketMenu = $MarketHud/MarketMenu
 @onready var marketMenuButton = $buildingHud/marketButton
 @onready var marketLabel = $buildingHud/marketLabel
-
 
 #IDK why this is here
 @onready var selection_box = $ColorRect
@@ -138,10 +137,10 @@ var buildingDraggin = null
 
 #A list of the buildings owned
 #Format is: ["Building Name", Vector(Building Pos), Building itself]
-var buildings = [] 
+var buildings = []
 
-var teammates = [] #list of teammates
-var grid # the grid controller
+var teammates = []  #list of teammates
+var grid  # the grid controller
 var player_id = null
 var buildingIDTracker = 0
 var caravanIDTracker = 1
@@ -149,11 +148,12 @@ var caravanIDTracker = 1
 #Multiplayer order queueing
 var queued_orders_recieved_in_control = []
 var queued_orders_to_send_in_control = []
-const ORDERS = [0,1,2,3,4,5,6] #0: Place a building, #1: Create new caravan route, #2: Remove caravan route, #3: Trade within the market
+const ORDERS = [0, 1, 2, 3, 4, 5, 6]  #0: Place a building, #1: Create new caravan route, #2: Remove caravan route, #3: Trade within the market
 
 
-func _ready(): #Runs on start, connects buttons
-	if FLAG_VERBOSE: print("On: ", multiplayer.get_unique_id(), " in control of: ", player_id)
+func _ready():  #Runs on start, connects buttons
+	if FLAG_VERBOSE:
+		print("On: ", multiplayer.get_unique_id(), " in control of: ", player_id)
 	spawnNexus()
 	if player_id == multiplayer.get_unique_id():
 		hud.visible = true
@@ -161,53 +161,53 @@ func _ready(): #Runs on start, connects buttons
 		combatBuildingHud.visible = true
 		farmButton.button_down.connect(_on_farm_button_pressed)
 		farmButton.button_up.connect(_on_farm_button_released)
-		
+
 		lumberJackButton.button_down.connect(_on_lumberJack_button_pressed)
 		lumberJackButton.button_up.connect(_on_lumberJack_button_released)
-		
+
 		stoneMineButton.button_down.connect(_on_stoneMine_button_pressed)
 		stoneMineButton.button_up.connect(_on_stoneMine_button_released)
-		
+
 		resourceHubButton.button_down.connect(_on_resourceHub_button_pressed)
 		resourceHubButton.button_up.connect(_on_resourceHub_button_released)
-		
+
 		barracksButton.button_down.connect(_on_barracks_button_pressed)
 		barracksButton.button_up.connect(_on_barracks_button_released)
-		
+
 		manageCaravansButton.button_down.connect(_on_manageCaravans_button_pressed)
 		manageCaravansButton.button_up.connect(_on_manageCaravans_button_released)
-		
+
 		resourceBuildingMenuButton.button_down.connect(_on_resourceBuildingMenu_button_pressed)
 		resourceBuildingMenuButton.button_up.connect(_on_resourceBuildingMenu_button_released)
-		
+
 		closeResourceBuilding.button_down.connect(_on_closeResourceMenu_button_pressed)
 		closeResourceBuilding.button_up.connect(_on_closeResourceMenu_button_released)
-	
+
 		marketMenuButton.button_down.connect(_on_marketMenu_button_pressed)
 		marketMenuButton.button_up.connect(_on_marketMenu_button_released)
 
 		combatBuildingMenuButton.button_down.connect(_on_combatBuildingMenu_button_pressed)
 		combatBuildingMenuButton.button_up.connect(_on_combatBuildingMenu_button_released)
-		
+
 		closeCombatBuilding.button_down.connect(_on_closeCombatMenu_button_pressed)
 		closeCombatBuilding.button_up.connect(_on_closeCombatMenu_button_released)
-		
+
 		wallCornerButton.button_down.connect(_on_wallCorner_button_pressed)
 		wallCornerButton.button_up.connect(_on_wallCorner_button_released)
 
 		turretButton.button_down.connect(_on_turret_button_pressed)
 		turretButton.button_up.connect(_on_turret_button_released)
-			
+
 		resourceButtons.append([stoneMineButton, stoneMineLabel])
 		resourceButtons.append([farmButton, farmLabel])
 		resourceButtons.append([lumberJackButton, lumberJackLabel])
 		resourceButtons.append([resourceHubButton, resourceHubLabel])
-		
+
 		combatButtons.append([barracksButton, barracksLabel])
 		combatButtons.append([wallCornerButton, wallCornerLabel])
 		combatButtons.append([turretButton, turretLabel])
 		RCLICK_ResourceHub.visible = false
-		
+
 		_hide_all()
 	else:
 		farm_prefab = farm_prefabEnemy
@@ -218,6 +218,7 @@ func _ready(): #Runs on start, connects buttons
 		barracks_prefab = barracks_prefabEnemy
 		turret_prefab = turret_prefabEnemy
 		resourceHub_prefab = resourceHub_prefabEnemy
+
 
 func _hide_all():
 	farmLabel.visible = false
@@ -232,7 +233,8 @@ func _hide_all():
 
 func _on_turret_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		if FLAG_VERBOSE: print("Ya Broke")
+		if FLAG_VERBOSE:
+			print("Ya Broke")
 		return
 	beginDragging("Turret")
 
@@ -250,7 +252,8 @@ func _on_turret_button_released():
 
 func _on_wallCorner_button_pressed():
 	if food < 50 or stone < 50 or wood < 50:
-		if FLAG_VERBOSE: print("Ya Broke")
+		if FLAG_VERBOSE:
+			print("Ya Broke")
 		return
 	beginDragging("WallCorner")
 
@@ -262,17 +265,21 @@ func _on_wallCorner_button_released():
 	if finishDragging("WallCorner") == false:
 		return
 	var corner = buildings[buildings.size() - 1]
-	
+
 	for d in grid.HEX_DIRS:
-		var objectsInside = grid.axial_probe(grid.coord_to_axial_hex(corner.get_global_position()) + d).objectsInside
+		var objectsInside = (
+			grid
+			. axial_probe(grid.coord_to_axial_hex(corner.get_global_position()) + d)
+			. objectsInside
+		)
 		if objectsInside.size() > 0 and objectsInside[0].type == "WallCorner":
 			var direction = corner.get_global_position() - objectsInside[0].get_global_position()
 			var length = direction.length()
 			var midpoint = corner.get_global_position() + (direction * -1) / 2.0
-			
+
 			var instance = wallSegment_prefab.instantiate()
 			corner.add_child(instance)
-			
+
 			instance.rotation = direction.angle()
 			instance.set_global_position(midpoint)
 			instance.scale.x = length / 617
@@ -285,12 +292,15 @@ func _on_wallCorner_button_released():
 func _on_combatBuildingMenu_button_pressed():
 	return
 
+
 func _on_combatBuildingMenu_button_released():
 	_hide_all()
 	combatBuildingMenu.visible = true
 
+
 func _on_closeCombatMenu_button_pressed():
 	return
+
 
 func _on_closeCombatMenu_button_released():
 	combatBuildingMenu.visible = false
@@ -299,12 +309,15 @@ func _on_closeCombatMenu_button_released():
 func _on_resourceBuildingMenu_button_pressed():
 	return
 
+
 func _on_resourceBuildingMenu_button_released():
 	_hide_all()
 	resourceBuildingMenu.visible = true
 
+
 func _on_closeResourceMenu_button_pressed():
 	return
+
 
 func _on_closeResourceMenu_button_released():
 	resourceBuildingMenu.visible = false
@@ -313,13 +326,16 @@ func _on_closeResourceMenu_button_released():
 func _on_marketMenu_button_pressed():
 	return
 
+
 func _on_marketMenu_button_released():
 	_hide_all()
 	hud.visible = false
 	marketMenu.open()
 
+
 func _on_closeMarketMenu_button_released():
 	marketMenu.visible = false
+
 
 func _on_closeMarketMenu_button_pressed():
 	return
@@ -329,27 +345,31 @@ func _on_manageCaravans_button_pressed():
 	if RCLICK_ResourceHub.visible == false:
 		return
 
+
 func _on_manageCaravans_button_released():
 	if RCLICK_ResourceHub.visible == false:
 		return
-	var resourceHubAtLocation = grid.probe(RCLICK_ResourceHub.get_global_position()).objectsInside[0]
+	var resourceHubAtLocation = (
+		grid.probe(RCLICK_ResourceHub.get_global_position()).objectsInside[0]
+	)
 	resourceHubAtLocation.manageCaravanMenu.visible = true
-	resourceHubAtLocation.manageCaravanMenu.set_global_position(RCLICK_ResourceHub.get_global_position())
+	resourceHubAtLocation.manageCaravanMenu.set_global_position(
+		RCLICK_ResourceHub.get_global_position()
+	)
 	RCLICK_ResourceHub.visible = false
-	
 
 
 #Start dragging the farm if has enough money
 func _on_farm_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		if FLAG_VERBOSE: print("Ya Broke")
+		if FLAG_VERBOSE:
+			print("Ya Broke")
 		return
 	beginDragging("Farm")
 
 
 #finishes dragging the farm and places
 func _on_farm_button_released():
-	
 	if buildingDraggin != "Farm" or wood < 500 or stone < 500 or food < 500:
 		buildingDraggin = null
 		return
@@ -363,7 +383,8 @@ func _on_farm_button_released():
 #starts draggin the lumberJack
 func _on_lumberJack_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		if FLAG_VERBOSE: print("Ya Broke")
+		if FLAG_VERBOSE:
+			print("Ya Broke")
 		return
 	beginDragging("LumberJack")
 
@@ -383,14 +404,14 @@ func _on_lumberJack_button_released():
 #Starts draggin the Stone mine
 func _on_stoneMine_button_pressed():
 	if food < 500 or stone < 500 or wood < 500:
-		if FLAG_VERBOSE: print("Ya Broke")
+		if FLAG_VERBOSE:
+			print("Ya Broke")
 		return
 	beginDragging("StoneMine")
 
 
 #finishes dragging the Stone Mine and places
 func _on_stoneMine_button_released():
-	
 	if buildingDraggin != "StoneMine" or wood < 500 or stone < 500 or food < 500:
 		buildingDraggin = null
 		return
@@ -404,7 +425,8 @@ func _on_stoneMine_button_released():
 #Start dragging the resource hub if has enough money
 func _on_resourceHub_button_pressed():
 	if food < 5000 or stone < 5000 or wood < 5000:
-		if FLAG_VERBOSE: print("Ya Broke")
+		if FLAG_VERBOSE:
+			print("Ya Broke")
 		return
 	beginDragging("ResourceHub")
 
@@ -416,7 +438,8 @@ func _on_resourceHub_button_released():
 		return
 	if finishDragging("ResourceHub") == false:
 		return
-	if FLAG_VERBOSE: print("Added Resource Hub")
+	if FLAG_VERBOSE:
+		print("Added Resource Hub")
 	food -= 5000
 	wood -= 5000
 	stone -= 5000
@@ -424,7 +447,8 @@ func _on_resourceHub_button_released():
 
 func _on_barracks_button_pressed():
 	if food < 1000 or wood < 1000 or stone < 1000:
-		if FLAG_VERBOSE: print("Ya Broke")
+		if FLAG_VERBOSE:
+			print("Ya Broke")
 		return
 	beginDragging("Barracks")
 
@@ -443,11 +467,13 @@ func _on_barracks_button_released():
 	stone -= 1000
 
 
-func _process(delta): #runs every tick
+func _process(delta):  #runs every tick
 	if queued_orders_recieved_in_control.size() > 0:
-		if FLAG_VERBOSE_MULTI: print(queued_orders_recieved_in_control)
+		if FLAG_VERBOSE_MULTI:
+			print(queued_orders_recieved_in_control)
 	if queued_orders_to_send_in_control.size() > 0:
-		if FLAG_VERBOSE_MULTI: print(queued_orders_to_send_in_control)
+		if FLAG_VERBOSE_MULTI:
+			print(queued_orders_to_send_in_control)
 	cleanBuildings()
 	process_orders()
 	sendCaravans()
@@ -457,29 +483,30 @@ func _process(delta): #runs every tick
 		hoveringText()
 		#Opens up the right click menu
 		if Input.is_action_just_pressed("right_click_menu"):
-			
 			var probing_hex = grid.probe(get_global_mouse_position())
-			if probing_hex.objectsInside.size() > 0 and probing_hex.objectsInside[0].type == "ResourceHub" and probing_hex.objectsInside[0].player_id == player_id:
-				
+			if (
+				probing_hex.objectsInside.size() > 0
+				and probing_hex.objectsInside[0].type == "ResourceHub"
+				and probing_hex.objectsInside[0].player_id == player_id
+			):
 				RCLICK_ResourceHub.set_global_position(get_global_mouse_position())
 				RCLICK_ResourceHub.visible = true
-				
+
 			else:
 				RCLICK_ResourceHub.visible = false
-				
-		
-		if buildingDraggin != null: #Code actually dragging the building around
+
+		if buildingDraggin != null:  #Code actually dragging the building around
 			buildings[buildings.size() - 1].global_position = get_global_mouse_position()
 			if !is_placeable(buildings[buildings.size() - 1]):
-				buildings[buildings.size() - 1].shapey.modulate = Color(250, 0, 4) #RED
+				buildings[buildings.size() - 1].shapey.modulate = Color(250, 0, 4)  #RED
 			else:
 				buildings[buildings.size() - 1].shapey.modulate = Color(1, 1, 1)  # Reset to white
-		
-	for m in buildings: #Doing tick stuff for each building
+
+	for m in buildings:  #Doing tick stuff for each building
 		if m.type == "Farm" and !m.fake:
 			m.generateFood(self, delta)
 		elif m.type == "Barracks" and !m.fake:
-			m.spawn(self.teammates[0],delta,m.pos, grid)
+			m.spawn(self.teammates[0], delta, m.pos, grid)
 		elif m.type == "LumberJack" and !m.fake:
 			m.generateWood(self, delta)
 		elif m.type == "StoneMine" and !m.fake:
@@ -489,8 +516,8 @@ func _process(delta): #runs every tick
 				m.getTarget(grid)
 			else:
 				m.attack(delta)
-	hud.updateFood(food) 
-	hud.updateWood(wood) 
+	hud.updateFood(food)
+	hud.updateWood(wood)
 	hud.updateStone(stone)
 	hud.updateIron(iron)
 	hud.updateTreasury(money)
@@ -500,20 +527,20 @@ func sendCaravans():
 	return
 	#for b in buildings:
 	#	if b.type == "Farm":
-			#if b.collectedFood >= 1000:
+	#if b.collectedFood >= 1000:
 
 
-func addFood(foodChange): #Changing money
+func addFood(foodChange):  #Changing money
 	food += foodChange
 	hud.updateFood(food)
 
 
-func addWood(woodChange): #Changing money
+func addWood(woodChange):  #Changing money
 	wood += woodChange
 	hud.updateWood(wood)
 
 
-func addStone(stoneChange): #Changing money
+func addStone(stoneChange):  #Changing money
 	stone += stoneChange
 	hud.updateStone(stone)
 
@@ -522,7 +549,7 @@ func takeDamage(b, x):
 	b.hp -= x
 
 
-func is_placeable(building) -> bool: #Only for if a body is FAKE
+func is_placeable(building) -> bool:  #Only for if a body is FAKE
 	var center = get_global_mouse_position()
 	var centerHex = grid.axial_probe(grid.coord_to_axial_hex(center))
 	for h in building.HEX_SHAPE:
@@ -533,13 +560,13 @@ func is_placeable(building) -> bool: #Only for if a body is FAKE
 			#[Forest, Tundra, Water, Sand, rainforest, Plains, Grassland, Stone, Iron, Ruby, Diamonds]
 			var tile_biome = grid.axial_probe(centerHex).biome
 			if building.type == "farm":
-				if !tile_biome in [5]: # plains
+				if !tile_biome in [5]:  # plains
 					return false
 			elif building.type == "stoneMine":
-				if !tile_biome in [7, 8, 9, 10]: # stone, ruby, diamond
+				if !tile_biome in [7, 8, 9, 10]:  # stone, ruby, diamond
 					return false
 			elif building.type == "lumberjack":
-				if !tile_biome in [0, 4]: # forest and rainforest
+				if !tile_biome in [0, 4]:  # forest and rainforest
 					return false
 	return true
 
@@ -565,12 +592,12 @@ func hoveringText():
 		combatBuildingLabel.visible = true
 	else:
 		combatBuildingLabel.visible = false
-	
+
 	if resourceBuildingMenuButton.is_hovered():
 		resourceBuildingLabel.visible = true
 	else:
 		resourceBuildingLabel.visible = false
-		
+
 	if marketMenuButton.is_hovered():
 		marketLabel.visible = true
 	else:
@@ -586,8 +613,7 @@ func freeBuilding(ID):
 			if object.type == "WallCorner":
 				while object.segments.size() > 0:
 					object.segments.pop_at(0).queue_free()
-					
-			
+
 			object.queue_free()
 			return
 
@@ -598,9 +624,9 @@ func beginDragging(buildingName):
 	#Adding the farm to be dragged to the list of buildings
 	# hashtag-No way this will cause errors in the future
 	var instance = null
-	#Convert this into a list of each prefab, then have buildingName 
+	#Convert this into a list of each prefab, then have buildingName
 	#passed in as an int representing its index in the list
-	
+
 	if buildingName == "Farm":
 		instance = farm_prefab.instantiate()
 	elif buildingName == "ResourceHub":
@@ -615,8 +641,8 @@ func beginDragging(buildingName):
 		instance = wallCorner_prefab.instantiate()
 	elif buildingName == "Turret":
 		instance = turret_prefab.instantiate()
-	 #New FAKE money farm
-	
+	#New FAKE money farm
+
 	instance.fake = true
 	instance.type = buildingName
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
@@ -625,7 +651,7 @@ func beginDragging(buildingName):
 	buildingIDTracker += 1
 	instance.controller = self
 	instance.global_position = get_global_mouse_position()
-	add_child(instance) #Adding the instance
+	add_child(instance)  #Adding the instance
 	buildings.push_back(instance)
 
 
@@ -635,21 +661,26 @@ func finishDragging(buildingName):
 	if !is_placeable(buildings[buildings.size() - 1]):
 		buildings.pop_back().queue_free()
 		return false
-	
+
 	if player_id != 1:
-		queued_orders_to_send_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
+		queued_orders_to_send_in_control.append(
+			[0, [grid.hex_center(get_global_mouse_position()), buildingName]]
+		)
 	else:
-		queued_orders_recieved_in_control.append([0,[grid.hex_center(get_global_mouse_position()), buildingName]])
-	
+		queued_orders_recieved_in_control.append(
+			[0, [grid.hex_center(get_global_mouse_position()), buildingName]]
+		)
+
 	freeBuilding(buildings[buildings.size() - 1].BUILDING_UNIQUE_ID)
 	return true
 
-func process_orders(): #Change this to basically process as many as possible. Idk how, like funny logic
+
+func process_orders():  #Change this to basically process as many as possible. Idk how, like funny logic
 	#In addition, add logic for in the server to confirm orders are A-OK
 	if queued_orders_recieved_in_control.size() > 0:
 		var order = queued_orders_recieved_in_control.pop_at(0)
-		
-		#If statements for orders based on order - update later 
+
+		#If statements for orders based on order - update later
 		if order[0] == 0:
 			spawn_building_order(order[1])
 		if order[0] == 1:
@@ -664,7 +695,7 @@ func spawn_building_order(args):
 	var buildingName = args[1]
 	var buildingPos = args[0]
 	var instance = null
-	
+
 	if buildingName == "Farm":
 		instance = farm_prefab.instantiate()
 	elif buildingName == "ResourceHub":
@@ -679,8 +710,8 @@ func spawn_building_order(args):
 		instance = wallCorner_prefab.instantiate()
 	elif buildingName == "Turret":
 		instance = turret_prefab.instantiate()
-	 #New FAKE money farm
-	
+	#New FAKE money farm
+
 	instance.fake = false
 	instance.type = buildingName
 	instance.BUILDING_UNIQUE_ID = buildingIDTracker
@@ -689,26 +720,32 @@ func spawn_building_order(args):
 	instance.pos = grid.coord_to_axial_hex(buildingPos)
 	instance.controller = self
 	instance.global_position = buildingPos
-	add_child(instance) #Adding the instance
+	add_child(instance)  #Adding the instance
 	buildings.push_back(instance)
 	for h in buildings[buildings.size() - 1].HEX_SHAPE:
-		grid.update_grid(grid.coord_to_axial_hex(buildingPos) + h, 2, [buildings[buildings.size() - 1]])
+		grid.update_grid(
+			grid.coord_to_axial_hex(buildingPos) + h, 2, [buildings[buildings.size() - 1]]
+		)
 	if buildingName == "ResourceHub":
-		buildings[buildings.size() - 1].meepleDocPos = grid.coord_to_axial_hex(buildingPos) + Vector2i(1,0)
+		buildings[buildings.size() - 1].meepleDocPos = (
+			grid.coord_to_axial_hex(buildingPos) + Vector2i(1, 0)
+		)
 
 
 func spawnNexus():
 	nexusSpawn = grid.nexusSpawn
-	
+
 	var instance = resourceHub_prefab.instantiate()
 	instance.nexus = true
 	var vectorNexusSpawn = null
 	for spawn in nexusSpawn:
-		if FLAG_VERBOSE: print(spawn)
-		if FLAG_VERBOSE: print(player_id)
+		if FLAG_VERBOSE:
+			print(spawn)
+		if FLAG_VERBOSE:
+			print(player_id)
 		if spawn.size() > 2 and spawn[2] == player_id:
 			vectorNexusSpawn = Vector2(spawn[0], spawn[1])
-	
+
 	instance.fake = true
 	instance.type = "ResourceHub"
 	#instance.$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
@@ -718,7 +755,7 @@ func spawnNexus():
 	instance.controller = self
 	instance.global_position = vectorNexusSpawn
 	instance.player_id = player_id
-	add_child(instance) #Adding the instance
+	add_child(instance)  #Adding the instance
 	buildings.push_back(instance)
 	#if FLAG_VERBOSE: print(vectorNexusSpawn)
 	#If not placeable, REMOVED
@@ -730,10 +767,14 @@ func spawnNexus():
 	#if FLAG_VERBOSE: print(instance.get_global_position())
 	#if FLAG_VERBOSE: print(grid.coord_to_axial_hex(instance.get_global_position()))
 	buildings[buildings.size() - 1].fake = false
-	buildings[buildings.size() - 1].global_position = grid.hex_center(instance.get_global_position())
+	buildings[buildings.size() - 1].global_position = grid.hex_center(
+		instance.get_global_position()
+	)
 	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(instance.get_global_position())
-	
-	
-	
+
 	for h in buildings[buildings.size() - 1].HEX_SHAPE:
-		grid.update_grid(grid.coord_to_axial_hex(instance.get_global_position()) + h, 2, [buildings[buildings.size() - 1]])
+		grid.update_grid(
+			grid.coord_to_axial_hex(instance.get_global_position()) + h,
+			2,
+			[buildings[buildings.size() - 1]]
+		)

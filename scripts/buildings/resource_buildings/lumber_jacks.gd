@@ -2,12 +2,12 @@ extends Building
 @onready var shapey = $Sprite2D
 @onready var HPBar = $HP_BAR
 
-var woodTimer = 0 #Tracking when to give $$$
+var woodTimer = 0  #Tracking when to give $$$
 
 var saved_wood = 0
 
 #func _ready():
-	#$MultiplayerSynchronizer.set_multiplayer_authority()
+#$MultiplayerSynchronizer.set_multiplayer_authority()
 
 var size = 1
 
@@ -21,20 +21,22 @@ const HEX_SHAPE := [
 	Vector2i(0, 1),
 ]
 
+
 func _ready():
 	set_size(size)
 	type = "lumberjack"
-	
 
-func generateWood(p, delta): #Generates income every 10 seconds
-	if self.fake: return
-	
+
+func generateWood(p, delta):  #Generates income every 10 seconds
+	if self.fake:
+		return
+
 	woodTimer += delta
 	if woodTimer >= 10:
 		saved_wood += 200
 		woodTimer = 0
-	
-	
+
+
 func updateHPBar():
 	if self.fake:
 		HPBar.visible = false

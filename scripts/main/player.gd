@@ -5,12 +5,11 @@ const FLAG_VERBOSE = false
 var SINGLE = true
 var player_id = 0
 
-var queued_orders_to_send_meeple: Array = [[0, []],[0, []]]
-var queued_orders_recieved_meeple: Array = [[0, []],[0, []]]
+var queued_orders_to_send_meeple: Array = [[0, []], [0, []]]
+var queued_orders_recieved_meeple: Array = [[0, []], [0, []]]
 
-var queued_orders_to_send_building: Array = [[0, []],[0, []]]
-var queued_orders_recieved_building: Array = [[0, []],[0, []]]
-
+var queued_orders_to_send_building: Array = [[0, []], [0, []]]
+var queued_orders_recieved_building: Array = [[0, []], [0, []]]
 
 @onready var c = []  #What nodes the player uses
 
@@ -18,7 +17,6 @@ var queued_orders_recieved_building: Array = [[0, []],[0, []]]
 @export var meepleControlScene: PackedScene
 
 var enemies = []
-
 
 var time: float = 0
 var grid: Node
@@ -28,7 +26,6 @@ const BUILDING_Z_INDEX = 2
 
 
 func _ready() -> void:
-	
 	var buildingControlC = buildingControlScene.instantiate()
 	var meepleControlC = meepleControlScene.instantiate()
 	meepleControlC.teammates.push_back(buildingControlC)
@@ -38,69 +35,64 @@ func _ready() -> void:
 	buildingControlC.grid = $Grid
 	meepleControlC.set_z_index(MEEPLE_Z_INDEX)
 	buildingControlC.set_z_index(BUILDING_Z_INDEX)
-	
-	
+
 	var buildingControlE = null
 	var meepleControlE = null
-	if FLAG_VERBOSE: print("From player_id: ", player_id)
-	if FLAG_VERBOSE: print(player_id)
+	if FLAG_VERBOSE:
+		print("From player_id: ", player_id)
+	if FLAG_VERBOSE:
+		print(player_id)
 	if !SINGLE:
 		buildingControlE = buildingControlScene.instantiate()
 		meepleControlE = meepleControlScene.instantiate()
 		enemies.append(meepleControlE)
 		enemies.append(buildingControlE)
-	
-	
+
 	if multiplayer.get_unique_id() == 1 and !SINGLE:
 		buildingControlC.player_id = multiplayer.get_peers()[0]
 		meepleControlC.player_id = multiplayer.get_peers()[0]
 		queued_orders_to_send_meeple[0][0] = multiplayer.get_peers()[0]
 		queued_orders_recieved_meeple[0][0] = multiplayer.get_peers()[0]
-		
+
 		queued_orders_to_send_building[0][0] = multiplayer.get_peers()[0]
 		queued_orders_recieved_building[0][0] = multiplayer.get_peers()[0]
-		
+
 		for e in enemies:
 			e.player_id = multiplayer.get_peers()[1]
 			queued_orders_to_send_meeple[1][0] = multiplayer.get_peers()[1]
 			queued_orders_recieved_meeple[1][0] = multiplayer.get_peers()[1]
-			
+
 			queued_orders_to_send_building[1][0] = multiplayer.get_peers()[1]
 			queued_orders_recieved_building[1][0] = multiplayer.get_peers()[1]
 	else:
 		buildingControlC.player_id = multiplayer.get_unique_id()
 		meepleControlC.player_id = multiplayer.get_unique_id()
 		if !SINGLE:
-			
-			
-			queued_orders_to_send_meeple[0][0] = multiplayer.get_unique_id() 
+			queued_orders_to_send_meeple[0][0] = multiplayer.get_unique_id()
 			queued_orders_recieved_meeple[0][0] = multiplayer.get_unique_id()
-			
-			queued_orders_to_send_building[0][0] = multiplayer.get_unique_id() 
+
+			queued_orders_to_send_building[0][0] = multiplayer.get_unique_id()
 			queued_orders_recieved_building[0][0] = multiplayer.get_unique_id()
 			var opID = 0
 			if multiplayer.get_peers()[0] == 1:
 				opID = multiplayer.get_peers()[1]
-				
+
 			else:
 				opID = multiplayer.get_peers()[0]
-			
+
 			queued_orders_to_send_meeple[1][0] = opID
 			queued_orders_recieved_meeple[1][0] = opID
-			
+
 			queued_orders_to_send_building[1][0] = opID
 			queued_orders_recieved_building[1][0] = opID
 			for e in enemies:
 				e.player_id = opID
-			
-	
-	
-	
+
 	c.append(meepleControlC)
 	c.append(buildingControlC)
 	add_child(buildingControlC)
 	add_child(meepleControlC)
-	
+
 	if !SINGLE:
 		buildingControlE.teammates.append(meepleControlE)
 		meepleControlE.teammates.append(buildingControlE)
@@ -110,49 +102,56 @@ func _ready() -> void:
 		add_child(buildingControlE)
 		add_child(meepleControlE)
 		$Grid.meeple_controls.append(meepleControlE)
-	
+
 	$Grid.meeple_controls.append(meepleControlC)
-	
+
 	#if FLAG_VERBOSE: print(meepleControl.player_id)
 	#if FLAG_VERBOSE: print(buildingControl.player_id)
 	#if FLAG_VERBOSE: print(meepleControlC.player_id)
 	#if FLAG_VERBOSE: print(buildingControlC.player_id)
- 
-	
+
+
 @rpc("any_peer")
 func transfer_orders(ordersMeeple, ordersBuilding, idFrom):
 	if multiplayer.get_unique_id() == idFrom:
 		if multiplayer.is_server():
-			transfer_orders.rpc(queued_orders_to_send_meeple, queued_orders_to_send_building, multiplayer.get_unique_id())
-			queued_orders_to_send_meeple = [[queued_orders_to_send_meeple[0][0],[]],[queued_orders_to_send_meeple[1][0], []]]
-			queued_orders_to_send_building = [[queued_orders_to_send_building[0][0],[]],[queued_orders_to_send_building[1][0], []]]
+			transfer_orders.rpc(
+				queued_orders_to_send_meeple,
+				queued_orders_to_send_building,
+				multiplayer.get_unique_id()
+			)
+			queued_orders_to_send_meeple = [
+				[queued_orders_to_send_meeple[0][0], []], [queued_orders_to_send_meeple[1][0], []]
+			]
+			queued_orders_to_send_building = [
+				[queued_orders_to_send_building[0][0], []],
+				[queued_orders_to_send_building[1][0], []]
+			]
 
 		else:
-			if FLAG_VERBOSE: print("Send help")
+			if FLAG_VERBOSE:
+				print("Send help")
 			breakpoint
-	
+
 	else:
 		if multiplayer.is_server():
-			for idArray in ordersMeeple: 
+			for idArray in ordersMeeple:
 				if idArray[0] == queued_orders_recieved_meeple[0][0]:
 					queued_orders_recieved_meeple[0][1].append_array(idArray[1])
 				elif idArray[0] == queued_orders_recieved_meeple[1][0]:
 					queued_orders_recieved_meeple[1][1].append_array(idArray[1])
-				
-				
+
 				if idArray[0] == queued_orders_to_send_meeple[0][0]:
 					queued_orders_to_send_meeple[0][1].append_array(idArray[1])
 				elif idArray[0] == queued_orders_recieved_meeple[1][0]:
 					queued_orders_to_send_meeple[1][1].append_array(idArray[1])
-			
+
 			for idArray in ordersBuilding:
-				
 				if idArray[0] == queued_orders_recieved_building[0][0]:
 					queued_orders_recieved_building[0][1].append_array(idArray[1])
 				elif idArray[0] == queued_orders_recieved_building[1][0]:
 					queued_orders_recieved_building[1][1].append_array(idArray[1])
-				
-				
+
 				if idArray[0] == queued_orders_to_send_building[0][0]:
 					queued_orders_to_send_building[0][1].append_array(idArray[1])
 				elif idArray[0] == queued_orders_recieved_building[1][0]:
@@ -160,26 +159,36 @@ func transfer_orders(ordersMeeple, ordersBuilding, idFrom):
 		else:
 			#if FLAG_VERBOSE: print("")
 			#if FLAG_VERBOSE: print("On multiplayer instance: " + str(player_id))
-			
+
 			for idArray in queued_orders_recieved_meeple:
 				if idArray[0] == ordersMeeple[0][0]:
 					idArray[1].append_array(ordersMeeple[0][1])
 				else:
 					idArray[1].append_array(ordersMeeple[1][1])
-			
+
 			for idArray in queued_orders_recieved_building:
 				if idArray[0] == ordersBuilding[0][0]:
 					idArray[1].append_array(ordersBuilding[0][1])
 				else:
 					idArray[1].append_array(ordersBuilding[1][1])
 
-			transfer_orders.rpc_id(1, queued_orders_to_send_meeple, queued_orders_to_send_building, multiplayer.get_unique_id())
-			queued_orders_to_send_meeple = [[queued_orders_to_send_meeple[0][0],[]],[queued_orders_to_send_meeple[1][0], []]]
-			queued_orders_to_send_building = [[queued_orders_to_send_building[0][0],[]],[queued_orders_to_send_building[1][0], []]]
+			transfer_orders.rpc_id(
+				1,
+				queued_orders_to_send_meeple,
+				queued_orders_to_send_building,
+				multiplayer.get_unique_id()
+			)
+			queued_orders_to_send_meeple = [
+				[queued_orders_to_send_meeple[0][0], []], [queued_orders_to_send_meeple[1][0], []]
+			]
+			queued_orders_to_send_building = [
+				[queued_orders_to_send_building[0][0], []],
+				[queued_orders_to_send_building[1][0], []]
+			]
 	pass
 
 
-func _process(_delta): #Runs every tick
+func _process(_delta):  #Runs every tick
 	#Meeple Orders
 	if !SINGLE:
 		for idArray in queued_orders_to_send_meeple:
@@ -193,7 +202,7 @@ func _process(_delta): #Runs every tick
 			if idArray[0] == enemies[0].player_id:
 				enemies[0].queued_orders_recieved_in_control.append_array(idArray[1])
 				idArray[1] = []
-		
+
 		#Building Orders
 		for idArray in queued_orders_to_send_building:
 			if idArray[0] == player_id:
@@ -206,8 +215,10 @@ func _process(_delta): #Runs every tick
 			if idArray[0] == enemies[1].player_id:
 				enemies[1].queued_orders_recieved_in_control.append_array(idArray[1])
 				idArray[1] = []
-				
 
 		if multiplayer.is_server():
-			transfer_orders(queued_orders_to_send_meeple, queued_orders_to_send_building, multiplayer.get_unique_id())
-	
+			transfer_orders(
+				queued_orders_to_send_meeple,
+				queued_orders_to_send_building,
+				multiplayer.get_unique_id()
+			)

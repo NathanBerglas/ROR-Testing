@@ -20,34 +20,35 @@ const HEX_DIRS := [
 @export var sprite: Sprite2D
 
 var redirected_from: Array = []
-var selected = false #Determines if a meeple is selected
-var path: Array = [] #destination of a meeple
-var queued_path: Array = [] #destination of a meeple
+var selected = false  #Determines if a meeple is selected
+var path: Array = []  #destination of a meeple
+var queued_path: Array = []  #destination of a meeple
 var should_be_moving = false
 var waiting = false
-var inqueue = false; # british behaviour, french sounding word
-var pause_a_tick = false; # When arriving to prevent merge skipping
+var inqueue = false  # british behaviour, french sounding word
+var pause_a_tick = false  # When arriving to prevent merge skipping
 var attackTarget = null
-var UNIQUEID = null #Unique Id for every meeple on a team by unit type
+var UNIQUEID = null  #Unique Id for every meeple on a team by unit type
 #When I say Unique, I mean UNIQUE
 var groupNum = 0
-var min_distance = 9 # Squared
+var min_distance = 9  # Squared
 var HP = 1
 var type = "Meeple"
 var superType = "Building"
 
+
 func _ready():
 	label.text = str(HP)
-	
+
 
 #func _process(delta): #runs on each meeple every tick
-	#label.text = str(HP)
-	
-	#if (path != null and should_be_moving): #if a meeple has somewhere to go, goes to it
-	#	_go_to_target(delta)
-	
-	#if dest != null and closeEnough(): #meeple reaches destination
-		#dest = null
+#label.text = str(HP)
+
+#if (path != null and should_be_moving): #if a meeple has somewhere to go, goes to it
+#	_go_to_target(delta)
+
+#if dest != null and closeEnough(): #meeple reaches destination
+#dest = null
 
 
 func update_hp(hp: int):
@@ -58,19 +59,19 @@ func update_hp(hp: int):
 
 
 #func hasMouse(): #Checks if the mouse is within the meeple
-	#var radius = 220 #should be set to meeple radius squared
-	#var mousePos = get_global_mouse_position()
-	#
-	#var dif = rb.global_position - mousePos
-	#
-	#if dif.length_squared() < radius:
-		#return true
-	#return false
+#var radius = 220 #should be set to meeple radius squared
+#var mousePos = get_global_mouse_position()
+#
+#var dif = rb.global_position - mousePos
+#
+#if dif.length_squared() < radius:
+#return true
+#return false
 
 
 func is_selected():
 	selected = true
-	sprite.modulate = Color(2 , 2.4, 2.4)
+	sprite.modulate = Color(2, 2.4, 2.4)
 
 
 func is_unselected():
@@ -79,35 +80,34 @@ func is_unselected():
 
 
 #func _go_to_target(delta):
-	#if path.size() <= 0:
-		#path = null
-		#return
-	#
-	#var to_target = path[0] - rb.global_position
-	#var dist = to_target.length_squared()
-	#var speed_towards_target = rb.linear_velocity.dot(to_target.normalized())
-	#
-	#if dist > min_distance and speed_towards_target < speed: # Checks if meeple is close to target point
-		#var force = to_target.normalized() * min(acceleration, abs(speed_towards_target-speed) / delta) # If acceleration would overshoot
-		#rb.apply_central_force(force)
-		#
-	#
-	#if closeEnough():
-		#rb.linear_velocity = Vector2.ZERO
-		#rb.angular_velocity = 0.0
-		#rb.set_global_position(path[0])
-	#
-		#path.pop_at(0)
-		#if path.size() == 0:
-			#path = null
-
+#if path.size() <= 0:
+#path = null
+#return
+#
+#var to_target = path[0] - rb.global_position
+#var dist = to_target.length_squared()
+#var speed_towards_target = rb.linear_velocity.dot(to_target.normalized())
+#
+#if dist > min_distance and speed_towards_target < speed: # Checks if meeple is close to target point
+#var force = to_target.normalized() * min(acceleration, abs(speed_towards_target-speed) / delta) # If acceleration would overshoot
+#rb.apply_central_force(force)
+#
+#
+#if closeEnough():
+#rb.linear_velocity = Vector2.ZERO
+#rb.angular_velocity = 0.0
+#rb.set_global_position(path[0])
+#
+#path.pop_at(0)
+#if path.size() == 0:
+#path = null
 
 #func closeEnough(): #checking if a meeple is close enough to their destination
-	#var dist = rb.global_position - path[0]
+#var dist = rb.global_position - path[0]
 #
-	#if ((dist.x * dist.x) < 3 and (dist.y * dist.y) < 3):
-		#return true
-	#return false
+#if ((dist.x * dist.x) < 3 and (dist.y * dist.y) < 3):
+#return true
+#return false
 
 
 func _on_rigid_body_2d_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
