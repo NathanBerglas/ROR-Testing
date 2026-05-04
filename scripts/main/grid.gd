@@ -1,10 +1,9 @@
 extends Node2D
 const FLAG_VERBOSE = false
 
-
 # Grid constants
 @export var HEX_SIZE: float = 64
-@export var GRID_COUNT: Vector2i = Vector2i(466,214)
+@export var GRID_COUNT: Vector2i = Vector2i(466, 214)
 var nexusSpawn = null
 
 var meeple_controls = []
@@ -13,8 +12,7 @@ const SQRT_3 = (111.0 / 128.0) * 2
 
 var biomeGen = null
 var created = false
-var grid: Array = [] 
-
+var grid: Array = []
 
 @onready var white_border: TileMapLayer = $"White Border"
 @onready var black_border: TileMapLayer = $"Black Border"
@@ -46,26 +44,29 @@ var Bmap = null
 
 
 class tile:
-	var hex: Vector2i # (q, r)
-	var classification: int = 0 # 0 is empty, 1 is obstruction, 2 is building, and 3 is stationary meeple, 4 is moving meeple
+	var hex: Vector2i  # (q, r)
+	var classification: int = 0  # 0 is empty, 1 is obstruction, 2 is building, and 3 is stationary meeple, 4 is moving meeple
 	var traversable: bool = true
-	var traversal_difficulty: float = 1.0 # Must be nonzero for AStar (i think?)
-	var biome: int = 0 # 0 is undefined biome
+	var traversal_difficulty: float = 1.0  # Must be nonzero for AStar (i think?)
+	var biome: int = 0  # 0 is undefined biome
 	var objectsInside: Array = []
 	var queue: Array = []
+
 	func _init(init_hex, _classification = 0):
 		self.hex = init_hex
 		self.classification = _classification
-		self.traversable = (classification == 0 || classification == 4 || classification==3) # Only traversable if empty or moving meeple
+		self.traversable = (classification == 0 || classification == 4 || classification == 3)  # Only traversable if empty or moving meeple
 
 
 func update_grid(hex: Vector2i, classification: int, objects: Array):
 	var tile_to_update = grid[hex.x][hex.y]
-	tile_to_update.classification = classification ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE 
-	tile_to_update.traversable = (classification==0 || classification==4 || classification==3)
+	tile_to_update.classification = classification  ### !!! ATTENTION !!! THIS UPDATES TILE TRAVERSABLE
+	tile_to_update.traversable = (classification == 0 || classification == 4 || classification == 3)
 	tile_to_update.objectsInside = objects
 	astar.set_point_disabled(_hex_to_id(hex), !tile_to_update.traversable)
-	white_border.set_cell(tile_to_update.hex, border_colours[tile_to_update.classification], Vector2i(0, 0))
+	white_border.set_cell(
+		tile_to_update.hex, border_colours[tile_to_update.classification], Vector2i(0, 0)
+	)
 
 
 func axial_probe(coordinate: Vector2i):
@@ -98,13 +99,12 @@ func _hex_round(frac: Vector2) -> Vector2i:
 
 
 func _hex_in_bounds(hex: Vector2i) -> bool:
-	return hex.x >= 0 and hex.y >= 0 \
-		and hex.x < GRID_COUNT.x and hex.y < GRID_COUNT.y
+	return hex.x >= 0 and hex.y >= 0 and hex.x < GRID_COUNT.x and hex.y < GRID_COUNT.y
 
 
 # Takes the coordinates, ie. pixel position on map and coverts it to a hex position, ie. (q, r)
 func coord_to_axial_hex(coordinate: Vector2):
-	var q = (1 / SQRT_3  * coordinate.x - 1.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE
+	var q = (1 / SQRT_3 * coordinate.x - 1.0 / (SQRT_3 * SQRT_3) * coordinate.y) / HEX_SIZE
 	var r = (2.0 / 3.0 * coordinate.y) / HEX_SIZE
 	if _hex_in_bounds(Vector2i(q, r)):
 		return _hex_round(Vector2(q, r))
@@ -117,7 +117,7 @@ func axial_hex_to_coord(hex: Vector2i):
 	var y: float = HEX_SIZE * 3.0 / 2 * hex.y
 	return Vector2(x, y)
 
-	
+
 func hex_center(coordinate: Vector2i):
 	return axial_hex_to_coord(coord_to_axial_hex(coordinate))
 
@@ -141,7 +141,7 @@ func update_astar():
 			var id = _hex_to_id(t.hex)
 			astar.add_point(id, t.hex, t.traversal_difficulty)
 			astar.set_point_disabled(id, !t.traversable)
-				
+
 	for q in range(GRID_COUNT.x):
 		for r in range(GRID_COUNT.y):
 			var t: tile = grid[q][r]
@@ -155,7 +155,7 @@ func update_astar():
 				#var next_tile = grid[next_hex.x][next_hex.y]
 				#if next_tile.traversable:
 				astar.connect_points(id, _hex_to_id(next_hex), false)
-					#print(id, " --> ", _hex_to_id(next_hex))
+				#print(id, " --> ", _hex_to_id(next_hex))
 
 
 func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attackingBoolean):
@@ -164,20 +164,20 @@ func find_path(start_hex: Vector2i, end_hex: Vector2i, partialPathBoolean, attac
 	astar.set_point_disabled(start_id, false)
 	# Check that destined grid spot is available
 	#if (grid[end_hex.x][end_hex.y].classification == 2):
-		#return [start_hex]
-	
-	if (grid[end_hex.x][end_hex.y].classification == 3 and !attackingBoolean):
+	#return [start_hex]
+
+	if grid[end_hex.x][end_hex.y].classification == 3 and !attackingBoolean:
 		astar.set_point_disabled(end_id, false)
 
-	var path_ids = astar.get_id_path(start_id, end_id, partialPathBoolean) # maybe allow partial paths?
+	var path_ids = astar.get_id_path(start_id, end_id, partialPathBoolean)  # maybe allow partial paths?
 	astar.set_point_disabled(end_id, !grid[end_hex.x][end_hex.y].traversable)
-	
+
 	if path_ids.size() == 0:
 		return [start_hex]
 	var path_hexes: Array[Vector2i] = []
-	for id in path_ids: # Unflatten path_ids
+	for id in path_ids:  # Unflatten path_ids
 		var q: int = id % GRID_COUNT.x
-		var r: int = int(1.0 * id / GRID_COUNT.x) #1.0 for floating division
+		var r: int = int(1.0 * id / GRID_COUNT.x)  #1.0 for floating division
 		path_hexes.append(Vector2i(q, r))
 	return path_hexes
 
@@ -187,7 +187,7 @@ func redirected_find_path(path, partialPathBoolean, attackingBoolean, pathToDisa
 	for h in pathToDisable:
 		astar.set_point_disabled(_hex_to_id(h), 1)
 		pathsCheck.append(astar.is_point_disabled(_hex_to_id(h)))
-	
+
 	var new_path = find_path(path[0], path[path.size() - 1], partialPathBoolean, attackingBoolean)
 	for h in range(pathToDisable.size()):
 		astar.set_point_disabled(_hex_to_id(pathToDisable[h]), pathsCheck[h])
@@ -212,10 +212,14 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 	# From now on, assuming the meeple in ingressing_hex is the same team as meeple_requesting
 	if !decision_made:
 		var meeple_in_ingressing_hex = ingressing_tile.objectsInside[0]
-		if (meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1] == meeple_requesting.path[meeple_requesting.path.size() - 1]) \
-		and meeple_requesting.type == "Infantry" \
-		and meeple_in_ingressing_hex.player_id == meeple_requesting.player_id:
-			
+		if (
+			(
+				meeple_in_ingressing_hex.path[meeple_in_ingressing_hex.path.size() - 1]
+				== meeple_requesting.path[meeple_requesting.path.size() - 1]
+			)
+			and meeple_requesting.type == "Infantry"
+			and meeple_in_ingressing_hex.player_id == meeple_requesting.player_id
+		):
 			for MC in meeple_controls:
 				if MC.player_id == meeple_requesting.player_id:
 					MC.meeple_start_merge(meeple_in_ingressing_hex)
@@ -223,12 +227,29 @@ func hex_ingress(ingressing_hex, meeple_requesting):
 			decision = "APPROVED"
 		if !meeple_in_ingressing_hex.waiting:
 			# 2 path, because the meeple in ingressing hex is moving, so it has initial hex, and target hex
-			if (ingressing_tile.classification == 4 and len(meeple_in_ingressing_hex.path) > 2) or (ingressing_tile.classification == 3 and len(meeple_in_ingressing_hex.path) > 2):
+			if (
+				(ingressing_tile.classification == 4 and len(meeple_in_ingressing_hex.path) > 2)
+				or (ingressing_tile.classification == 3 and len(meeple_in_ingressing_hex.path) > 2)
+			):
 				ingressing_tile.queue.push_back(meeple_requesting)
 				meeple_requesting.inqueue = true
-				if FLAG_VERBOSE: print("Queing a meeple, ", meeple_requesting.UNIQUEID, " to the queue on hex ", ingressing_tile.hex)
+				if FLAG_VERBOSE:
+					print(
+						"Queing a meeple, ",
+						meeple_requesting.UNIQUEID,
+						" to the queue on hex ",
+						ingressing_tile.hex
+					)
 				decision = "PENDING"
-	if FLAG_VERBOSE: print("Meeple ", meeple_requesting.UNIQUEID, " ingress request to ", ingressing_hex, " - Granted: ", decision)
+	if FLAG_VERBOSE:
+		print(
+			"Meeple ",
+			meeple_requesting.UNIQUEID,
+			" ingress request to ",
+			ingressing_hex,
+			" - Granted: ",
+			decision
+		)
 	return decision
 
 
@@ -236,38 +257,48 @@ func hex_egress(egressing_hex):
 	var egressing_hex_tile = grid[egressing_hex.x][egressing_hex.y]
 	#var egressing_meeple = egressing_hex_tile.objectsInside[0]
 	if len(egressing_hex_tile.queue) == 0:
-		update_grid(egressing_hex, 0, egressing_hex_tile.objectsInside.slice(1)) # Removes meeple from grid
+		update_grid(egressing_hex, 0, egressing_hex_tile.objectsInside.slice(1))  # Removes meeple from grid
 	else:
 		var collected_meeple = egressing_hex_tile.queue.pop_front()
 		collected_meeple.inqueue = false
-		if FLAG_VERBOSE: print("Collecting meeple, ", collected_meeple.UNIQUEID, " from queue on hex ", egressing_hex)
+		if FLAG_VERBOSE:
+			print(
+				"Collecting meeple, ",
+				collected_meeple.UNIQUEID,
+				" from queue on hex ",
+				egressing_hex
+			)
 		update_grid(egressing_hex, 4, [collected_meeple])
 		for MC in meeple_controls:
-				if MC.player_id == collected_meeple.player_id:
-					MC.egress_granted(collected_meeple)
-		
+			if MC.player_id == collected_meeple.player_id:
+				MC.egress_granted(collected_meeple)
+
 		hex_egress(collected_meeple.path[0])
 
 
 func _ready():
 	#for i in range(0, 1000):
-		#var test_hex = Vector2i(i,i)
-		#if coord_to_axial_hex(axial_hex_to_coord(test_hex)) != test_hex:
-			#print(test_hex)
-			#print(axial_hex_to_coord(test_hex))
-			#print(coord_to_axial_hex(axial_hex_to_coord(test_hex)))
-			#
-	
+	#var test_hex = Vector2i(i,i)
+	#if coord_to_axial_hex(axial_hex_to_coord(test_hex)) != test_hex:
+	#print(test_hex)
+	#print(axial_hex_to_coord(test_hex))
+	#print(coord_to_axial_hex(axial_hex_to_coord(test_hex)))
+	#
+
 	#BterrainOffset = terrainOffset
 	#Bgrid = self
 	#add_child(biomeGen)
+	assert(BMAP_RESOLUTIONx != null, "Requires Main scene to be run")
 	for q in range(GRID_COUNT.x):
 		var row: Array = []
 		for r in range(GRID_COUNT.y):
 			var tileToCreate = tile.new(Vector2i(q, r))
 			var center = axial_hex_to_coord(tileToCreate.hex)
-			
-			if center.x > terrainOffset and center.x < (BMAP_RESOLUTIONx * BPIXELS_PER_TILE) + terrainOffset:
+
+			if (
+				center.x > terrainOffset
+				and center.x < (BMAP_RESOLUTIONx * BPIXELS_PER_TILE) + terrainOffset
+			):
 				var index = Vector2i(
 					int(floor((center.x - terrainOffset) / BPIXELS_PER_TILE)),
 					int(floor((center.y) / BPIXELS_PER_TILE))
@@ -283,41 +314,42 @@ func _ready():
 						white_border.set_cell(tileToCreate.hex, 1, def)
 						interior.set_cell(tileToCreate.hex, 2 + Bmap[index.y][index.x], def)
 					tileToCreate.biome = Bmap[index.y][index.x]
-					if tileToCreate.biome == 2: #water
+					if tileToCreate.biome == 2:  #water
 						tileToCreate.traversable = false
-					tileToCreate.traversal_difficulty = 1 / traversal_difficulty_by_biome[Bmap[index.y][index.x]]
+					tileToCreate.traversal_difficulty = (
+						1 / traversal_difficulty_by_biome[Bmap[index.y][index.x]]
+					)
 			row.append(tileToCreate)
 		grid.append(row)
 	update_astar()
 
-
 #func _process(_delta):
-	#if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		#draw_debug_square()
+#if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+#draw_debug_square()
 #
 #
 #var debug_points = []
 #func draw_debug_square():
-	#var mouse_pos = get_global_mouse_position()
-	#var center = Vector2i(mouse_pos)
-	#const square_radius = 100
-	#for x in range(center.x - square_radius, center.x + square_radius):
-		#for y in range(center.y - square_radius, center.y + square_radius):
-			#var pos = Vector2(x, y)
-			#var color = color_from_cell(coord_to_axial_hex(pos))
-			#debug_points.append({ "pos": pos, "color": color })
-	#queue_redraw()
+#var mouse_pos = get_global_mouse_position()
+#var center = Vector2i(mouse_pos)
+#const square_radius = 100
+#for x in range(center.x - square_radius, center.x + square_radius):
+#for y in range(center.y - square_radius, center.y + square_radius):
+#var pos = Vector2(x, y)
+#var color = color_from_cell(coord_to_axial_hex(pos))
+#debug_points.append({ "pos": pos, "color": color })
+#queue_redraw()
 #
 #
 #func color_from_cell(cell: Vector2i) -> Color:
-	#var hash = int(cell.x) * 73856093 ^ int(cell.y) * 19349663
-	## Extract pseudo-random RGB from hash
-	#var r = float((hash >> 16) & 0xFF) / 255.0
-	#var g = float((hash >> 8) & 0xFF) / 255.0
-	#var b = float(hash & 0xFF) / 255.0
-	#return Color(r, g, b, 1)  # 50% opacity
+#var hash = int(cell.x) * 73856093 ^ int(cell.y) * 19349663
+## Extract pseudo-random RGB from hash
+#var r = float((hash >> 16) & 0xFF) / 255.0
+#var g = float((hash >> 8) & 0xFF) / 255.0
+#var b = float(hash & 0xFF) / 255.0
+#return Color(r, g, b, 1)  # 50% opacity
 #
 #
 #func _draw():
-	#for point in debug_points:
-		#draw_rect(Rect2(point.pos, Vector2(1, 1)), point.color)
+#for point in debug_points:
+#draw_rect(Rect2(point.pos, Vector2(1, 1)), point.color)

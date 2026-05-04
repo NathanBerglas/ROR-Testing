@@ -7,8 +7,7 @@ var cropsTimer = 0
 var saved_food = 0
 
 #func _ready():
-	#$MultiplayerSynchronizer.set_multiplayer_authority()
-
+#$MultiplayerSynchronizer.set_multiplayer_authority()
 
 var size = 1
 
@@ -22,20 +21,23 @@ const HEX_SHAPE := [
 	Vector2i(0, 1),
 ]
 
+
 func _ready():
 	set_size(size)
 	type = "farm"
-func generateFood(p, delta): #Generates income every 10 seconds
-	if self.fake: return
-	
+
+
+func generateFood(p, delta):  #Generates income every 10 seconds
+	if self.fake:
+		return
+
 	cropsTimer += delta
 	if cropsTimer >= 10:
-		
 		saved_food += 200
-		
+
 		cropsTimer = 0
 
-	
+
 func updateHPBar():
 	if self.fake:
 		HPBar.visible = false

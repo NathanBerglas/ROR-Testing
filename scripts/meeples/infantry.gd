@@ -1,16 +1,16 @@
 extends meeple
 
-
 var attackTimer = 0
 var attackRange = 1
+
 
 func _ready():
 	super._ready()
 	self.sprite = $Sprite2D
 	self.type = "Infantry"
-	
 
-func _process(delta): #runs on each meeple every tick
+
+func _process(delta):  #runs on each meeple every tick
 	#label.text = str(self.HP)
 	if attackTarget:
 		if attackTarget.type == "Infantry":
@@ -28,15 +28,19 @@ func _process(delta): #runs on each meeple every tick
 				if inAttackRange(attackTarget.pos):
 					attack(attackTarget, delta)
 	#if (path != null and should_be_moving): #if a meeple has somewhere to go, goes to it
-		#_go_to_target(delta)
-	
+	#_go_to_target(delta)
+
 	#if dest != null and closeEnough(): #meeple reaches destination
-		#dest = null
-	
+	#dest = null
+
+
 func get_id():
 	return self.UNIQUEID
+
+
 func set_id(id):
 	self.UNIQUEID = id
+
 
 func attack(target, delta):
 	attackTimer += delta
@@ -48,11 +52,11 @@ func attack(target, delta):
 			else:
 				target.update_hp(-HP)
 			if target.HP <= 0:
-				attackTarget = null		
+				attackTarget = null
 		else:
 			if should_be_moving:
 				target.hp -= HP * 10
-				print('attacked for ', -HP * 10, " damage")
+				print("attacked for ", -HP * 10, " damage")
 			else:
 				target.hp -= int(HP * 5)
 			if target.hp <= 0:
@@ -63,9 +67,8 @@ func inAttackRange(target):
 	if target == null:
 		return false
 	var distToTarget = path[0] - target
-	for v in HEX_DIRS: #Need to change based on varying range
+	for v in HEX_DIRS:  #Need to change based on varying range
 		if distToTarget == v:
 			return true
-			
+
 	return false
-	

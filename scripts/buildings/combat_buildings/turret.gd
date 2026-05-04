@@ -10,10 +10,7 @@ const SECONDS_PER_ATTACK = 2
 var time_since_last_attack = 0
 
 var size = 0.9
-const HEX_SHAPE := [
-	Vector2i(0, 1),
-	Vector2i(0, 0),
-	Vector2i(-1, 1)]
+const HEX_SHAPE := [Vector2i(0, 1), Vector2i(0, 0), Vector2i(-1, 1)]
 
 
 func _ready():
@@ -28,7 +25,7 @@ func attack(delta):
 		if target == null:
 			return
 		target.update_hp(-DMG)
-		if !is_instance_valid(target): # was just killed
+		if !is_instance_valid(target):  # was just killed
 			target = null
 
 
@@ -40,8 +37,12 @@ func getTarget(grid):
 			if !(tile_pos in visited_hexs):
 				visited_hexs.append(tile_pos)
 				var tile = grid.axial_probe(tile_pos)
-				if len(tile.objectsInside) > 0 and tile.objectsInside[0] is meeple and tile.objectsInside[0].player_id != player_id:
-						target = tile.objectsInside[0]
+				if (
+					len(tile.objectsInside) > 0
+					and tile.objectsInside[0] is meeple
+					and tile.objectsInside[0].player_id != player_id
+				):
+					target = tile.objectsInside[0]
 
 
 func updateHPBar():

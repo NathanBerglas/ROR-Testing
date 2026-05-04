@@ -20,20 +20,19 @@
 [ext_resource type="Texture2D" uid="uid://bmjqv3d2068k3" path="res://assets/buildings/lumberJacks.png" id="8_w1qyp"]
 [ext_resource type="PackedScene" uid="uid://dh3llecy2aj26" path="res://scenes/prefabs/buildings/combat_buildings/turret.tscn" id="9_k0c8h"]
 [ext_resource type="PackedScene" uid="uid://w6d4wnbyeqy3" path="res://scenes/prefabs/buildings/resource_buildings/resourceHubEnemy.tscn" id="9_mdj8m"]
-[ext_resource type="PackedScene" uid="uid://dqjl8bsde3lkv" path="res://scenes/prefabs/buildings/Nexus.tscn" id="10_v74i5"]
 [ext_resource type="Texture2D" uid="uid://doa6csaa1ut7r" path="res://assets/buildings/centralHub.png" id="11_cq801"]
 [ext_resource type="PackedScene" uid="uid://b3efqc86if06o" path="res://scenes/prefabs/buildings/combat_buildings/barracksEnemy.tscn" id="11_e0bfq"]
-[ext_resource type="PackedScene" uid="uid://b68p435fysnhc" path="res://scenes/prefabs/buildings/combat_buildings/wallCornerEnemy.tscn" id="13_1soro"]
-[ext_resource type="PackedScene" uid="uid://bsxe1atoj1q53" path="res://scenes/prefabs/buildings/combat_buildings/wallSegmentEnemy.tscn" id="15_gvj3m"]
 [ext_resource type="Texture2D" uid="uid://dyuci5fayskyh" path="res://assets/menus/food_icon.png" id="12_88gta"]
+[ext_resource type="PackedScene" uid="uid://b68p435fysnhc" path="res://scenes/prefabs/buildings/combat_buildings/wallCornerEnemy.tscn" id="13_1soro"]
 [ext_resource type="Texture2D" uid="uid://dwjtc5otikwnm" path="res://assets/menus/stone_icon.png" id="13_jj6us"]
 [ext_resource type="Texture2D" uid="uid://gywy5m0hvtd4" path="res://assets/menus/wood_icon.png" id="14_jj6us"]
 [ext_resource type="Texture2D" uid="uid://wndwdy07kcoq" path="res://assets/menus/marketMenuButton.png" id="14_vy5db"]
+[ext_resource type="PackedScene" uid="uid://bsxe1atoj1q53" path="res://scenes/prefabs/buildings/combat_buildings/wallSegmentEnemy.tscn" id="15_gvj3m"]
 [ext_resource type="Texture2D" uid="uid://dti5y5haogtj8" path="res://assets/menus/money_icon.png" id="15_yc8is"]
 [ext_resource type="Texture2D" uid="uid://bmti1roo83v4s" path="res://assets/buildings/WallCorner.png" id="16_t6ejh"]
 [ext_resource type="PackedScene" uid="uid://6clds1ci2jfq" path="res://scenes/prefabs/buildings/combat_buildings/turretEnemy.tscn" id="17_ekw31"]
 [ext_resource type="Texture2D" uid="uid://duhlw8ydi84fg" path="res://assets/buildings/turrent.png" id="19_2hoj7"]
-[ext_resource type="PackedScene" uid="uid://bqax1ba3jxi2e" path="res://scenes/prefabs/buildings/NexusEnemy.tscn" id="19_abdoh"]
+[ext_resource type="Texture2D" uid="uid://ctfclimiysewa" path="res://assets/menus/iron_icon.png" id="22_1soro"]
 [ext_resource type="PackedScene" uid="uid://dkhccswoxn7m8" path="res://scenes/menus/marketMenu.tscn" id="25_4obvr"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fbp8a"]
@@ -60,65 +59,76 @@ wallSegment_prefab = ExtResource("8_hlxnr")
 wallSegment_prefabEnemy = ExtResource("15_gvj3m")
 turret_prefab = ExtResource("9_k0c8h")
 turret_prefabEnemy = ExtResource("17_ekw31")
-nexus_prefab = ExtResource("10_v74i5")
-nexus_prefabEnemy = ExtResource("19_abdoh")
 
 [node name="buildingHud" type="CanvasLayer" parent="." unique_id=815674145]
-visible = false
 script = ExtResource("2_oj14w")
 
-[node name="Food" type="Label" parent="buildingHud" unique_id=2073406]
-offset_left = 67.0
-offset_right = 341.0
-offset_bottom = 55.833332
-theme_override_font_sizes/font_size = 40
-text = "Food: 1000"
+[node name="ResourcesV" type="VBoxContainer" parent="buildingHud" unique_id=740878565]
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="FoodIcon" type="TextureRect" parent="buildingHud" unique_id=967490944]
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 55.0
-offset_bottom = 54.0
+[node name="ResourcesMain" type="HBoxContainer" parent="buildingHud/ResourcesV" unique_id=1010344029]
+layout_mode = 2
+
+[node name="FoodIcon" type="TextureRect" parent="buildingHud/ResourcesV/ResourcesMain" unique_id=967490944]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
 texture = ExtResource("12_88gta")
 expand_mode = 1
 
-[node name="StoneIcon" type="TextureRect" parent="buildingHud" unique_id=1273971968]
-offset_left = 5.0
-offset_top = 110.0
-offset_right = 55.0
-offset_bottom = 159.0
-texture = ExtResource("13_jj6us")
-expand_mode = 1
+[node name="Food" type="Label" parent="buildingHud/ResourcesV/ResourcesMain" unique_id=2073406]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "XX"
 
-[node name="Stone" type="Label" parent="buildingHud" unique_id=351734712]
-offset_left = 67.0
-offset_top = 112.0
-offset_right = 341.0
-offset_bottom = 167.83333
-theme_override_font_sizes/font_size = 40
-text = "Stone: 1000"
-metadata/_edit_use_anchors_ = true
-
-[node name="WoodIcon" type="TextureRect" parent="buildingHud" unique_id=1352569140]
-offset_left = 5.0
-offset_top = 60.0
-offset_right = 55.0
-offset_bottom = 109.0
+[node name="WoodIcon" type="TextureRect" parent="buildingHud/ResourcesV/ResourcesMain" unique_id=1352569140]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
 texture = ExtResource("14_jj6us")
 expand_mode = 1
 
-[node name="Lumber" type="Label" parent="buildingHud" unique_id=1233910810]
-anchors_preset = -1
-anchor_left = 0.0052083335
-anchor_right = 0.0052083335
-anchor_bottom = 0.00077160023
-offset_left = 57.0
-offset_top = 56.0
-offset_right = 331.0
-offset_bottom = 111.0
-theme_override_font_sizes/font_size = 40
-text = "Lumber: 1000"
+[node name="Lumber" type="Label" parent="buildingHud/ResourcesV/ResourcesMain" unique_id=1233910810]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "XX"
 metadata/_edit_use_anchors_ = true
+
+[node name="StoneIcon" type="TextureRect" parent="buildingHud/ResourcesV/ResourcesMain" unique_id=1273971968]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("13_jj6us")
+expand_mode = 1
+
+[node name="Stone" type="Label" parent="buildingHud/ResourcesV/ResourcesMain" unique_id=351734712]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "XX"
+metadata/_edit_use_anchors_ = true
+
+[node name="ResourcesMain2" type="HBoxContainer" parent="buildingHud/ResourcesV" unique_id=611803314]
+layout_mode = 2
+
+[node name="IronIcon" type="TextureRect" parent="buildingHud/ResourcesV/ResourcesMain2" unique_id=1762062355]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("22_1soro")
+expand_mode = 1
+
+[node name="Iron" type="Label" parent="buildingHud/ResourcesV/ResourcesMain2" unique_id=649577868]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "XX"
+
+[node name="MoneyIcon" type="TextureRect" parent="buildingHud/ResourcesV/ResourcesMain2" unique_id=1844753779]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("15_yc8is")
+expand_mode = 1
+
+[node name="Treasury" type="Label" parent="buildingHud/ResourcesV/ResourcesMain2" unique_id=50422195]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "XX"
 
 [node name="combatBuildingsLabel" type="Label" parent="buildingHud" unique_id=983631813]
 offset_left = 457.0
@@ -140,22 +150,6 @@ text = "Opens Resource
 Building Menu"
 horizontal_alignment = 1
 metadata/_edit_use_anchors_ = true
-
-[node name="MoneyIcon" type="TextureRect" parent="buildingHud" unique_id=1079048617]
-offset_left = 5.0
-offset_top = 165.0
-offset_right = 55.0
-offset_bottom = 214.0
-texture = ExtResource("15_yc8is")
-expand_mode = 1
-
-[node name="Treasury" type="Label" parent="buildingHud" unique_id=196090001]
-offset_left = 67.0
-offset_top = 165.0
-offset_right = 341.0
-offset_bottom = 220.83333
-theme_override_font_sizes/font_size = 40
-text = "Treasury: XX"
 
 [node name="resourceBuildingButton" type="Button" parent="buildingHud" unique_id=1378047722]
 offset_left = 870.0
