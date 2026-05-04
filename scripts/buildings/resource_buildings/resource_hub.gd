@@ -343,7 +343,7 @@ func meeple_process(delta):
 					else:
 						c.queued_path = controller.grid.find_path(c.path[0], meepleDocPos, false, false) 
 			#End of if caravan
-			else:
+			elif c.type == "":
 				if c.stopTimer >= c.building_timer:
 					pass
 					# Place the building
