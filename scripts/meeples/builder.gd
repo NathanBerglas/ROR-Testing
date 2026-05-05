@@ -3,7 +3,8 @@ extends meeple
 @export var enemy_texture: Texture2D
 
 var building = null
-var building_time = null
+var building_timer = null
+var building_location = null
 
 var atStop = false
 var stopTimer = 0

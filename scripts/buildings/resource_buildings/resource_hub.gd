@@ -4,6 +4,8 @@ const FLAG_VERBOSE = false
 
 var nexus = false
 
+@onready var range_circle: Polygon2D = $rangeCircle
+
 @onready var shapey = $Sprite2D
 @onready var HPBar = $HP_BAR
 
@@ -24,12 +26,15 @@ var nexus = false
 @export var nexusEnemySprite: Texture2D
 
 const CARAVAN_WAIT_TIMER = 2
-const MAX_CARAVAN_STOPS = 3
+const MAX_CARAVAN_STOPS: int = 3
 const CARAVAN_TICKS_PER_SECOND = 60
 var time_since_last_caravan_tick = 0
 
-var manageCaravanButtonIDTracker = 1
-var routeNumTracker = 1
+const RANGE_CIRCLE_STRAIGHT_LINES: int = 40
+const BUILD_RANGE: int = 750
+
+var manageCaravanButtonIDTracker: int = 1
+var routeNumTracker: int = 1
 
 var managed_meeples: Array = []
 var managedRoutes: Array = []
@@ -69,6 +74,8 @@ func _ready():
 
 	manageCaravanMenu.visible = false
 	managingCaravanMenu.visible = false
+	build_range_circle()
+	range_circle.visible = false
 
 	if nexus:
 		if player_id == 1 or player_id == multiplayer.get_unique_id():
@@ -79,13 +86,23 @@ func _ready():
 	set_size(size)
 
 
+# RangeCircle.gd
+
+func build_range_circle():
+	var points := PackedVector2Array()
+	for i in RANGE_CIRCLE_STRAIGHT_LINES:
+		var angle = (float(i) / RANGE_CIRCLE_STRAIGHT_LINES) * TAU
+		points.append(Vector2(cos(angle), sin(angle)) * BUILD_RANGE)
+	range_circle.polygon = points
+	range_circle.color = Color(0.0, 0.824, 0.827, 0.357)  # translucent fill
+
+
 func _process(delta):
 	time_since_last_caravan_tick += delta
 	#if player_id == multiplayer.get_unique_id():
 	if time_since_last_caravan_tick > (1.0 / CARAVAN_TICKS_PER_SECOND):
 		meeple_process(time_since_last_caravan_tick)
 		time_since_last_caravan_tick = 0
-
 	if Input.is_action_just_pressed("right_click_menu"):
 		if managingCaravanMenu.visible == true:
 			_on_finishManaging_button_released()
@@ -378,10 +395,15 @@ func meeple_process(delta):
 							c.path[0], meepleDocPos, false, false
 						)
 			#End of if caravan
-			elif c.type == "":
+			elif c.type == "Builder":
+				
 				if c.stopTimer >= c.building_timer:
-					pass
-					# Place the building
+					var args = []
+					args.append(c.get_global_position())
+					args.append(c.building)
+					free_meeple(c.UNIQUEID)
+					controller.spawn_building(args)
+			
 
 		if c.pause_a_tick:
 			c.pause_a_tick = false
@@ -443,9 +465,11 @@ func send_builder(args):
 	var building = args[1]
 	var building_time = args[2]
 	var instance = builder_prefab.instantiate()
-
+	
+	build_location = controller.grid.coord_to_axial_hex(build_location)
 	instance.building = building
-	instance.building_time = building_time
+	print(building_time)
+	instance.building_timer = building_time
 	instance.queued_path = controller.grid.find_path(meepleDocPos, build_location, false, false)  #To build location
 	instance.UNIQUEID = meeple_id_tracker
 	meeple_id_tracker += 1

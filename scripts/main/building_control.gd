@@ -136,8 +136,11 @@ var combatButtons = []
 var buildingDraggin = null
 
 #A list of the buildings owned
-#Format is: ["Building Name", Vector(Building Pos), Building itself]
+#Format is: ["Building Name", Vector(Building Pos), Building itself] maybe? I dont know. Could be anything at this point tbh
 var buildings = []
+var r_hub_positions = [] #Used for algorithms to be more efficient ig
+var current_hub = null
+const BUILDING_TIMES: Array = [10] #eventually will be an array of all building times
 
 var teammates = []  #list of teammates
 var grid  # the grid controller
@@ -497,6 +500,15 @@ func _process(delta):  #runs every tick
 
 		if buildingDraggin != null:  #Code actually dragging the building around
 			buildings[buildings.size() - 1].global_position = get_global_mouse_position()
+			var min_dist = null
+			for p in r_hub_positions:
+				if min_dist == null or sqrt(pow(get_global_mouse_position().x - p.x, 2) + pow(get_global_mouse_position().y - p.y, 2)) < min_dist:
+					
+					if current_hub != null:
+						current_hub.range_circle.visible = false
+					current_hub = grid.probe(p).objectsInside[0]
+					current_hub.range_circle.visible = true
+					min_dist = sqrt(pow(get_global_mouse_position().x - p.x, 2) + pow(get_global_mouse_position().y - p.y, 2))
 			if !is_placeable(buildings[buildings.size() - 1]):
 				buildings[buildings.size() - 1].shapey.modulate = Color(250, 0, 4)  #RED
 			else:
@@ -568,6 +580,13 @@ func is_placeable(building) -> bool:  #Only for if a body is FAKE
 			elif building.type == "lumberjack":
 				if !tile_biome in [0, 4]:  # forest and rainforest
 					return false
+			else:
+				if tile_biome in [2]: #unplaceable tiles: Water
+					return false
+	if building.type != "ResourceHub":
+		var closest_r_hub_position = current_hub.get_global_position()
+		if sqrt(pow(closest_r_hub_position.x - center.x, 2) + pow(closest_r_hub_position.y - center.y, 2)) > current_hub.BUILD_RANGE:
+			return false
 	return true
 
 
@@ -613,7 +632,10 @@ func freeBuilding(ID):
 			if object.type == "WallCorner":
 				while object.segments.size() > 0:
 					object.segments.pop_at(0).queue_free()
-
+			if object.type == "ResourceHub":
+				for j in range(r_hub_positions.size()):
+					if r_hub_positions[j] == object.get_global_position():
+						r_hub_positions.pop_at(j)
 			object.queue_free()
 			return
 
@@ -657,21 +679,29 @@ func beginDragging(buildingName):
 
 func finishDragging(buildingName):
 	buildingDraggin = null
+	var temp_hub = current_hub
+	
+	
 	#If not placeable, REMOVED
 	if !is_placeable(buildings[buildings.size() - 1]):
 		buildings.pop_back().queue_free()
+		current_hub.range_circle.visible = false
+		current_hub = null
 		return false
+	current_hub.range_circle.visible = false
+	current_hub = null
 
 	if player_id != 1:
 		queued_orders_to_send_in_control.append(
-			[0, [grid.hex_center(get_global_mouse_position()), buildingName]]
+			[0, [grid.hex_center(get_global_mouse_position()), buildingName, temp_hub.get_global_position()]]
 		)
 	else:
 		queued_orders_recieved_in_control.append(
-			[0, [grid.hex_center(get_global_mouse_position()), buildingName]]
+			[0, [grid.hex_center(get_global_mouse_position()), buildingName,temp_hub.get_global_position()]]
 		)
 
 	freeBuilding(buildings[buildings.size() - 1].BUILDING_UNIQUE_ID)
+	
 	return true
 
 
@@ -682,7 +712,7 @@ func process_orders():  #Change this to basically process as many as possible. I
 
 		#If statements for orders based on order - update later
 		if order[0] == 0:
-			spawn_building_order(order[1])
+			place_building_order(order[1])
 		if order[0] == 1:
 			grid.probe(order[1][0]).objectsInside[0].manage_caravan_order(order[1])
 		if order[0] == 2:
@@ -691,7 +721,11 @@ func process_orders():  #Change this to basically process as many as possible. I
 			$MarketHud/MarketMenu.trade(order[1][0], order[1][1], order[1][2])
 
 
-func spawn_building_order(args):
+func place_building_order(args):
+	grid.probe(args[2]).objectsInside[0].send_builder([args[0], args[1], BUILDING_TIMES[0]])
+
+
+func spawn_building(args):
 	var buildingName = args[1]
 	var buildingPos = args[0]
 	var instance = null
@@ -730,6 +764,7 @@ func spawn_building_order(args):
 		buildings[buildings.size() - 1].meepleDocPos = (
 			grid.coord_to_axial_hex(buildingPos) + Vector2i(1, 0)
 		)
+		r_hub_positions.append(instance.get_global_position())
 
 
 func spawnNexus():
@@ -771,7 +806,7 @@ func spawnNexus():
 		instance.get_global_position()
 	)
 	buildings[buildings.size() - 1].pos = grid.coord_to_axial_hex(instance.get_global_position())
-
+	r_hub_positions.append(instance.get_global_position())
 	for h in buildings[buildings.size() - 1].HEX_SHAPE:
 		grid.update_grid(
 			grid.coord_to_axial_hex(instance.get_global_position()) + h,
